@@ -49,11 +49,11 @@ $scope = \TwitchController\Core\Config\Settings::pluginScope($plugin->slug);
 // Schema: Bereich.Funktion.Recht - dieselbe Form wie im Kern. Rechte,
 // die auf ".View" enden, bekommen neu eingeladene Benutzer automatisch.
 $hooks->on('permissions.catalog', static function (array $catalog): array {
-    $catalog['Beispiel'] = [
+    $catalog['Example'] = [
         'label' => translate('example.name'),
         'permissions' => [
-            'Beispiel.Seite.View'   => translate('example.permissions.view'),
-            'Beispiel.Seite.Manage' => translate('example.permissions.manage'),
+            'Example.Page.View'   => translate('example.permissions.view'),
+            'Example.Page.Manage' => translate('example.permissions.manage'),
         ],
     ];
 
@@ -73,7 +73,7 @@ $hooks->on('admin.nav', static function (array $nav): array {
             [
                 'label'      => translate('example.page'),
                 'href'       => '/example',
-                'permission' => 'Beispiel.Seite.View',
+                'permission' => 'Example.Page.View',
             ],
         ],
     ];
@@ -106,23 +106,23 @@ $hooks->on('plugin.settings', static function (array $pages) use ($plugin): arra
 $router->get('/example', static function (Request $request) use ($app, $plugin, $scope): Response {
     return Response::html(
         $app->view->from($plugin->directory . '/views')->render('page', [
-            'title'     => 'Beispiel',
+            'title'     => translate('example.page'),
             'active'    => 'example',
             'gruss'     => $app->settings->string('gruss', 'Moin', $scope),
             'zaehler'   => $app->settings->int('events_gesehen', 0, $scope),
-            'canManage' => $app->auth->can('Beispiel.Seite.Manage'),
+            'canManage' => $app->auth->can('Example.Page.Manage'),
             'csrf'      => $app->auth->csrfToken(),
             'notice'    => $request->get('notice'),
         ])
     );
-}, ['auth' => true, 'permission' => 'Beispiel.Seite.View']);
+}, ['auth' => true, 'permission' => 'Example.Page.View']);
 
 $router->post('/example', static function (Request $request) use ($app, $scope): Response {
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return Response::text(translate('common.error.form_expired'), 400);
     }
 
-    if (!$app->auth->can('Beispiel.Seite.Manage')) {
+    if (!$app->auth->can('Example.Page.Manage')) {
         return Response::text(translate('common.error.no_permission'), 403);
     }
 

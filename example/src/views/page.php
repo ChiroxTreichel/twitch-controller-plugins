@@ -41,7 +41,7 @@
         </form>
     <?php else: ?>
         <p><?= $e($gruss) ?></p>
-        <p class="hint"><?= translate('common.missing_permission', ['permission' => '<span class="mono">Beispiel.Seite.Manage</span>']) ?></p>
+        <p class="hint"><?= translate('common.missing_permission', ['permission' => '<span class="mono">Example.Page.Manage</span>']) ?></p>
     <?php endif; ?>
 </div>
 
