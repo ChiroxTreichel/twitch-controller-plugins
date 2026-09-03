@@ -93,12 +93,12 @@ final class Config
             $stufen = self::sortTiers($stufen);
         }
 
+        // Testdaten sind reine Vorgaben fuer das Formular, kein
+        // gespeicherter Zustand: was man dort eintippt, gilt fuer
+        // diesen einen Test und wird nicht gesichert.
         $vorschau = [];
         foreach ($definition['preview'] as $key => $vorgabe) {
-            $wert = $gespeichert['preview'][$key] ?? null;
-            $vorschau[$key] = is_scalar($wert) && (string) $wert !== ''
-                ? (string) $wert
-                : (string) $vorgabe;
+            $vorschau[$key] = (string) $vorgabe;
         }
 
         return [

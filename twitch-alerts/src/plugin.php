@@ -171,7 +171,22 @@ $router->post('/display/alerts/twitch/{type}', static function (
 
         $fall = (string) $request->input('case');
 
-        return (new Dispatcher($app))->test($type, $fall)
+        // Die Werte kommen aus dem Formular und werden nicht
+        // gespeichert: sie sind zum Wegwerfen. Vorher musste man sie
+        // erst sichern, damit ein Test sie benutzt.
+        $werte = $request->post['preview'] ?? [];
+        $werte = is_array($werte) ? $werte : [];
+
+        $sauber = [];
+        foreach (array_keys($definition['preview']) as $key) {
+            $wert = trim((string) ($werte[$key] ?? ''));
+
+            $sauber[$key] = function_exists('mb_substr')
+                ? mb_substr($wert, 0, 200)
+                : substr($wert, 0, 200);
+        }
+
+        return (new Dispatcher($app))->test($type, $fall, $sauber)
             ? $zurueck(translate('twitch_alerts.test_sent', ['type' => $definition['label']]))
             : $zurueck(null, translate('twitch_alerts.test_nothing'));
     }
@@ -267,18 +282,6 @@ $router->post('/display/alerts/twitch/{type}', static function (
                 'duration' => max(0, min(120, (int) ($fall['duration'] ?? 0))),
             ];
         }
-    }
-
-    // Testdaten
-    $vorschau = $request->post['preview'] ?? [];
-    foreach (array_keys($definition['preview']) as $key) {
-        $wert = is_array($vorschau) ? ($vorschau[$key] ?? '') : '';
-        // Nicht mb_substr ohne Netz: fehlt die Erweiterung, waere das
-        // ein Fatal Error beim Speichern.
-        $wert = trim((string) $wert);
-        $config['preview'][$key] = function_exists('mb_substr')
-            ? mb_substr($wert, 0, 200)
-            : substr($wert, 0, 200);
     }
 
     Config::save($app, $type, $config);

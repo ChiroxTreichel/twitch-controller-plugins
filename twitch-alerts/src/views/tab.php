@@ -180,37 +180,6 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
             <?php endforeach ?>
         <?php endif ?>
 
-        <?php if ($darfTesten || $darfAendern): ?>
-            <h3><?= $e(translate('twitch_alerts.test_data')) ?></h3>
-            <p class="hint"><?= $e(translate('twitch_alerts.test_data_hint')) ?></p>
-
-            <div class="row">
-                <?php foreach ($config['preview'] as $key => $wert): ?>
-                    <label class="field">
-                        <span class="hint"><?= $e($feldnamen[$key] ?? $key) ?></span>
-                        <?php if (isset($feldoptionen[$key])): ?>
-                            <?php /*
-                                Feste Auswahl statt freier Eingabe - eine
-                                Stufe gibt es bei Twitch nur dreimal, und
-                                ein Tippfehler stuende sonst im Alert.
-                            */ ?>
-                            <select class="input" name="preview[<?= $e((string) $key) ?>]"
-                                <?= $darfAendern ? '' : 'disabled' ?>>
-                                <?php foreach ($feldoptionen[$key] as $option): ?>
-                                    <option value="<?= $e($option) ?>"
-                                        <?= $wert === $option ? 'selected' : '' ?>><?= $e($option) ?></option>
-                                <?php endforeach ?>
-                            </select>
-                        <?php else: ?>
-                            <input class="input" type="text" maxlength="200"
-                                   name="preview[<?= $e((string) $key) ?>]" value="<?= $e($wert) ?>"
-                                <?= $darfAendern ? '' : 'readonly' ?>>
-                        <?php endif ?>
-                    </label>
-                <?php endforeach ?>
-            </div>
-        <?php endif ?>
-
         <div class="row" style="margin-top:16px;">
             <?php if ($darfAendern): ?>
                 <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
@@ -236,25 +205,52 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
         </div>
         <p class="hint"><?= $e(translate('twitch_alerts.test_hint')) ?></p>
 
-        <div class="row">
-            <?php if ($stufen): ?>
-                <?php /* Bei Stufen entscheidet der Testbetrag, welche greift. */ ?>
-                <form method="post" action="<?= $e($ziel) ?>">
-                    <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-                    <input type="hidden" name="action" value="test">
-                    <button class="btn btn-ghost" type="submit"><?= $e(translate('twitch_alerts.send_test')) ?></button>
-                </form>
-            <?php else: ?>
-                <?php foreach ($definition['cases'] as $key => $label): ?>
-                    <form method="post" action="<?= $e($ziel) ?>">
-                        <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-                        <input type="hidden" name="action" value="test">
-                        <input type="hidden" name="case" value="<?= $e((string) $key) ?>">
-                        <button class="btn btn-ghost btn-small" type="submit"><?= $e($label) ?></button>
-                    </form>
+        <?php /*
+            Die Werte stehen HIER und nicht im Speichern-Formular: sie
+            sind zum Wegwerfen. Vorher musste man sie erst sichern,
+            damit ein Test sie benutzt - ein Umweg, und dauerhaft
+            gespeicherte Wegwerfwerte.
+        */ ?>
+        <form method="post" action="<?= $e($ziel) ?>">
+            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+            <input type="hidden" name="action" value="test">
+
+            <div class="row">
+                <?php foreach ($config['preview'] as $key => $wert): ?>
+                    <label class="field">
+                        <span class="hint"><?= $e($feldnamen[$key] ?? $key) ?></span>
+                        <?php if (isset($feldoptionen[$key])): ?>
+                            <select class="input" name="preview[<?= $e((string) $key) ?>]">
+                                <?php foreach ($feldoptionen[$key] as $option): ?>
+                                    <option value="<?= $e($option) ?>"
+                                        <?= $wert === $option ? 'selected' : '' ?>><?= $e($option) ?></option>
+                                <?php endforeach ?>
+                            </select>
+                        <?php else: ?>
+                            <input class="input" type="text" maxlength="200"
+                                   name="preview[<?= $e((string) $key) ?>]" value="<?= $e($wert) ?>">
+                        <?php endif ?>
+                    </label>
                 <?php endforeach ?>
-            <?php endif ?>
-        </div>
+            </div>
+
+            <div class="row" style="margin-top:14px;">
+                <?php if ($stufen): ?>
+                    <?php /* Bei Stufen entscheidet die Anzahl, welche greift. */ ?>
+                    <button class="btn btn-ghost" type="submit"><?= $e(translate('twitch_alerts.send_test')) ?></button>
+                <?php else: ?>
+                    <?php /*
+                        Ein Knopf je Fall: welcher Fall gemeint ist,
+                        sagt der Name des Knopfes. So braucht es keine
+                        zusaetzliche Auswahlliste daneben.
+                    */ ?>
+                    <?php foreach ($definition['cases'] as $key => $label): ?>
+                        <button class="btn btn-ghost btn-small" type="submit"
+                                name="case" value="<?= $e((string) $key) ?>"><?= $e($label) ?></button>
+                    <?php endforeach ?>
+                <?php endif ?>
+            </div>
+        </form>
     </div>
 <?php endif ?>
 

@@ -173,9 +173,16 @@ final class Dispatcher
     }
 
     /**
-     * Ein Test-Alert mit den eingestellten Testdaten.
+     * Ein Test-Alert.
+     *
+     * Die Werte kommen aus dem Formular und werden nicht gespeichert -
+     * sie sind zum Wegwerfen. Was fehlt, wird aus der Vorgabe des Typs
+     * ergaenzt, damit ein leeres Feld nicht zu einem leeren Alert
+     * fuehrt.
+     *
+     * @param array<string, string> $werte
      */
-    public function test(string $type, string $case = ''): bool
+    public function test(string $type, string $case = '', array $werte = []): bool
     {
         $definition = Types::get($type);
         if ($definition === null) {
@@ -183,7 +190,12 @@ final class Dispatcher
         }
 
         $config = Config::of($this->app, $type);
-        $werte = $config['preview'];
+
+        // Leere Felder aus der Vorgabe fuellen. Ein Test ohne Namen
+        // zeigte sonst einen Alert ohne Namen - und man haelt es fuer
+        // einen Fehler im Alert.
+        $werte = array_filter($werte, static fn (string $w): bool => trim($w) !== '');
+        $werte += $config['preview'];
 
         if ($definition['mode'] === 'tiers') {
             $betrag = (int) round((float) ($werte['amount'] ?? 0));
