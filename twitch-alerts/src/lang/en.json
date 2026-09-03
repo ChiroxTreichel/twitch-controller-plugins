@@ -13,6 +13,7 @@
     "twitch_alerts.cheer": "Bits",
     "twitch_alerts.choose_file": "Choose a file",
     "twitch_alerts.confirm_delete_tier": "Really delete the tier from %{amount} %{unit}?",
+    "twitch_alerts.confirm_delete_tier_yes": "Yes, delete the tier",
     "twitch_alerts.content": "Content",
     "twitch_alerts.delete_tier_heading": "Delete a tier",
     "twitch_alerts.duration": "Duration (sec.)",

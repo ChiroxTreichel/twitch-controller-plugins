@@ -9,6 +9,7 @@
  * Dieselbe Vorlage für alle sechs Typen: Fälle und Stufen
  * unterscheiden sich nur in dem, was `definition` sagt.
  *
+ * @var \TwitchController\Core\Http\View $view
  * @var callable $e
  * @var callable $url
  * @var string $type
@@ -248,21 +249,23 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
         </div>
         <div class="row">
             <?php foreach ($config['tiers'] as $i => $stufe): ?>
-                <form method="post" action="<?= $e($ziel) ?>"
-                      onsubmit="return confirm('<?= $e(translate('twitch_alerts.confirm_delete_tier', [
-                          'amount' => (string) $stufe['min'],
-                          'unit'   => $definition['unit'],
-                      ])) ?>');">
-                    <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-                    <input type="hidden" name="action" value="delete_tier">
-                    <input type="hidden" name="tier" value="<?= (int) $i ?>">
-                    <button class="btn btn-danger btn-small" type="submit">
-                        <?= $e(translate('twitch_alerts.from_amount', [
-                            'amount' => (string) $stufe['min'],
-                            'unit'   => $definition['unit'],
-                        ])) ?>
-                    </button>
-                </form>
+                <?= $view->render('_confirm', [
+                    'label'    => translate('twitch_alerts.from_amount', [
+                        'amount' => (string) $stufe['min'],
+                        'unit'   => $definition['unit'],
+                    ]),
+                    'question' => translate('twitch_alerts.confirm_delete_tier', [
+                        'amount' => (string) $stufe['min'],
+                        'unit'   => $definition['unit'],
+                    ]),
+                    'confirm'  => translate('twitch_alerts.confirm_delete_tier_yes'),
+                    'action'   => $ziel,
+                    'fields'   => [
+                        'csrf'   => $csrf,
+                        'action' => 'delete_tier',
+                        'tier'   => (string) $i,
+                    ],
+                ], null) ?>
             <?php endforeach ?>
         </div>
     </div>

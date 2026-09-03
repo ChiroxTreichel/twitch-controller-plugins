@@ -13,6 +13,7 @@
     "twitch_alerts.cheer": "Bits",
     "twitch_alerts.choose_file": "Datei auswählen",
     "twitch_alerts.confirm_delete_tier": "Die Stufe ab %{amount} %{unit} wirklich löschen?",
+    "twitch_alerts.confirm_delete_tier_yes": "Ja, Stufe löschen",
     "twitch_alerts.content": "Inhalt",
     "twitch_alerts.delete_tier_heading": "Stufe löschen",
     "twitch_alerts.duration": "Dauer (Sek.)",
