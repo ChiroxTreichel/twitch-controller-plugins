@@ -46,6 +46,31 @@ final class Commands
     }
 
     // -----------------------------------------------------------------
+    //  Hauptschalter
+    // -----------------------------------------------------------------
+
+    /**
+     * Reagiert das Plugin ueberhaupt auf Chatnachrichten?
+     *
+     * Voreinstellung an: wer das Plugin installiert, will Befehle -
+     * ein Schalter, den man nach der Installation erst suchen muss,
+     * waere eine Falle.
+     *
+     * Der Schalter sitzt zusaetzlich in der Seitenleiste, damit man
+     * mitten im Stream Ruhe herstellen kann, ohne erst hierher zu
+     * navigieren. Die eingestellten Befehle bleiben dabei stehen.
+     */
+    public static function enabled(App $app): bool
+    {
+        return $app->settings->bool('enabled', true, self::scope());
+    }
+
+    public static function setEnabled(App $app, bool $an): void
+    {
+        $app->settings->set('enabled', $an, self::scope());
+    }
+
+    // -----------------------------------------------------------------
     //  Grundbefehle
     // -----------------------------------------------------------------
 

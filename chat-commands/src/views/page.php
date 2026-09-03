@@ -11,10 +11,35 @@ declare(strict_types=1);
  * @var array<string, array{label: string, permission: string}> $tabs
  * @var string $open
  * @var string $content
+ * @var bool $enabled
  * @var string $notice
  * @var string $error
  */
 ?>
+<div class="head-row">
+    <h1><?= $e(translate('chat_commands.name')) ?></h1>
+
+    <?php if (permission('ChatCommands.Global.Toggle')): ?>
+        <form method="post" action="<?= $e($url('/chat/commands/toggle')) ?>">
+            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+            <input type="hidden" name="action" value="toggle">
+            <button class="switch<?= $enabled ? ' is-on' : '' ?>" type="submit"
+                    title="<?= $e(translate('chat_commands.toggle_hint')) ?>"
+                    aria-label="<?= $e(translate('chat_commands.toggle_hint')) ?>">
+                <span class="switch-track"><span class="switch-knob"></span></span>
+            </button>
+        </form>
+    <?php else: ?>
+        <span class="badge <?= $enabled ? 'badge-ok' : 'badge-off' ?>">
+            <?= $e($enabled ? translate('chat_commands.on') : translate('chat_commands.off')) ?>
+        </span>
+    <?php endif ?>
+</div>
+
+<?php if (!$enabled): ?>
+    <div class="note note-warn"><?= $e(translate('chat_commands.all_off_hint')) ?></div>
+<?php endif ?>
+
 <div class="tabs">
     <?php foreach ($tabs as $key => $tab): ?>
         <a class="tab<?= $open === $key ? ' is-active' : '' ?>"

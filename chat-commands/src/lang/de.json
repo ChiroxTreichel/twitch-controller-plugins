@@ -1,4 +1,5 @@
 {
+    "chat_commands.all_off_hint": "Chatbefehle sind ausgeschaltet – im Chat passiert nichts. Einstellen lässt sich trotzdem alles.",
     "chat_commands.builtin.befehle": "Befehle",
     "chat_commands.builtin.befehle.description": "Listet alle verfügbaren Chatbefehle alphabetisch und kommasepariert auf.",
     "chat_commands.builtin.discord": "Discord",
@@ -31,13 +32,19 @@
     "chat_commands.nav.chat": "Chat",
     "chat_commands.new": "Neuer Befehl",
     "chat_commands.none": "Es sind noch keine eigenen Befehle angelegt.",
+    "chat_commands.off": "aus",
+    "chat_commands.on": "an",
     "chat_commands.perm.basic_edit": "darf die Grundbefehle einstellen.",
     "chat_commands.perm.basic_view": "darf die Grundbefehle sehen.",
     "chat_commands.perm.custom_edit": "darf eigene Befehle anlegen, ändern und löschen.",
     "chat_commands.perm.custom_view": "darf die eigenen Befehle sehen.",
+    "chat_commands.perm.toggle": "darf Chatbefehle ein- und ausschalten.",
     "chat_commands.placeholder_label": "Platzhalter:",
     "chat_commands.response_example": "{USER} hier steht deine Antwort",
     "chat_commands.saved": "!%{name} gespeichert.",
     "chat_commands.tab.basic": "Grundbefehle",
-    "chat_commands.tab.custom": "Eigene Befehle"
+    "chat_commands.tab.custom": "Eigene Befehle",
+    "chat_commands.toggle_hint": "Chatbefehle ein- oder ausschalten. Die eingestellten Befehle bleiben stehen.",
+    "chat_commands.turned_off": "Chatbefehle sind aus.",
+    "chat_commands.turned_on": "Chatbefehle sind an."
 }

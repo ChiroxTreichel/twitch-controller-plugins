@@ -36,6 +36,13 @@ final class Dispatcher
             return;
         }
 
+        // Hauptschalter. Vor allem anderen, damit "aus" auch nichts
+        // ins Log schreibt - sonst sieht es beim Suchen aus, als waere
+        // der Befehl angekommen und die Antwort gescheitert.
+        if (!Commands::enabled($this->app)) {
+            return;
+        }
+
         // Kein Riegel gegen das eigene Konto: ohne Bot-Konto ist das
         // der Kanalinhaber, und der koennte dann keinen Befehl mehr
         // ausloesen. Gegen die Schleife sorgt der Kern - er legt jede

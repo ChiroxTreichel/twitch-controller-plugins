@@ -6,6 +6,15 @@ haben eigene Einstellungen, **Eigene Befehle** legst du selbst an.
 Braucht keine IRC-Verbindung und keine Zugangsdaten — gelesen und
 geantwortet wird über die Kernfähigkeit *Chat*.
 
+## Hauptschalter
+
+Oben auf der Seite und zusätzlich in der Seitenleiste: aus heißt, im
+Chat passiert nichts. Die eingestellten Befehle bleiben stehen.
+Voreinstellung ist **an** — wer das Plugin installiert, will Befehle.
+
+Der Schalter in der Seitenleiste ist von jeder Seite aus erreichbar:
+mitten im Stream Ruhe herstellen, ohne erst hierher zu navigieren.
+
 ## Grundbefehle
 
 | Befehl | Was er tut |
@@ -88,6 +97,7 @@ $hooks->on('chat_commands.names', static function (array $namen): array {
 
 | Recht | erlaubt |
 | --- | --- |
+| `ChatCommands.Global.Toggle` | Chatbefehle ein- und ausschalten |
 | `ChatCommands.Basic.View` / `.Edit` | Grundbefehle sehen / einstellen |
 | `ChatCommands.Custom.View` / `.Edit` | eigene Befehle sehen / pflegen |
 

@@ -38,6 +38,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
     $catalog['ChatCommands'] = [
         'label'       => translate('chat_commands.name'),
         'permissions' => [
+            'ChatCommands.Global.Toggle' => translate('chat_commands.perm.toggle'),
             'ChatCommands.Basic.View'   => translate('chat_commands.perm.basic_view'),
             'ChatCommands.Basic.Edit'   => translate('chat_commands.perm.basic_edit'),
             'ChatCommands.Custom.View'  => translate('chat_commands.perm.custom_view'),
@@ -51,7 +52,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 // -------------------------------------------------------------------
 //  Menue
 // -------------------------------------------------------------------
-$hooks->on('admin.nav', static function (array $nav): array {
+$hooks->on('admin.nav', static function (array $nav) use ($app): array {
     $nav['chat'] = [
         'label' => translate('chat_commands.nav.chat'),
         'order' => 20,
@@ -60,6 +61,16 @@ $hooks->on('admin.nav', static function (array $nav): array {
                 'label'      => translate('chat_commands.name'),
                 'href'       => '/chat/commands',
                 'permission' => 'ChatCommands.Basic.View',
+                // Schnellschalter: mitten im Stream Ruhe herstellen,
+                // ohne erst hierher zu navigieren. Die eingestellten
+                // Befehle bleiben dabei stehen.
+                'toggle'     => [
+                    'on'         => Commands::enabled($app),
+                    'action'     => '/chat/commands/toggle',
+                    'value'      => 'toggle',
+                    'permission' => 'ChatCommands.Global.Toggle',
+                    'title'      => translate('chat_commands.toggle_hint'),
+                ],
             ],
         ],
     ];
@@ -130,6 +141,8 @@ $seite = static function (Request $request, array $params = []) use ($app, $plug
     }
 
     return Response::html($vorlagen->render('page', [
+        'enabled' => Commands::enabled($app),
+        'csrf'    => $csrf,
         'title'   => translate('chat_commands.name'),
         // Ohne Schraegstrich am Anfang - so heissen die Menueschluessel,
         // und ohne das bliebe der Menuepunkt unmarkiert.
@@ -173,6 +186,27 @@ $zurueck = static function (string $tab, ?string $notice = null, ?string $error 
         . ($query === [] ? '' : '?' . http_build_query($query))
     );
 };
+
+$router->post('/chat/commands/toggle', static function (Request $request) use ($app, $zurueck): Response {
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $zurueck('basic', null, translate('common.error.form_expired'));
+    }
+
+    if ($request->input('action') !== 'toggle') {
+        return $zurueck('basic', null, translate('common.error.unknown_action'));
+    }
+
+    if (!permission('ChatCommands.Global.Toggle')) {
+        return $zurueck('basic', null, translate('common.error.no_permission'));
+    }
+
+    $an = !Commands::enabled($app);
+    Commands::setEnabled($app, $an);
+
+    return $zurueck('basic', $an
+        ? translate('chat_commands.turned_on')
+        : translate('chat_commands.turned_off'));
+}, ['auth' => true, 'permission' => 'ChatCommands.Basic.View']);
 
 $router->post('/chat/commands/basic', static function (Request $request) use ($app, $zurueck): Response {
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
