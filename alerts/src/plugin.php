@@ -8,8 +8,20 @@ declare(strict_types=1);
  * ===================================================================
  *
  * Bringt den Bereich "Anzeigen > Alerts", die Flaeche im Overlay und
- * die Grundeinstellungen. Was ein Alert ist, liefern andere Plugins -
+ * die Warteschlange davor. Was ein Alert ist, liefern andere Plugins -
  * siehe src/Alerts.php fuer den Vertrag.
+ *
+ * Zwei Seiten, und die Trennung ist Absicht:
+ *
+ *   /display/alerts            die Reiter der Alert-Plugins, plus dem
+ *                              Hauptschalter. Das ist Betrieb.
+ *   /display/alerts/settings   Groesse und Lage der Flaeche. Das sind
+ *                              die Einstellungen dieses Plugins und
+ *                              stehen deshalb in der Plugin-Liste -
+ *                              nicht als Reiter zwischen den Alerts.
+ *
+ * Wie lange ein Alert steht, gehoert nicht hierher: das legt jeder
+ * Alert selbst fest, je Fall oder je Stufe.
  */
 
 use TwitchController\Core\Http\Request;
@@ -22,6 +34,25 @@ use TwitchController\Plugin\Alerts\Alerts;
 /** @var \TwitchController\Core\Http\Router $router */
 
 $scope = Alerts::scope();
+
+/**
+ * Zurueck zu einer Seite dieses Plugins, mit Meldung.
+ */
+$zurueckZu = static function (string $pfad) use ($app): callable {
+    return static function (?string $notice = null, ?string $error = null) use ($app, $pfad): Response {
+        $query = [];
+        if ($notice !== null) {
+            $query['notice'] = $notice;
+        }
+        if ($error !== null) {
+            $query['error'] = $error;
+        }
+
+        return Response::redirect(
+            $app->url($pfad) . ($query === [] ? '' : '?' . http_build_query($query))
+        );
+    };
+};
 
 // -------------------------------------------------------------------
 //  Rechte
@@ -44,7 +75,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 //  Menue
 // -------------------------------------------------------------------
 // Eigener Bereich "Anzeigen": dort sammelt sich alles, was im Stream
-// zu sehen ist. Konto hat order 0, das hier kommt dahinter.
+// zu sehen ist.
 $hooks->on('admin.nav', static function (array $nav): array {
     $nav['display'] = [
         'label' => translate('alerts.nav.display'),
@@ -61,10 +92,13 @@ $hooks->on('admin.nav', static function (array $nav): array {
     return $nav;
 });
 
+// Die Groesse der Flaeche gehoert zu diesem Plugin, nicht zu den
+// Alerts. Deshalb erreichbar aus der Plugin-Liste - und nicht als
+// Reiter zwischen Follows und Bits.
 $hooks->on('plugin.settings', static function (array $pages) use ($plugin): array {
     $pages[$plugin->slug] = [
-        'label' => translate('alerts.nav.basics'),
-        'href'  => '/display/alerts',
+        'label' => translate('alerts.nav.settings'),
+        'href'  => '/display/alerts/settings',
     ];
 
     return $pages;
@@ -103,32 +137,33 @@ $hooks->on('overlay.assets', static function (array $assets) use ($app): array {
     return $assets;
 });
 
-// Eigenes CSS fuer die Verwaltungsseiten - Schalter und aufklappbare
-// Faelle bringt der Kern nicht mit.
+// Eigenes CSS und JS fuer die Verwaltungsseiten - Schalter,
+// aufklappbare Faelle und die Dateiauswahl bringt der Kern nicht mit.
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/alerts/assets/admin.css');
+    $assets['js'][]  = $app->asset('/plugin/alerts/assets/admin.js');
 
     return $assets;
 });
 
 // -------------------------------------------------------------------
-//  Die Seite
+//  Die Alert-Seite: nur die Reiter der Plugins
 // -------------------------------------------------------------------
-$seite = static function (Request $request, array $params) use ($app, $plugin, $scope): Response {
+$seite = static function (Request $request, array $params = []) use ($app, $plugin): Response {
     $reiter = Alerts::tabs($app);
 
-    // Der erste Reiter ist immer die Grundeinstellung - sie gehoert
-    // diesem Plugin und braucht keinen Hook.
+    // Ohne Angabe der erste Reiter. Es gibt keinen eigenen - diese
+    // Seite gehoert den Alert-Plugins.
     $offen = strtolower(trim((string) ($params['tab'] ?? '')));
-    if ($offen === '' || ($offen !== 'basics' && !isset($reiter[$offen]))) {
-        $offen = 'basics';
+    if ($offen === '' || !isset($reiter[$offen])) {
+        $offen = (string) array_key_first($reiter);
     }
 
     $inhalt = '';
-    if ($offen !== 'basics' && $reiter[$offen]['render'] !== null) {
+    if ($offen !== '' && isset($reiter[$offen]) && $reiter[$offen]['render'] !== null) {
         // Ein Fehler im Reiter eines anderen Plugins darf nicht die
-        // ganze Seite kosten - sonst kommt man nicht mehr an die
-        // Grundeinstellungen, um es abzuschalten.
+        // ganze Seite kosten - sonst kommt man nicht mehr an den
+        // Hauptschalter, um es abzuschalten.
         try {
             $inhalt = (string) ($reiter[$offen]['render'])();
         } catch (Throwable $e) {
@@ -145,50 +180,43 @@ $seite = static function (Request $request, array $params) use ($app, $plugin, $
 
     return Response::html(
         $app->view->from($plugin->directory . '/views')->render('page', [
-            'title'      => translate('alerts.name'),
-            'active'     => 'display/alerts',
-            'tabs'       => $reiter,
-            'open'       => $offen,
-            'content'    => $inhalt,
-            'enabled'    => Alerts::enabled($app),
-            'width'      => Alerts::width($app),
-            'offsetTop'  => Alerts::offsetTop($app),
-            'mediaWidth' => $app->settings->int('media_width', 0, $scope),
-            'mediaHeight' => $app->settings->int('media_height', 0, $scope),
-            'duration'   => $app->settings->int('duration', Alerts::DEFAULT_DURATION, $scope),
-            'csrf'       => $app->auth->csrfToken(),
-            'notice'     => $request->get('notice'),
-            'error'      => $request->get('error'),
+            'title'   => translate('alerts.name'),
+            'active'  => 'display/alerts',
+            'tabs'    => $reiter,
+            'open'    => $offen,
+            'content' => $inhalt,
+            'enabled' => Alerts::enabled($app),
+            'csrf'    => $app->auth->csrfToken(),
+            'notice'  => $request->get('notice'),
+            'error'   => $request->get('error'),
         ])
     );
 };
 
-$router->get('/display/alerts', $seite, [
-    'auth' => true,
-    'permission' => 'Alerts.Global.View',
-]);
-$router->get('/display/alerts/{tab}', $seite, [
-    'auth' => true,
-    'permission' => 'Alerts.Global.View',
-]);
-
 // -------------------------------------------------------------------
-//  Grundeinstellungen speichern
+//  Einstellungen dieses Plugins
 // -------------------------------------------------------------------
-$router->post('/display/alerts', static function (Request $request) use ($app, $scope): Response {
-    $zurueck = static function (?string $notice = null, ?string $error = null) use ($app): Response {
-        $query = [];
-        if ($notice !== null) {
-            $query['notice'] = $notice;
-        }
-        if ($error !== null) {
-            $query['error'] = $error;
-        }
+// VOR der Muster-Route: der Router nimmt den ersten Treffer in
+// Registrierungsreihenfolge, sonst faengt {tab} das "settings" ab.
+$router->get('/display/alerts/settings', static function (Request $request) use ($app, $plugin, $scope): Response {
+    return Response::html(
+        $app->view->from($plugin->directory . '/views')->render('settings', [
+            'title'       => translate('alerts.nav.settings'),
+            'active'      => 'display/alerts',
+            'width'       => Alerts::width($app),
+            'offsetTop'   => Alerts::offsetTop($app),
+            'mediaWidth'  => $app->settings->int('media_width', 0, $scope),
+            'mediaHeight' => $app->settings->int('media_height', 0, $scope),
+            'enabled'     => Alerts::enabled($app),
+            'csrf'        => $app->auth->csrfToken(),
+            'notice'      => $request->get('notice'),
+            'error'       => $request->get('error'),
+        ])
+    );
+}, ['auth' => true, 'permission' => 'Alerts.Global.View']);
 
-        return Response::redirect(
-            $app->url('/display/alerts') . ($query === [] ? '' : '?' . http_build_query($query))
-        );
-    };
+$router->post('/display/alerts/settings', static function (Request $request) use ($app, $scope, $zurueckZu): Response {
+    $zurueck = $zurueckZu('/display/alerts/settings');
 
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return $zurueck(null, translate('common.error.form_expired'));
@@ -201,37 +229,20 @@ $router->post('/display/alerts', static function (Request $request) use ($app, $
             }
 
             $breite = (int) $request->input('width');
-            $abstand = (int) $request->input('offset_top');
-            $dauer = (int) $request->input('duration');
 
             if ($breite < 160 || $breite > 3840) {
                 return $zurueck(null, translate('alerts.width_invalid'));
             }
 
-            if ($dauer < 1 || $dauer > Alerts::MAX_DURATION) {
-                return $zurueck(null, translate('alerts.duration_invalid', ['max' => Alerts::MAX_DURATION]));
-            }
-
             $app->settings->setMany([
-                'width'        => $breite,
-                'offset_top'   => max(0, min(2160, $abstand)),
-                'duration'     => $dauer,
+                'width'      => $breite,
+                'offset_top' => max(0, min(2160, (int) $request->input('offset_top'))),
                 // Leer heisst automatisch - dafuer 0 speichern.
                 'media_width'  => max(0, (int) $request->input('media_width')),
                 'media_height' => max(0, (int) $request->input('media_height')),
             ], $scope);
 
             return $zurueck(translate('alerts.saved'));
-
-        case 'toggle':
-            if (!permission('Alerts.Global.Toggle')) {
-                return $zurueck(null, translate('common.error.no_permission'));
-            }
-
-            $an = !Alerts::enabled($app);
-            $app->settings->set('enabled', $an, $scope);
-
-            return $zurueck($an ? translate('alerts.turned_on') : translate('alerts.turned_off'));
 
         case 'test':
             if (!permission('Alerts.Global.Test')) {
@@ -252,4 +263,37 @@ $router->post('/display/alerts', static function (Request $request) use ($app, $
     }
 
     return $zurueck(null, translate('common.error.unknown_action'));
+}, ['auth' => true]);
+
+$router->get('/display/alerts', $seite, [
+    'auth' => true,
+    'permission' => 'Alerts.Global.View',
+]);
+$router->get('/display/alerts/{tab}', $seite, [
+    'auth' => true,
+    'permission' => 'Alerts.Global.View',
+]);
+
+// -------------------------------------------------------------------
+//  Hauptschalter
+// -------------------------------------------------------------------
+$router->post('/display/alerts', static function (Request $request) use ($app, $scope, $zurueckZu): Response {
+    $zurueck = $zurueckZu('/display/alerts');
+
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $zurueck(null, translate('common.error.form_expired'));
+    }
+
+    if ($request->input('action') !== 'toggle') {
+        return $zurueck(null, translate('common.error.unknown_action'));
+    }
+
+    if (!permission('Alerts.Global.Toggle')) {
+        return $zurueck(null, translate('common.error.no_permission'));
+    }
+
+    $an = !Alerts::enabled($app);
+    $app->settings->set('enabled', $an, $scope);
+
+    return $zurueck($an ? translate('alerts.turned_on') : translate('alerts.turned_off'));
 }, ['auth' => true]);

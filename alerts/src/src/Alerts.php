@@ -92,9 +92,11 @@ final class Alerts
             return false;
         }
 
+        // Wie lange ein Alert steht, gehoert zum Alert - nicht zu
+        // diesem Plugin. Kommt keine Dauer mit, gilt die Vorgabe.
         $dauer = (float) ($alert['duration'] ?? 0);
         if ($dauer <= 0) {
-            $dauer = (float) $app->settings->int('duration', self::DEFAULT_DURATION, self::scope());
+            $dauer = (float) self::DEFAULT_DURATION;
         }
         $dauer = max(1.0, min((float) self::MAX_DURATION, $dauer));
 

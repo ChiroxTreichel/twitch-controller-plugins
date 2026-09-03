@@ -1,0 +1,13 @@
+{
+  "slug": "twitch-alerts",
+  "name": "Twitch-Alerts",
+  "version": "1.0.0",
+  "description": "Alerts für Follows, Bits, Subs, geschenkte Subs, Prime-Subs und Raids. Text, Video, Ton und Dauer je Fall - bei Bits und Raids in Stufen nach Betrag.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.0.0",
+    "alerts": ">=1.0.0"
+  },
+  "optional": {},
+  "tags": ["alerts", "twitch", "overlay"]
+}

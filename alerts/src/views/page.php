@@ -1,10 +1,11 @@
 <?php
 /**
- * Die Alerts-Seite: Kopfzeile mit Hauptschalter, darunter die Reiter.
+ * Die Alert-Seite: Kopfzeile mit Hauptschalter, darunter die Reiter
+ * der Alert-Plugins.
  *
- * Der erste Reiter sind die Grundeinstellungen - die gehören diesem
- * Plugin. Alle weiteren kommen über den Hook `alerts.tabs` von anderen
- * Plugins; ihr Inhalt steht fertig gerendert in $content.
+ * Diese Seite hat keinen eigenen Reiter. Größe und Lage der Fläche
+ * sind die Einstellungen dieses Plugins und stehen in der
+ * Plugin-Liste - sie gehören nicht zwischen Follows und Bits.
  *
  * @var callable $e
  * @var callable $url
@@ -12,24 +13,15 @@
  * @var string $open
  * @var string $content
  * @var bool $enabled
- * @var int $width
- * @var int $offsetTop
- * @var int $mediaWidth
- * @var int $mediaHeight
- * @var int $duration
  * @var string $csrf
  * @var string $notice
  * @var string $error
  */
-
-$darfAendern = permission('Alerts.Global.Edit');
-$darfSchalten = permission('Alerts.Global.Toggle');
-$darfTesten = permission('Alerts.Global.Test');
 ?>
 <div class="alerts-head">
     <h1><?= $e(translate('alerts.name')) ?></h1>
 
-    <?php if ($darfSchalten): ?>
+    <?php if (permission('Alerts.Global.Toggle')): ?>
         <form method="post" action="<?= $e($url('/display/alerts')) ?>">
             <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
             <input type="hidden" name="action" value="toggle">
@@ -59,99 +51,22 @@ $darfTesten = permission('Alerts.Global.Test');
     <div class="note note-error"><?= $e($error) ?></div>
 <?php endif ?>
 
-<div class="tabs">
-    <a class="tab<?= $open === 'basics' ? ' is-active' : '' ?>"
-       href="<?= $e($url('/display/alerts')) ?>"><?= $e(translate('alerts.nav.basics')) ?></a>
-    <?php foreach ($tabs as $key => $tab): ?>
-        <a class="tab<?= $open === $key ? ' is-active' : '' ?>"
-           href="<?= $e($url('/display/alerts/' . rawurlencode((string) $key))) ?>"><?= $e($tab['label']) ?></a>
-    <?php endforeach ?>
-</div>
-
-<?php if ($open !== 'basics'): ?>
-    <?php /* Von einem anderen Plugin gerendert - siehe alerts.tabs. */ ?>
-    <?= $content ?>
-<?php else: ?>
-
+<?php if ($tabs === []): ?>
     <div class="card">
-        <div class="card-head">
-            <h2><?= $e(translate('alerts.basics_heading')) ?></h2>
+        <div class="empty">
+            <?= $e(translate('alerts.no_tabs')) ?><br>
+            <a class="btn btn-small" style="margin-top:14px;"
+               href="<?= $e($url('/account/plugins/find')) ?>"><?= $e(translate('account.plugins.tab_find')) ?></a>
         </div>
-        <p class="hint"><?= $e(translate('alerts.basics_hint')) ?></p>
-
-        <form method="post" action="<?= $e($url('/display/alerts')) ?>">
-            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-            <input type="hidden" name="action" value="basics">
-
-            <div class="row">
-                <label class="field">
-                    <span class="hint"><?= $e(translate('alerts.width')) ?></span>
-                    <input class="input" type="number" name="width" min="160" max="3840"
-                           value="<?= (int) $width ?>" <?= $darfAendern ? '' : 'disabled' ?>>
-                </label>
-                <label class="field">
-                    <span class="hint"><?= $e(translate('alerts.offset_top')) ?></span>
-                    <input class="input" type="number" name="offset_top" min="0" max="2160"
-                           value="<?= (int) $offsetTop ?>" <?= $darfAendern ? '' : 'disabled' ?>>
-                </label>
-                <label class="field">
-                    <span class="hint"><?= $e(translate('alerts.duration')) ?></span>
-                    <input class="input" type="number" name="duration" min="1"
-                           max="<?= (int) \TwitchController\Plugin\Alerts\Alerts::MAX_DURATION ?>"
-                           value="<?= (int) $duration ?>" <?= $darfAendern ? '' : 'disabled' ?>>
-                </label>
-            </div>
-
-            <p class="hint" style="margin-top:14px;"><?= $e(translate('alerts.media_hint')) ?></p>
-
-            <div class="row">
-                <label class="field">
-                    <span class="hint"><?= $e(translate('alerts.media_width')) ?></span>
-                    <input class="input" type="number" name="media_width" min="0" max="3840"
-                           placeholder="<?= $e(translate('alerts.automatic')) ?>"
-                           value="<?= $mediaWidth > 0 ? (int) $mediaWidth : '' ?>"
-                        <?= $darfAendern ? '' : 'disabled' ?>>
-                </label>
-                <label class="field">
-                    <span class="hint"><?= $e(translate('alerts.media_height')) ?></span>
-                    <input class="input" type="number" name="media_height" min="0" max="2160"
-                           placeholder="<?= $e(translate('alerts.automatic')) ?>"
-                           value="<?= $mediaHeight > 0 ? (int) $mediaHeight : '' ?>"
-                        <?= $darfAendern ? '' : 'disabled' ?>>
-                </label>
-            </div>
-
-            <?php if ($darfAendern): ?>
-                <div class="row" style="margin-top:16px;">
-                    <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
-                </div>
-            <?php endif ?>
-        </form>
+    </div>
+<?php else: ?>
+    <div class="tabs">
+        <?php foreach ($tabs as $key => $tab): ?>
+            <a class="tab<?= $open === $key ? ' is-active' : '' ?>"
+               href="<?= $e($url('/display/alerts/' . rawurlencode((string) $key))) ?>"><?= $e($tab['label']) ?></a>
+        <?php endforeach ?>
     </div>
 
-    <?php if ($darfTesten): ?>
-        <div class="card">
-            <div class="card-head">
-                <h2><?= $e(translate('alerts.test_heading')) ?></h2>
-            </div>
-            <p class="hint"><?= $e(translate('alerts.test_hint')) ?></p>
-
-            <form method="post" action="<?= $e($url('/display/alerts')) ?>">
-                <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-                <input type="hidden" name="action" value="test">
-                <button class="btn btn-ghost" type="submit"><?= $e(translate('alerts.send_test')) ?></button>
-            </form>
-        </div>
-    <?php endif ?>
-
-    <?php if ($tabs === []): ?>
-        <div class="card">
-            <div class="empty">
-                <?= $e(translate('alerts.no_tabs')) ?><br>
-                <a class="btn btn-small" style="margin-top:14px;"
-                   href="<?= $e($url('/account/plugins/find')) ?>"><?= $e(translate('account.plugins.tab_find')) ?></a>
-            </div>
-        </div>
-    <?php endif ?>
-
+    <?php /* Von einem Alert-Plugin gerendert - siehe alerts.tabs. */ ?>
+    <?= $content ?>
 <?php endif ?>
