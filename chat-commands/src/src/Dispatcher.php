@@ -36,19 +36,26 @@ final class Dispatcher
             return;
         }
 
-        // Nicht auf sich selbst antworten. Der Kern liest den eigenen
-        // Chat mit, also kommt jede Antwort als neue Nachricht zurueck -
-        // faengt eine davon mit "!" an, laeuft das im Kreis, bis Twitch
-        // uns bremst.
-        if ($this->isSelf((string) ($message['chatter_id'] ?? ''))) {
-            return;
-        }
-
+        // Kein Riegel gegen das eigene Konto: ohne Bot-Konto ist das
+        // der Kanalinhaber, und der koennte dann keinen Befehl mehr
+        // ausloesen. Gegen die Schleife sorgt der Kern - er legt jede
+        // gesendete Nachricht sofort ab, sodass die Zweitzustellung
+        // ueber den Webhook liegen bleibt und dieser Hook nicht noch
+        // einmal feuert. Siehe Chat::rememberOwn().
         $parts = preg_split('/\s+/', $text) ?: [];
         $name = Commands::normalizeName((string) ($parts[0] ?? ''));
         if ($name === '') {
             return;
         }
+
+        // Das alte System schrieb hier eine Zeile ins Log. Ohne sie
+        // ist beim Suchen nicht zu unterscheiden, ob der Webhook
+        // ausblieb oder ob nur die Antwort scheiterte.
+        $this->app->log(sprintf(
+            'Chatbefehle: !%s von %s erkannt.',
+            $name,
+            (string) ($message['chatter_login'] ?? '?')
+        ));
 
         $antwort = $this->answerFor($name, $message, array_values($parts));
         if ($antwort === '') {
@@ -149,20 +156,6 @@ final class Dispatcher
     private function unique(string $text): string
     {
         return $text . ' ' . str_repeat(self::INVISIBLE, random_int(1, 12));
-    }
-
-    /**
-     * Schreibt hier unser eigenes Konto?
-     */
-    private function isSelf(string $chatterId): bool
-    {
-        if ($chatterId === '') {
-            return false;
-        }
-
-        $chat = $this->app->chat;
-
-        return $chatterId === $chat->senderId($chat->senderPurpose());
     }
 
     private static function mention(string $login): string
