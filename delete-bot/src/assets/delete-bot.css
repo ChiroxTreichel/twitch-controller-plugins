@@ -1,0 +1,21 @@
+/*
+ * Löschbot: das Musterfeld.
+ *
+ * Feste Zeichenbreite, weil hier reguläre Ausdrücke stehen. In einer
+ * Proportionalschrift ist "cutt\s*\.\s*ly" kaum zu lesen, und ein
+ * übersehenes Zeichen bedeutet ein Muster, das nie trifft.
+ */
+
+.delete-bot-words {
+    width: 100%;
+    min-height: 200px;
+    resize: vertical;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.86rem;
+    line-height: 1.6;
+
+    /* Ein Muster gehört in eine Zeile - umgebrochen sähe es aus wie
+       zwei, und die Liste ist zeilenweise zu lesen. */
+    white-space: pre;
+    overflow-x: auto;
+}
