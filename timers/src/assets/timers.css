@@ -1,0 +1,50 @@
+/*
+ * Timer: die zwei Fortschrittsbalken und Kleinigkeiten.
+ *
+ * Der Kern hat keinen Balken - er brauchte bisher keinen. Hier ist er
+ * die Antwort auf "warum postet der Timer nicht": ein Blick zeigt, an
+ * welcher der beiden Bedingungen es haengt.
+ */
+
+.timer-bar {
+    height: 6px;
+    margin: 6px 0 4px;
+    border-radius: 999px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    overflow: hidden;
+}
+
+.timer-bar-fill {
+    height: 100%;
+    background: var(--accent);
+
+    /* Bei 0% bliebe sonst der abgerundete Rand als Punkt stehen. */
+    min-width: 0;
+    transition: width 0.3s ease;
+}
+
+/* Die zwei Balken nebeneinander, auf schmalen Fenstern untereinander. */
+.timer-bars {
+    align-items: flex-start;
+    margin: 14px 0 4px;
+}
+
+/*
+ * Ein ausgeschalteter Timer steht weiter in der Liste - man will ihn
+ * ja wiederfinden. Der Zusatz sagt leise, dass er gerade nichts tut.
+ */
+.timer-off {
+    font-weight: 400;
+    font-style: italic;
+    color: var(--muted);
+}
+
+/* Eine Nachricht je Zeile - lang genug, dass man sie ganz sieht. */
+.timer-messages {
+    width: 100%;
+    min-height: 74px;
+    resize: vertical;
+    font-family: inherit;
+    line-height: 1.5;
+}

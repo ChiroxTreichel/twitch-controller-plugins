@@ -53,25 +53,24 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 //  Menue
 // -------------------------------------------------------------------
 $hooks->on('admin.nav', static function (array $nav) use ($app): array {
-    $nav['chat'] = [
-        'label' => translate('chat_commands.nav.chat'),
-        'order' => 20,
-        'items' => [
-            [
-                'label'      => translate('chat_commands.name'),
-                'href'       => '/chat/commands',
-                'permission' => 'ChatCommands.Basic.View',
-                // Schnellschalter: mitten im Stream Ruhe herstellen,
-                // ohne erst hierher zu navigieren. Die eingestellten
-                // Befehle bleiben dabei stehen.
-                'toggle'     => [
-                    'on'         => Commands::enabled($app),
-                    'action'     => '/chat/commands/toggle',
-                    'value'      => 'toggle',
-                    'permission' => 'ChatCommands.Global.Toggle',
-                    'title'      => translate('chat_commands.toggle_hint'),
-                ],
-            ],
+    // Eintrag ANHAENGEN, nicht die Gruppe setzen: andere Plugins
+    // haengen in dieselbe Gruppe, und wer sie ueberschreibt, laesst je
+    // nach Ladereihenfolge deren Menuepunkt verschwinden.
+    $nav['chat']['label'] = translate('chat_commands.nav.chat');
+    $nav['chat']['order'] = 20;
+    $nav['chat']['items'][] = [
+        'label'      => translate('chat_commands.name'),
+        'href'       => '/chat/commands',
+        'permission' => 'ChatCommands.Basic.View',
+        // Schnellschalter: mitten im Stream Ruhe herstellen, ohne erst
+        // hierher zu navigieren. Die eingestellten Befehle bleiben
+        // dabei stehen.
+        'toggle'     => [
+            'on'         => Commands::enabled($app),
+            'action'     => '/chat/commands/toggle',
+            'value'      => 'toggle',
+            'permission' => 'ChatCommands.Global.Toggle',
+            'title'      => translate('chat_commands.toggle_hint'),
         ],
     ];
 

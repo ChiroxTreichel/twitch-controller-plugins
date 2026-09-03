@@ -102,7 +102,13 @@ final class Dispatcher
             return self::fillPlaceholders($eigene[$name], $message);
         }
 
-        return '';
+        // Zuletzt duerfen andere Plugins antworten - die Timer bringen
+        // so ihr "!titel" mit. Die eigenen Befehle haben Vorrang, sonst
+        // koennte ein Plugin still etwas verdecken, das hier
+        // eingestellt ist.
+        $fremd = $this->app->hooks->filter('chat_commands.answer', '', $name, $message);
+
+        return is_string($fremd) ? self::fillPlaceholders($fremd, $message) : '';
     }
 
     /**
