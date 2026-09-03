@@ -1,4 +1,6 @@
 {
+    "example.counted": "Follows counted since installation: %{count}",
+    "example.counted_hint": "Counting happens in the %{hook} hook — the moment Twitch sends the event.",
     "example.events_title": "Reacting to events",
     "example.greeting": "Greeting",
     "example.lead": "A plugin with no use, but plenty of comments.",
@@ -7,5 +9,6 @@
     "example.page": "Example page",
     "example.permissions.manage": "may change the example setting.",
     "example.permissions.view": "may open the example page.",
-    "example.scope_hint": "Lives in scope %{scope} and disappears with the plugin."
+    "example.scope_hint": "Lives in scope %{scope} and disappears with the plugin.",
+    "example.styled": "This paragraph is styled by the plugin’s own CSS file (%{file})."
 }

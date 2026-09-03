@@ -119,11 +119,11 @@ $router->get('/example', static function (Request $request) use ($app, $plugin, 
 
 $router->post('/example', static function (Request $request) use ($app, $scope): Response {
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
-        return Response::text('Formular abgelaufen.', 400);
+        return Response::text(translate('common.error.form_expired'), 400);
     }
 
     if (!$app->auth->can('Beispiel.Seite.Manage')) {
-        return Response::text('Keine Berechtigung.', 403);
+        return Response::text(translate('common.error.no_permission'), 403);
     }
 
     $app->settings->set('gruss', $request->input('gruss'), $scope);

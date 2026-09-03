@@ -48,14 +48,18 @@
 <div class="card">
     <h2><?= $e(translate('example.events_title')) ?></h2>
     <p class="example-notice">
-        Dieser Absatz ist über eine eigene CSS-Datei des Plugins gestaltet
-        (<span class="mono">assets/example.css</span>).
+        <?= translate('example.styled', [
+            'file' => '<span class="mono">assets/example.css</span>',
+        ]) ?>
     </p>
     <p>
-        Follows gezählt seit Installation: <strong><?= $e((string) $zaehler) ?></strong>
+        <?= translate('example.counted', [
+            'count' => '<strong>' . $e((string) $zaehler) . '</strong>',
+        ]) ?>
     </p>
     <p class="hint">
-        Gezählt wird im Hook <span class="mono">core.event.stored</span> &mdash; also in dem Moment,
-        in dem Twitch das Event schickt.
+        <?= translate('example.counted_hint', [
+            'hook' => '<span class="mono">core.event.stored</span>',
+        ]) ?>
     </p>
 </div>

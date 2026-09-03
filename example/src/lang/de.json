@@ -1,4 +1,6 @@
 {
+    "example.counted": "Follows gezählt seit der Installation: %{count}",
+    "example.counted_hint": "Gezählt wird im Hook %{hook} — also in dem Moment, in dem Twitch das Event schickt.",
     "example.events_title": "Reaktion auf Events",
     "example.greeting": "Grußwort",
     "example.lead": "Ein Plugin ohne Nutzen, dafür mit Kommentaren.",
@@ -7,5 +9,6 @@
     "example.page": "Beispielseite",
     "example.permissions.manage": "darf die Beispieleinstellung ändern.",
     "example.permissions.view": "darf die Beispielseite öffnen.",
-    "example.scope_hint": "Liegt im Scope %{scope} und verschwindet mit dem Plugin."
+    "example.scope_hint": "Liegt im Scope %{scope} und verschwindet mit dem Plugin.",
+    "example.styled": "Dieser Absatz ist über eine eigene CSS-Datei des Plugins gestaltet (%{file})."
 }

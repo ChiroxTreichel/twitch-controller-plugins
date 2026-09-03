@@ -48,7 +48,7 @@ final class Types
                 'unit'         => '',
                 'cases'        => ['default' => translate('twitch_alerts.case.follow')],
                 'placeholders' => ['username'],
-                'defaults'     => ['default' => '{{ username }} folgt dir jetzt'],
+                'defaults'     => ['default' => translate('twitch_alerts.default.follow')],
                 'preview'      => ['username' => 'Talutah'],
             ],
 
@@ -59,11 +59,11 @@ final class Types
                 'unit'         => translate('twitch_alerts.unit.bits'),
                 'cases'        => [],
                 'placeholders' => ['username', 'amount', 'message'],
-                'defaults'     => ['tier' => '{{ username }} hat {{ amount }} Bits gespendet'],
+                'defaults'     => ['tier' => translate('twitch_alerts.default.cheer')],
                 'preview'      => [
                     'username' => 'Talutah',
                     'amount'   => '100',
-                    'message'  => 'Das ist ein Test-Cheer',
+                    'message'  => translate('twitch_alerts.preview.cheer_message'),
                 ],
             ],
 
@@ -79,9 +79,9 @@ final class Types
                 ],
                 'placeholders' => ['username', 'totalsubs', 'consecutive', 'tier'],
                 'defaults'     => [
-                    'first'        => '{{ username }} hat neu abonniert',
-                    'resub'        => '{{ username }} hat zum {{ totalsubs }}. Mal abonniert',
-                    'resub_streak' => '{{ username }} ist seit {{ consecutive }} Monaten dabei',
+                    'first'        => translate('twitch_alerts.default.sub_first'),
+                    'resub'        => translate('twitch_alerts.default.sub_resub'),
+                    'resub_streak' => translate('twitch_alerts.default.sub_streak'),
                 ],
                 'preview' => [
                     'username'    => 'Talutah',
@@ -104,10 +104,10 @@ final class Types
                 ],
                 'placeholders' => ['username', 'receiver', 'amount', 'tier'],
                 'defaults'     => [
-                    'single'      => '{{ username }} hat {{ receiver }} ein Abo geschenkt',
-                    'multi'       => '{{ username }} hat {{ amount }} Abos verschenkt',
-                    'anon_single' => 'Jemand hat {{ receiver }} ein Abo geschenkt',
-                    'anon_multi'  => 'Jemand hat {{ amount }} Abos verschenkt',
+                    'single'      => translate('twitch_alerts.default.gift_single'),
+                    'multi'       => translate('twitch_alerts.default.gift_multi'),
+                    'anon_single' => translate('twitch_alerts.default.gift_anon_single'),
+                    'anon_multi'  => translate('twitch_alerts.default.gift_anon_multi'),
                 ],
                 'preview' => [
                     'username' => 'Talutah',
@@ -129,9 +129,9 @@ final class Types
                 ],
                 'placeholders' => ['username', 'totalsubs', 'consecutive'],
                 'defaults'     => [
-                    'first'        => '{{ username }} hat mit Prime abonniert',
-                    'resub'        => '{{ username }} hat zum {{ totalsubs }}. Mal mit Prime abonniert',
-                    'resub_streak' => '{{ username }} ist seit {{ consecutive }} Monaten mit Prime dabei',
+                    'first'        => translate('twitch_alerts.default.prime_first'),
+                    'resub'        => translate('twitch_alerts.default.prime_resub'),
+                    'resub_streak' => translate('twitch_alerts.default.prime_streak'),
                 ],
                 'preview' => [
                     'username'    => 'Talutah',
@@ -147,7 +147,7 @@ final class Types
                 'unit'         => translate('twitch_alerts.unit.raiders'),
                 'cases'        => [],
                 'placeholders' => ['username', 'amount'],
-                'defaults'     => ['tier' => '{{ username }} raidet mit {{ amount }} Zuschauern'],
+                'defaults'     => ['tier' => translate('twitch_alerts.default.raid')],
                 'preview'      => [
                     'username' => 'Talutah',
                     'amount'   => '10',
