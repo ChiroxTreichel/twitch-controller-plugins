@@ -1,0 +1,92 @@
+/*
+ * ===================================================================
+ *  Alerts im Overlay
+ * ===================================================================
+ *
+ * Uebernommen aus dem alten System, damit ein Alert genauso aussieht
+ * wie vorher: zentrierte Spalte, Video oben, darunter fetter Text mit
+ * hartem Schatten. Die Werte - 32px, 800, 3px-Schatten, das Lila des
+ * Akzents - sind bewusst dieselben.
+ *
+ * Einstellbares kommt als CSS-Variable vom Platz im Overlay (siehe
+ * plugin.php, 'vars'). Diese Datei bleibt damit eine gewoehnliche
+ * CSS-Datei ohne PHP darin.
+ */
+
+#ov-slot-alerts {
+    /* Der Abstand von oben ist einstellbar; ohne Wert wie in der
+       Legacy 120px. */
+    margin-top: var(--alert-offset-top, 120px);
+
+    /* Der Alert selbst faengt keine Klicks - er liegt im Stream. */
+    pointer-events: none;
+}
+
+.alert {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+
+    /* Schrift wie in der Legacy. Nunito, falls vorhanden; sonst die
+       Systemschrift - im Stream soll nichts nachgeladen werden
+       muessen, bevor der erste Alert kommt. */
+    font-family: Nunito, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.alert-media {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+.alert-video {
+    display: block;
+    width: var(--alert-media-width, 100%);
+    height: var(--alert-media-height, auto);
+}
+
+.alert-copy {
+    margin: 0;
+    color: #fff;
+    font-size: 32px;
+    font-weight: 800;
+    line-height: 1.1;
+    text-align: center;
+
+    /* Der harte Schatten ist kein Schmuck: ohne ihn verschwindet
+       weisser Text auf einem hellen Spielbild. */
+    text-shadow: 3px 3px 3px rgba(0, 0, 0, 0.9);
+}
+
+/* Der eingesetzte Name, Betrag oder Rang. */
+.alert-copy .alert-accent {
+    color: #d46dff;
+}
+
+/*
+ * Ein- und Ausblenden. Ein Alert erscheint, bleibt seine Dauer und
+ * geht wieder - ohne Sprung, weil ein harter Wechsel im Stream nach
+ * einem Fehler aussieht.
+ */
+.alert {
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity 220ms ease-out, transform 220ms ease-out;
+}
+
+.alert.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/*
+ * Wer keine Bewegung sehen will oder kann, bekommt keine. Im Overlay
+ * ist das selten eingestellt, aber es kostet nichts.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .alert {
+        transition: none;
+        transform: none;
+    }
+}

@@ -1,0 +1,12 @@
+{
+  "slug": "alerts",
+  "name": "Alerts",
+  "version": "1.0.0",
+  "description": "Der Rahmen für Alerts im Stream. Bringt den Bereich «Anzeigen → Alerts», die Fläche im Overlay und die Warteschlange mit - aber selbst keine Alerts. Die liefern Plugins wie Twitch-Alerts.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.0.0"
+  },
+  "optional": {},
+  "tags": ["alerts", "overlay", "grundlage"]
+}
