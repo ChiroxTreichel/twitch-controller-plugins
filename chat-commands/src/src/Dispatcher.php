@@ -1,0 +1,174 @@
+<?php
+
+declare(strict_types=1);
+
+namespace TwitchController\Plugin\ChatCommands;
+
+use TwitchController\Core\App;
+
+/**
+ * Erkennt Befehle im Chat und antwortet.
+ *
+ * Laeuft im Webhook-Request (Hook core.chat.message). Twitch wartet auf
+ * unsere Antwort, deshalb: pruefen, entscheiden, eine Nachricht
+ * schicken - nichts, was lange dauert.
+ */
+final class Dispatcher
+{
+    /**
+     * Unsichtbares Zeichen gegen die Dedup-Sperre von Twitch.
+     *
+     * U+2063 INVISIBLE SEPARATOR. Siehe unique() fuer den Grund.
+     */
+    private const INVISIBLE = "\u{2063}";
+
+    public function __construct(private readonly App $app)
+    {
+    }
+
+    /**
+     * @param array<string, mixed> $message Nutzlast von core.chat.message
+     */
+    public function handle(array $message): void
+    {
+        $text = trim((string) ($message['text'] ?? ''));
+        if ($text === '' || $text[0] !== '!') {
+            return;
+        }
+
+        // Nicht auf sich selbst antworten. Der Kern liest den eigenen
+        // Chat mit, also kommt jede Antwort als neue Nachricht zurueck -
+        // faengt eine davon mit "!" an, laeuft das im Kreis, bis Twitch
+        // uns bremst.
+        if ($this->isSelf((string) ($message['chatter_id'] ?? ''))) {
+            return;
+        }
+
+        $parts = preg_split('/\s+/', $text) ?: [];
+        $name = Commands::normalizeName((string) ($parts[0] ?? ''));
+        if ($name === '') {
+            return;
+        }
+
+        $antwort = $this->answerFor($name, $message, array_values($parts));
+        if ($antwort === '') {
+            return;
+        }
+
+        $ergebnis = $this->app->chat->send($this->unique($antwort));
+
+        if (!$ergebnis['ok']) {
+            $this->app->log('Chatbefehle: !' . $name . ' konnte nicht antworten: ' . $ergebnis['error']);
+        }
+    }
+
+    /**
+     * Der Antworttext, oder leer wenn es den Befehl nicht gibt.
+     *
+     * Reihenfolge wie im alten System: Grundbefehle zuerst. Ein eigener
+     * Befehl kann einen Grundbefehl damit nicht ueberschreiben - beim
+     * Anlegen wird derselbe Name auch abgelehnt, damit man nicht etwas
+     * einstellt, das nie greift.
+     *
+     * @param array<string, mixed> $message
+     * @param list<string>         $parts
+     */
+    public function answerFor(string $name, array $message, array $parts): string
+    {
+        if ($name === 'discord') {
+            return (new Discord($this->app))->answer($message, $parts);
+        }
+
+        if ($name === 'befehle') {
+            return $this->commandList($message);
+        }
+
+        $eigene = Commands::custom($this->app);
+        if (isset($eigene[$name])) {
+            return self::fillPlaceholders($eigene[$name], $message);
+        }
+
+        return '';
+    }
+
+    /**
+     * !befehle - alle Namen alphabetisch, kommagetrennt.
+     *
+     * @param array<string, mixed> $message
+     */
+    private function commandList(array $message): string
+    {
+        $namen = Commands::names($this->app);
+        if ($namen === []) {
+            return '';
+        }
+
+        $mit = array_map(static fn (string $name): string => '!' . $name, $namen);
+
+        return translate('chat_commands.list', [
+            'user'     => self::mention((string) ($message['chatter_login'] ?? '')),
+            'commands' => implode(', ', $mit),
+        ]);
+    }
+
+    /**
+     * {USER} wird zur Anrede des Schreibers.
+     *
+     * Bewusst der Login und nicht der Anzeigename: mit "@login" wird
+     * die Anrede auf Twitch zu einer echten Erwaehnung, ein
+     * Anzeigename mit anderer Schreibweise nicht immer.
+     *
+     * @param array<string, mixed> $message
+     */
+    public static function fillPlaceholders(string $text, array $message): string
+    {
+        return str_replace(
+            '{USER}',
+            self::mention((string) ($message['chatter_login'] ?? '')),
+            $text
+        );
+    }
+
+    /**
+     * Haengt ein unsichtbares Zeichen an, damit Twitch die Nachricht
+     * nicht als Wiederholung verwirft.
+     *
+     * Twitch verwirft eine Nachricht, die mit der vorigen desselben
+     * Absenders identisch ist. Fragen zwei Leute hintereinander
+     * dasselbe, bekaeme nur der erste eine Antwort - und der zweite
+     * gar keine Meldung, es passiert einfach nichts.
+     *
+     * Deshalb eine wechselnde Anzahl von U+2063 INVISIBLE SEPARATOR:
+     * fuer Twitch ein anderer Text, fuer Zuschauer nichts.
+     *
+     * Im alten System stand hier derselbe Trick - allerdings war die
+     * Datei doppelt kodiert, sodass statt des unsichtbaren Zeichens
+     * die Bytes von "â£" im Chat landeten. Sichtbar, an jeder Antwort,
+     * bis zu zwoelfmal.
+     */
+    private function unique(string $text): string
+    {
+        return $text . ' ' . str_repeat(self::INVISIBLE, random_int(1, 12));
+    }
+
+    /**
+     * Schreibt hier unser eigenes Konto?
+     */
+    private function isSelf(string $chatterId): bool
+    {
+        if ($chatterId === '') {
+            return false;
+        }
+
+        $chat = $this->app->chat;
+
+        return $chatterId === $chat->senderId($chat->senderPurpose());
+    }
+
+    private static function mention(string $login): string
+    {
+        $login = ltrim(trim($login), '@');
+
+        return $login === '' ? '' : '@' . $login;
+    }
+}
