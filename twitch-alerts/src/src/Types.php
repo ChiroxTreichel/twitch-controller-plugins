@@ -180,6 +180,22 @@ final class Types
     }
 
     /**
+     * Felder der Testdaten, die keine freie Eingabe sind.
+     *
+     * "Stufe" ist bei Twitch eine von drei - eine Textzeile dafuer
+     * laedt zu Tippfehlern ein, die im Alert dann als Text stehen. Im
+     * alten System war es auch eine Auswahlliste.
+     *
+     * @return array<string, list<string>>
+     */
+    public static function fieldOptions(): array
+    {
+        return [
+            'tier' => ['Tier 1', 'Tier 2', 'Tier 3'],
+        ];
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public static function get(string $type): ?array

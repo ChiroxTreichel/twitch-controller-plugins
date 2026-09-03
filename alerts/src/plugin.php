@@ -76,7 +76,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 // -------------------------------------------------------------------
 // Eigener Bereich "Anzeigen": dort sammelt sich alles, was im Stream
 // zu sehen ist.
-$hooks->on('admin.nav', static function (array $nav): array {
+$hooks->on('admin.nav', static function (array $nav) use ($app): array {
     $nav['display'] = [
         'label' => translate('alerts.nav.display'),
         'order' => 10,
@@ -85,6 +85,16 @@ $hooks->on('admin.nav', static function (array $nav): array {
                 'label'      => translate('alerts.name'),
                 'href'       => '/display/alerts',
                 'permission' => 'Alerts.Global.View',
+                // Schnellschalter in der Seitenleiste: alle Alerts von
+                // jeder Seite aus aus. Wenn im Stream Ruhe sein soll,
+                // will man nicht erst hierher navigieren.
+                'toggle'     => [
+                    'on'         => Alerts::enabled($app),
+                    'action'     => '/display/alerts',
+                    'value'      => 'toggle',
+                    'permission' => 'Alerts.Global.Toggle',
+                    'title'      => translate('alerts.toggle_hint'),
+                ],
             ],
         ],
     ];
@@ -133,15 +143,6 @@ $hooks->on('overlay.slots', static function (array $slots) use ($app): array {
 $hooks->on('overlay.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/alerts/assets/alerts.css');
     $assets['js'][]  = $app->asset('/plugin/alerts/assets/alerts.js');
-
-    return $assets;
-});
-
-// Eigenes CSS und JS fuer die Verwaltungsseiten - Schalter,
-// aufklappbare Faelle und die Dateiauswahl bringt der Kern nicht mit.
-$hooks->on('admin.assets', static function (array $assets) use ($app): array {
-    $assets['css'][] = $app->asset('/plugin/alerts/assets/admin.css');
-    $assets['js'][]  = $app->asset('/plugin/alerts/assets/admin.js');
 
     return $assets;
 });
@@ -294,6 +295,16 @@ $router->post('/display/alerts', static function (Request $request) use ($app, $
 
     $an = !Alerts::enabled($app);
     $app->settings->set('enabled', $an, $scope);
+
+    // Der Schalter steht auch in der Seitenleiste, also auf jeder
+    // Seite. Ein fester Rueckweg zu /display/alerts wuerde einen von
+    // dort wegwerfen, wo man gerade war.
+    $woher = $request->header('Referer');
+    $eigene = $app->url('');
+
+    if ($woher !== '' && str_starts_with($woher, $eigene)) {
+        return Response::redirect($woher);
+    }
 
     return $zurueck($an ? translate('alerts.turned_on') : translate('alerts.turned_off'));
 }, ['auth' => true]);

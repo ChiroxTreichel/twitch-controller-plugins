@@ -27,6 +27,7 @@ $darfTesten = permission($area . '.Test');
 $ziel = $url('/display/alerts/twitch/' . rawurlencode($type));
 $stufen = $definition['mode'] === 'tiers';
 $feldnamen = \TwitchController\Plugin\TwitchAlerts\Types::fieldLabels();
+$feldoptionen = \TwitchController\Plugin\TwitchAlerts\Types::fieldOptions();
 
 /**
  * Ein Feld für eine Datei-Adresse. Eintippen oder auswählen - der
@@ -51,7 +52,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
 };
 ?>
 <div class="card">
-    <div class="alerts-head">
+    <div class="head-row">
         <h2 style="margin:0;"><?= $e($definition['label']) ?></h2>
 
         <?php if ($darfSchalten): ?>
@@ -78,7 +79,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
     <?php endif ?>
 
     <?php if ($definition['placeholders'] !== []): ?>
-        <p class="hint alert-placeholders">
+        <p class="hint placeholders">
             <?= $e(translate('twitch_alerts.placeholders')) ?>
             <?php foreach ($definition['placeholders'] as $platzhalter): ?>
                 <code>{{ <?= $e($platzhalter) ?> }}</code>
@@ -97,14 +98,14 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
             <p class="hint"><?= $e(translate('twitch_alerts.tiers_hint', ['unit' => $definition['unit']])) ?></p>
 
             <?php foreach ($config['tiers'] as $i => $stufe): ?>
-                <details class="alert-case"<?= $i === 0 ? ' open' : '' ?>>
+                <details class="case"<?= $i === 0 ? ' open' : '' ?>>
                     <summary>
                         <?= $e(translate('twitch_alerts.from_amount', [
                             'amount' => (string) $stufe['min'],
                             'unit'   => $definition['unit'],
                         ])) ?>
                     </summary>
-                    <div class="alert-case-body">
+                    <div class="case-body">
                         <div class="row">
                             <label class="field">
                                 <span class="hint"><?= $e(translate('twitch_alerts.min_amount')) ?></span>
@@ -145,9 +146,9 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
         <?php else: ?>
             <?php foreach ($definition['cases'] as $key => $label): ?>
                 <?php $fall = $config['cases'][$key] ?? ['text' => '', 'video' => '', 'audio' => '', 'duration' => 0]; ?>
-                <details class="alert-case"<?= array_key_first($definition['cases']) === $key ? ' open' : '' ?>>
+                <details class="case"<?= array_key_first($definition['cases']) === $key ? ' open' : '' ?>>
                     <summary><?= $e($label) ?></summary>
-                    <div class="alert-case-body">
+                    <div class="case-body">
                         <div class="row">
                             <label class="field grow">
                                 <span class="hint"><?= $e(translate('twitch_alerts.text')) ?></span>
@@ -187,9 +188,24 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
                 <?php foreach ($config['preview'] as $key => $wert): ?>
                     <label class="field">
                         <span class="hint"><?= $e($feldnamen[$key] ?? $key) ?></span>
-                        <input class="input" type="text" maxlength="200"
-                               name="preview[<?= $e((string) $key) ?>]" value="<?= $e($wert) ?>"
-                            <?= $darfAendern ? '' : 'readonly' ?>>
+                        <?php if (isset($feldoptionen[$key])): ?>
+                            <?php /*
+                                Feste Auswahl statt freier Eingabe - eine
+                                Stufe gibt es bei Twitch nur dreimal, und
+                                ein Tippfehler stuende sonst im Alert.
+                            */ ?>
+                            <select class="input" name="preview[<?= $e((string) $key) ?>]"
+                                <?= $darfAendern ? '' : 'disabled' ?>>
+                                <?php foreach ($feldoptionen[$key] as $option): ?>
+                                    <option value="<?= $e($option) ?>"
+                                        <?= $wert === $option ? 'selected' : '' ?>><?= $e($option) ?></option>
+                                <?php endforeach ?>
+                            </select>
+                        <?php else: ?>
+                            <input class="input" type="text" maxlength="200"
+                                   name="preview[<?= $e((string) $key) ?>]" value="<?= $e($wert) ?>"
+                                <?= $darfAendern ? '' : 'readonly' ?>>
+                        <?php endif ?>
                     </label>
                 <?php endforeach ?>
             </div>

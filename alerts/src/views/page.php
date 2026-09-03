@@ -18,7 +18,7 @@
  * @var string $error
  */
 ?>
-<div class="alerts-head">
+<div class="head-row">
     <h1><?= $e(translate('alerts.name')) ?></h1>
 
     <?php if (permission('Alerts.Global.Toggle')): ?>
