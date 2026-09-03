@@ -28,11 +28,20 @@ $ziel = $url('/chat/commands/custom');
     </p>
 
     <?php foreach ($commands as $name => $antwort): ?>
+        <?php $formular = 'chatcmd-' . $name; ?>
         <details class="case">
             <summary>!<?= $e((string) $name) ?></summary>
 
             <div class="case-body">
-                <form method="post" action="<?= $e($ziel) ?>">
+                <?php /*
+                    Der Knopf steht ausserhalb des Formulars und findet
+                    es ueber form="…". Anders geht es nicht: die
+                    Rueckfrage bringt ihr eigenes Formular mit, und
+                    ein Formular in einem Formular ist ungueltiges HTML.
+                    So stehen Speichern und Loeschen in einer Zeile
+                    nebeneinander statt untereinander.
+                */ ?>
+                <form id="<?= $e($formular) ?>" method="post" action="<?= $e($ziel) ?>">
                     <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                     <input type="hidden" name="action" value="save">
                     <input type="hidden" name="previous" value="<?= $e((string) $name) ?>">
@@ -54,28 +63,29 @@ $ziel = $url('/chat/commands/custom');
                                    <?= $darfAendern ? '' : 'disabled' ?>>
                         </label>
                     </div>
-
-                    <?php if ($darfAendern): ?>
-                        <div class="row">
-                            <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
-                        </div>
-                    <?php endif ?>
                 </form>
 
                 <?php if ($darfAendern): ?>
-                    <?= $view->render('_confirm', [
-                        'label'    => translate('chat_commands.delete'),
-                        'question' => translate('chat_commands.delete_question', ['name' => (string) $name]),
-                        'confirm'  => translate('chat_commands.delete'),
-                        'action'   => $ziel,
-                        'fields'   => [
-                            'csrf'     => $csrf,
-                            'action'   => 'delete',
-                            'previous' => (string) $name,
-                        ],
-                        'danger'   => true,
-                        'small'    => true,
-                    ], null) ?>
+                    <div class="row">
+                        <button class="btn" type="submit" form="<?= $e($formular) ?>">
+                            <?= $e(translate('common.save')) ?>
+                        </button>
+
+                        <?= $view->render('_confirm', [
+                            'label'    => translate('chat_commands.delete'),
+                            'question' => translate('chat_commands.delete_question', ['name' => (string) $name]),
+                            'confirm'  => translate('chat_commands.delete'),
+                            'action'   => $ziel,
+                            'fields'   => [
+                                'csrf'     => $csrf,
+                                'action'   => 'delete',
+                                'previous' => (string) $name,
+                            ],
+                            'danger'   => true,
+                            // Gleiche Groesse wie Speichern daneben.
+                            'small'    => false,
+                        ], null) ?>
+                    </div>
                 <?php endif ?>
             </div>
         </details>
