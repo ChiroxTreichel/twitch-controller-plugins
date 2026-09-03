@@ -48,7 +48,7 @@
     "twitch_alerts.test_hint": "The alert appears on the overlay. To see it, the area has to be open – in the browser or in OBS.",
     "twitch_alerts.test_nothing": "No tier matches this test data. Check the minimum count.",
     "twitch_alerts.test_sent": "Test for %{type} sent.",
-    "twitch_alerts.test_while_all_off": "All alerts are off – switch them on under Basics first, then test.",
+    "twitch_alerts.test_while_all_off": "All alerts are off – switch them on at the top of this page first, then test.",
     "twitch_alerts.test_while_type_off": "This alert is off – switch it on first, then test.",
     "twitch_alerts.text": "Text",
     "twitch_alerts.tier_added": "Tier created.",

@@ -48,7 +48,7 @@ $darfTesten = permission('Alerts.Global.Test');
 
     <form method="post" action="<?= $e($url('/display/alerts/settings')) ?>">
         <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-        <input type="hidden" name="action" value="basics">
+        <input type="hidden" name="action" value="settings">
 
         <div class="row">
             <label class="field">

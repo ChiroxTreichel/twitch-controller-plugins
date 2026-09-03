@@ -17,7 +17,7 @@ use TwitchController\Core\Overlay\Bus;
  *
  *   1. den Bereich "Anzeigen > Alerts" samt Reitern
  *   2. die Flaeche im Overlay und die Warteschlange davor
- *   3. die Grundeinstellungen - Breite, Mediengroesse, Hauptschalter
+ *   3. die Einstellungen - Breite, Lage, Mediengroesse
  *
  * Was ein Alert IST, liefern andere Plugins. Twitch-Alerts meldet
  * seine Reiter an und schickt seine Alerts hierher:

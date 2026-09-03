@@ -169,8 +169,9 @@ final class Config
     }
 
     /**
-     * Eine Dauer, die nicht aus dem Rahmen faellt. 0 heisst: die
-     * Vorgabe aus den Grundeinstellungen gilt.
+     * Eine Dauer, die nicht aus dem Rahmen faellt. 0 heisst: es
+     * gilt die Vorgabe aus Alerts::DEFAULT_DURATION - die Dauer
+     * gehoert zum Alert, nicht zu einer globalen Einstellung.
      */
     private static function duration(mixed $wert): int
     {

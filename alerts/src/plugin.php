@@ -223,7 +223,7 @@ $router->post('/display/alerts/settings', static function (Request $request) use
     }
 
     switch ($request->input('action')) {
-        case 'basics':
+        case 'settings':
             if (!permission('Alerts.Global.Edit')) {
                 return $zurueck(null, translate('common.error.no_permission'));
             }

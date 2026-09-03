@@ -48,7 +48,7 @@
     "twitch_alerts.test_hint": "Der Alert erscheint im Overlay. Damit du ihn siehst, muss die Fläche gerade offen sein – im Browser oder in OBS.",
     "twitch_alerts.test_nothing": "Für diese Testdaten passt keine Stufe. Prüfe die Mindestanzahl.",
     "twitch_alerts.test_sent": "Test für %{type} abgeschickt.",
-    "twitch_alerts.test_while_all_off": "Alle Alerts sind aus – erst unter Grundeinstellungen einschalten, dann testen.",
+    "twitch_alerts.test_while_all_off": "Alle Alerts sind aus – erst oben auf dieser Seite einschalten, dann testen.",
     "twitch_alerts.test_while_type_off": "Dieser Alert ist aus – erst einschalten, dann testen.",
     "twitch_alerts.text": "Text",
     "twitch_alerts.tier_added": "Stufe angelegt.",
