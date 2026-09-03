@@ -1,0 +1,7 @@
+# Vom Kern beim Aktivieren angelegte Dateien, falls dieses Repo
+# versehentlich als Installationsordner benutzt wird.
+*.log
+
+# Editor
+/.idea/
+/.vscode/
