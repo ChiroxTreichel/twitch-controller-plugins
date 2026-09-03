@@ -3,7 +3,7 @@
     "alerts.area_heading": "Size and position",
     "alerts.area_hint": "The area is centred horizontally; the offset counts from the top edge of the overlay.",
     "alerts.automatic": "automatic",
-    "alerts.back_to_alerts": "Back to the alerts",
+    "alerts.back_to_plugins": "Back to the plugins",
     "alerts.lead": "The frame for alerts in the stream. What is shown comes from plugins – size, duration and the master switch live here.",
     "alerts.media_height": "Video height",
     "alerts.media_hint": "Leave empty and the video is as wide as the area, with the height following the aspect ratio.",

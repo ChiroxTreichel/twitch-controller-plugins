@@ -25,10 +25,10 @@
         <form method="post" action="<?= $e($url('/display/alerts')) ?>">
             <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
             <input type="hidden" name="action" value="toggle">
-            <button class="alert-switch<?= $enabled ? ' is-on' : '' ?>" type="submit"
-                    title="<?= $e(translate('alerts.toggle_hint')) ?>">
-                <span class="alert-switch-track"><span class="alert-switch-knob"></span></span>
-                <span><?= $e($enabled ? translate('alerts.on') : translate('alerts.off')) ?></span>
+            <button class="switch<?= $enabled ? ' is-on' : '' ?>" type="submit"
+                    title="<?= $e(translate('alerts.toggle_hint')) ?>"
+                    aria-label="<?= $e(translate('alerts.toggle_hint')) ?>">
+                <span class="switch-track"><span class="switch-knob"></span></span>
             </button>
         </form>
     <?php else: ?>

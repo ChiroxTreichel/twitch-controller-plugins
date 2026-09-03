@@ -58,10 +58,10 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
             <form method="post" action="<?= $e($ziel) ?>">
                 <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                 <input type="hidden" name="action" value="toggle">
-                <button class="alert-switch<?= $config['enabled'] ? ' is-on' : '' ?>" type="submit"
-                        title="<?= $e(translate('twitch_alerts.toggle_hint', ['type' => $definition['label']])) ?>">
-                    <span class="alert-switch-track"><span class="alert-switch-knob"></span></span>
-                    <span><?= $e($config['enabled'] ? translate('alerts.on') : translate('alerts.off')) ?></span>
+                <button class="switch<?= $config['enabled'] ? ' is-on' : '' ?>" type="submit"
+                        title="<?= $e(translate('twitch_alerts.toggle_hint', ['type' => $definition['label']])) ?>"
+                        aria-label="<?= $e(translate('twitch_alerts.toggle_hint', ['type' => $definition['label']])) ?>">
+                    <span class="switch-track"><span class="switch-knob"></span></span>
                 </button>
             </form>
         <?php else: ?>

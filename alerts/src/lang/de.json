@@ -3,7 +3,7 @@
     "alerts.area_heading": "Größe und Lage",
     "alerts.area_hint": "Die Fläche ist waagerecht mittig; der Abstand zählt von der Oberkante des Overlays.",
     "alerts.automatic": "automatisch",
-    "alerts.back_to_alerts": "Zurück zu den Alerts",
+    "alerts.back_to_plugins": "Zurück zu den Plugins",
     "alerts.lead": "Der Rahmen für Alerts im Stream. Was angezeigt wird, liefern Plugins – hier stehen Größe, Dauer und der Hauptschalter.",
     "alerts.media_height": "Höhe des Videos",
     "alerts.media_hint": "Leer heißt: das Video ist so breit wie die Fläche, die Höhe folgt dem Seitenverhältnis.",

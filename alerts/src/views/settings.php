@@ -35,8 +35,13 @@ $darfTesten = permission('Alerts.Global.Test');
 <?php endif ?>
 
 <div class="row">
-    <a class="btn btn-ghost btn-small" href="<?= $e($url('/display/alerts')) ?>">
-        &larr; <?= $e(translate('alerts.back_to_alerts')) ?>
+    <?php /*
+        Zurueck zur Plugin-Liste, nicht zu den Alerts: von dort kommt
+        man hierher, und hierher gehoert diese Seite auch - es sind
+        die Einstellungen des Plugins.
+    */ ?>
+    <a class="btn btn-ghost btn-small" href="<?= $e($url('/account/plugins')) ?>">
+        &larr; <?= $e(translate('alerts.back_to_plugins')) ?>
     </a>
 </div>
 
