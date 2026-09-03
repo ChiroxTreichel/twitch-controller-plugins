@@ -33,7 +33,7 @@ uninstall.php    Tabellen abraeumen
 views/           eigene Vorlagen                       (optional)
 assets/          CSS, JS, Medien                       (optional)
 lang/            Uebersetzungen je Sprachcode          (optional)
-src/             Klassen unter Overlays\Plugin\<Slug>\ (optional)
+src/             Klassen unter TwitchController\Plugin\<Slug>\ (optional)
 ```
 
 Der Inhalt von `src/` landet in der **Wurzel** des Archivs, nicht in

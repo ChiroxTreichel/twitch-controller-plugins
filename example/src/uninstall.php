@@ -12,6 +12,6 @@ declare(strict_types=1);
  * Verfuegbar: $db, $settings, $plugin, $fromVersion (installierte Version)
  */
 
-/** @var \Overlays\Core\Database\Db $db */
+/** @var \TwitchController\Core\Database\Db $db */
 
 $db->run('DROP TABLE IF EXISTS example_notes');

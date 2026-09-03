@@ -12,12 +12,12 @@ declare(strict_types=1);
  * gehoert in die Hooks, sonst wird jeder Seitenaufruf langsam.
  *
  * Verfuegbare Variablen:
- *   $app      Overlays\Core\App
- *   $plugin   Overlays\Core\Plugin\Manifest  (slug, version, directory)
- *   $hooks    Overlays\Core\Hook\Hooks
- *   $router   Overlays\Core\Http\Router
- *   $settings Overlays\Core\Config\Settings
- *   $db       Overlays\Core\Database\Db
+ *   $app      TwitchController\Core\App
+ *   $plugin   TwitchController\Core\Plugin\Manifest  (slug, version, directory)
+ *   $hooks    TwitchController\Core\Hook\Hooks
+ *   $router   TwitchController\Core\Http\Router
+ *   $settings TwitchController\Core\Config\Settings
+ *   $db       TwitchController\Core\Database\Db
  *
  * Dateien eines Plugins:
  *   plugin.json      Manifest (slug, name, version, requires, optional)
@@ -27,21 +27,21 @@ declare(strict_types=1);
  *   views/           eigene Vorlagen (optional)
  *   assets/          CSS, JS, Bilder (optional, ueber /plugin/<slug>/assets/…)
  *   lang/            Uebersetzungen je Sprachcode (optional)
- *   src/             Klassen, Namensraum Overlays\Plugin\<Slug>\… (optional)
+ *   src/             Klassen, Namensraum TwitchController\Plugin\<Slug>\… (optional)
  */
 
-use Overlays\Core\Http\Request;
-use Overlays\Core\Http\Response;
+use TwitchController\Core\Http\Request;
+use TwitchController\Core\Http\Response;
 
-/** @var \Overlays\Core\App $app */
-/** @var \Overlays\Core\Plugin\Manifest $plugin */
-/** @var \Overlays\Core\Hook\Hooks $hooks */
-/** @var \Overlays\Core\Http\Router $router */
-/** @var \Overlays\Core\Config\Settings $settings */
+/** @var \TwitchController\Core\App $app */
+/** @var \TwitchController\Core\Plugin\Manifest $plugin */
+/** @var \TwitchController\Core\Hook\Hooks $hooks */
+/** @var \TwitchController\Core\Http\Router $router */
+/** @var \TwitchController\Core\Config\Settings $settings */
 
 // Eigener Einstellungs-Bereich. Alles, was das Plugin speichert, liegt
 // unter diesem Scope und wird beim Entfernen mitgeloescht.
-$scope = \Overlays\Core\Config\Settings::pluginScope($plugin->slug);
+$scope = \TwitchController\Core\Config\Settings::pluginScope($plugin->slug);
 
 // -------------------------------------------------------------------
 //  1. Eigene Rechte anmelden
