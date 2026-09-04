@@ -1,7 +1,7 @@
 {
   "slug": "streaminfo-tags",
   "name": "Streaminfo – Tags",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "Eigene Tags festlegen und auf der Streaminfo-Seite einzeln ein- und ausschalten. Die eingeschalteten stehen in eckigen Klammern vor dem Titel: [VTuber][German] Das ist mein Titel.",
   "author": "Twitch-Controller",
   "requires": {

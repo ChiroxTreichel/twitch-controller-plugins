@@ -58,14 +58,30 @@ $ziel = $url('/stream/info/tags');
             </div>
         <?php endforeach ?>
 
+        <?php /*
+            Die Vorlage fuer eine neue Zeile - siehe assets/rows.js.
+            <template> wird nicht angezeigt und nicht abgeschickt, ohne
+            JavaScript ist sie also unsichtbar und ohne Wirkung.
+        */ ?>
+        <?php if ($canEdit): ?>
+            <template data-row-template>
+                <div class="row">
+                    <input class="input grow" type="text" name="tags[]"
+                           maxlength="<?= $e((string) $maxTag) ?>" value=""
+                           placeholder="<?= $e(translate('si_tags.example')) ?>">
+                </div>
+            </template>
+        <?php endif ?>
+
         <?php if ($tags === []): ?>
-            <p class="hint"><?= $e(translate('si_tags.empty')) ?></p>
+            <p class="hint" data-empty-hint><?= $e(translate('si_tags.empty')) ?></p>
         <?php endif ?>
 
         <div class="row">
             <?php if ($canEdit): ?>
                 <?php if (count($tags) < $maxTags): ?>
-                    <button class="btn btn-ghost btn-small" type="submit" name="add" value="1">
+                    <button class="btn btn-ghost btn-small" type="submit" name="add" value="1"
+                            data-add-row="tags[]" data-max="<?= $e((string) $maxTags) ?>">
                         <?= $e(translate('si_tags.add_row')) ?>
                     </button>
                 <?php else: ?>

@@ -58,6 +58,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/streaminfo-tags/assets/tags.css');
     $assets['js'][] = $app->asset('/plugin/streaminfo-tags/assets/tags.js');
+    $assets['js'][] = $app->asset('/plugin/streaminfo-tags/assets/rows.js');
 
     return $assets;
 });
@@ -108,7 +109,11 @@ $hooks->on('streaminfo.title_bare', static function (mixed $titel) use ($app): s
 });
 
 $hooks->on('streaminfo.title_compose', static function (mixed $blank, Request $request) use ($app): string {
-    $gewaehlt = $request->input('si_tags');
+    // Ueber ->post und nicht ueber ->input(): input() gibt immer eine
+    // Zeichenkette zurueck, fuer die Haken (si_tags[]) also den
+    // Vorgabewert. Damit war die Auswahl stets leer, und die Tags kamen
+    // nie vor den Titel - ohne jede Fehlermeldung.
+    $gewaehlt = $request->post['si_tags'] ?? [];
 
     return Tags::prefix(
         $app,
@@ -167,7 +172,11 @@ $router->post('/stream/info/tags', static function (Request $request) use ($app,
         return $zurueck($ziel, ['error' => translate('common.error.no_permission')]);
     }
 
-    $zeilen = $request->input('tags');
+    // Ueber ->post und nicht ueber ->input(): input() gibt immer eine
+    // Zeichenkette zurueck, fuer ein Feld wie "tags[]" also den
+    // Vorgabewert. is_array() darauf ist damit nie wahr - und das
+    // Speichern schrieb eine leere Liste, ohne jede Fehlermeldung.
+    $zeilen = $request->post['tags'] ?? [];
     $zeilen = is_array($zeilen) ? array_values($zeilen) : [];
 
     // Anhaengen und Entfernen ohne JavaScript - wie beim Loeschbot und

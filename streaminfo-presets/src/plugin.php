@@ -49,6 +49,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     $assets['js'][] = $app->asset('/plugin/streaminfo-presets/assets/presets.js');
+    $assets['js'][] = $app->asset('/plugin/streaminfo-presets/assets/rows.js');
 
     return $assets;
 });
@@ -147,7 +148,11 @@ $router->post('/stream/info/presets', static function (Request $request) use ($a
         return $zurueck($ziel, ['error' => translate('common.error.no_permission')]);
     }
 
-    $zeilen = $request->input('presets');
+    // Ueber ->post und nicht ueber ->input(): input() gibt immer eine
+    // Zeichenkette zurueck, fuer ein Feld wie "presets[]" also den
+    // Vorgabewert. is_array() darauf ist damit nie wahr - und das
+    // Speichern schrieb eine leere Liste, ohne jede Fehlermeldung.
+    $zeilen = $request->post['presets'] ?? [];
     $zeilen = is_array($zeilen) ? array_values($zeilen) : [];
 
     // Eine Zeile anhaengen oder entfernen, ohne JavaScript: der Knopf
