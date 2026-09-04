@@ -1,4 +1,5 @@
 {
+    "timers.add_message": "Neue Nachricht",
     "timers.all_off_hint": "Timer sind ausgeschaltet – im Chat passiert nichts. Einstellen lässt sich trotzdem alles.",
     "timers.create": "Erstellen",
     "timers.created": "«%{title}» angelegt.",
@@ -16,7 +17,7 @@
     "timers.field.interval": "Intervall (min)",
     "timers.field.keywords": "Stream-Titel-Stichwörter",
     "timers.field.keywords_hint": "kommagetrennt, leer = egal",
-    "timers.field.messages": "Nachrichten (eine je Zeile, sie rotieren beim Posten)",
+    "timers.field.messages": "Nachrichten (sie rotieren beim Posten)",
     "timers.field.min_lines": "Min. Zeilen",
     "timers.field.title": "Titel",
     "timers.inactive": "inaktiv",

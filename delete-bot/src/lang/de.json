@@ -1,16 +1,19 @@
 {
+    "delete_bot.add_row": "Muster hinzufügen",
     "delete_bot.all_off_hint": "Der Löschbot ist ausgeschaltet – es wird nichts gelöscht. Die Muster lassen sich trotzdem pflegen und testen.",
     "delete_bot.check": "Prüfen",
     "delete_bot.count": "%{count} Muster gespeichert.",
     "delete_bot.error.invalid": "Nicht verwendbar, weil kein gültiger regulärer Ausdruck: %{patterns}",
     "delete_bot.field.probe": "Nachricht",
-    "delete_bot.field.words": "Muster, eines je Zeile",
     "delete_bot.invalid_hint": "Diese Muster sind keine gültigen regulären Ausdrücke und treffen deshalb nie:",
+    "delete_bot.invalid_row": "Kein gültiger regulärer Ausdruck – dieses Muster trifft nie.",
+    "delete_bot.invalid_short": "kaputt",
     "delete_bot.lead": "Passt eine Chatnachricht auf eines der Muster, wird sie gelöscht.",
     "delete_bot.list": "Muster",
     "delete_bot.list_hint": "Ein Muster je Zeile. Jedes ist ein regulärer Ausdruck ohne Begrenzer – Groß- und Kleinschreibung ist egal.",
     "delete_bot.name": "Löschbot",
     "delete_bot.nav.chat": "Chat",
+    "delete_bot.no_words": "Noch keine Muster vorhanden.",
     "delete_bot.off": "aus",
     "delete_bot.on": "an",
     "delete_bot.perm.edit": "darf die Musterliste ändern.",
@@ -18,6 +21,7 @@
     "delete_bot.perm.toggle": "darf den Löschbot ein- und ausschalten.",
     "delete_bot.perm.view": "darf die Musterliste sehen.",
     "delete_bot.probe_example": "Schau mal auf cutt.ly/abc vorbei",
+    "delete_bot.remove_row": "Löschen",
     "delete_bot.result.blocked": "Diese Nachricht würde gelöscht.",
     "delete_bot.result.empty_list": "Es ist noch kein Muster gespeichert.",
     "delete_bot.result.kept": "Diese Nachricht würde stehen bleiben.",
@@ -32,5 +36,5 @@
     "delete_bot.toggle_hint": "Löschbot ein- oder ausschalten. Die Musterliste bleibt stehen.",
     "delete_bot.turned_off": "Der Löschbot ist aus.",
     "delete_bot.turned_on": "Der Löschbot ist an.",
-    "delete_bot.words_example": "cutt\\s*\\.\\s*ly\nbit\\s*\\.\\s*ly/\\S+\nfree\\s*follower"
+    "delete_bot.word_example": "cutt\\s*\\.\\s*ly"
 }

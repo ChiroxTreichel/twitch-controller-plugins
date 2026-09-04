@@ -92,7 +92,11 @@ $hooks->on('core.chat.message', static function (array $message) use ($app): voi
 //  Die Seite
 // -------------------------------------------------------------------
 $seite = static function (Request $request) use ($app, $plugin): Response {
+    // all() fuer die Oberflaeche - mit den leeren Zeilen, die der
+    // Knopf "Muster hinzufuegen" angelegt hat. Geprueft wird mit
+    // active().
     $muster = Words::all($app);
+    $aktive = Words::active($app);
 
     // Das Testergebnis kommt aus der Adresse zurueck, damit ein
     // Neuladen nichts erneut abschickt. Geprueft wird hier und nicht
@@ -102,7 +106,7 @@ $seite = static function (Request $request) use ($app, $plugin): Response {
     $ergebnis = null;
 
     if ($probe !== '' && permission('DeleteBot.Global.Test')) {
-        $ergebnis = Words::check($probe, $muster);
+        $ergebnis = Words::check($probe, $aktive);
     }
 
     return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
@@ -110,7 +114,8 @@ $seite = static function (Request $request) use ($app, $plugin): Response {
         'active'   => 'chat/delete-bot',
         'enabled'  => Words::enabled($app),
         'words'    => $muster,
-        'invalid'  => Words::invalid($muster),
+        'active'   => $aktive,
+        'invalid'  => Words::invalid($aktive),
         'probe'    => $probe,
         'result'   => $ergebnis,
         'csrf'     => $app->auth->csrfToken(),
@@ -183,7 +188,23 @@ $router->post('/chat/delete-bot', static function (Request $request) use ($app, 
         return $zurueck(['error' => translate('common.error.no_permission')]);
     }
 
-    $muster = Words::normalize((string) $request->input('words'));
+    // Die Zeilen kommen als Feld an: eine Eingabe je Muster, wie im
+    // alten System. Ein Textfeld waere weniger Arbeit gewesen, aber
+    // dann gaebe es kein "Loeschen" je Zeile - und man muesste zaehlen,
+    // in welcher Zeile das kaputte Muster steht.
+    $zeilen = $request->post['words'] ?? [];
+    $muster = Words::normalize(is_array($zeilen) ? array_map('strval', array_values($zeilen)) : []);
+
+    // Hinzufuegen und Loeschen laufen ueber dasselbe Formular: so
+    // gehen die uebrigen Eingaben nicht verloren, und es braucht kein
+    // JavaScript.
+    $stelle = $request->input('remove');
+    if ($stelle !== '' && is_numeric($stelle)) {
+        $muster = Words::without($muster, (int) $stelle);
+    } elseif ($request->input('add') !== '') {
+        $muster = Words::withEmptyRow($muster);
+    }
+
     Words::save($app, $muster);
 
     $kaputt = Words::invalid($muster);
@@ -193,12 +214,16 @@ $router->post('/chat/delete-bot', static function (Request $request) use ($app, 
     // sofort, denn ein kaputtes Muster trifft nie.
     if ($kaputt !== []) {
         return $zurueck([
-            'notice' => translate('delete_bot.saved', ['count' => (string) count($muster)]),
+            'notice' => translate('delete_bot.saved', ['count' => (string) count(Words::active($app))]),
             'error'  => translate('delete_bot.error.invalid', [
                 'patterns' => implode(', ', $kaputt),
             ]),
         ]);
     }
 
-    return $zurueck(['notice' => translate('delete_bot.saved', ['count' => (string) count($muster)])]);
+    return $zurueck([
+        'notice' => translate('delete_bot.saved', [
+            'count' => (string) count(Words::active($app)),
+        ]),
+    ]);
 }, ['auth' => true, 'permission' => 'DeleteBot.Global.View']);

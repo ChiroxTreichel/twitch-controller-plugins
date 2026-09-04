@@ -1,16 +1,19 @@
 {
+    "delete_bot.add_row": "Add pattern",
     "delete_bot.all_off_hint": "The delete bot is switched off – nothing is deleted. The patterns can still be edited and tested.",
     "delete_bot.check": "Check",
     "delete_bot.count": "%{count} patterns saved.",
     "delete_bot.error.invalid": "Unusable because they are not valid regular expressions: %{patterns}",
     "delete_bot.field.probe": "Message",
-    "delete_bot.field.words": "Patterns, one per line",
     "delete_bot.invalid_hint": "These patterns are not valid regular expressions and therefore never match:",
+    "delete_bot.invalid_row": "Not a valid regular expression – this pattern never matches.",
+    "delete_bot.invalid_short": "broken",
     "delete_bot.lead": "If a chat message matches one of the patterns, it is deleted.",
     "delete_bot.list": "Patterns",
-    "delete_bot.list_hint": "One pattern per line. Each is a regular expression without delimiters – case does not matter.",
+    "delete_bot.list_hint": "One pattern per row. Each is a regular expression without delimiters – case does not matter.",
     "delete_bot.name": "Delete bot",
     "delete_bot.nav.chat": "Chat",
+    "delete_bot.no_words": "No patterns yet.",
     "delete_bot.off": "off",
     "delete_bot.on": "on",
     "delete_bot.perm.edit": "may change the pattern list.",
@@ -18,6 +21,7 @@
     "delete_bot.perm.toggle": "may switch the delete bot on and off.",
     "delete_bot.perm.view": "may see the pattern list.",
     "delete_bot.probe_example": "Check out cutt.ly/abc",
+    "delete_bot.remove_row": "Delete",
     "delete_bot.result.blocked": "This message would be deleted.",
     "delete_bot.result.empty_list": "No pattern has been saved yet.",
     "delete_bot.result.kept": "This message would be kept.",
@@ -32,5 +36,5 @@
     "delete_bot.toggle_hint": "Switch the delete bot on or off. The pattern list is kept.",
     "delete_bot.turned_off": "The delete bot is off.",
     "delete_bot.turned_on": "The delete bot is on.",
-    "delete_bot.words_example": "cutt\\s*\\.\\s*ly\nbit\\s*\\.\\s*ly/\\S+\nfree\\s*follower"
+    "delete_bot.word_example": "cutt\\s*\\.\\s*ly"
 }

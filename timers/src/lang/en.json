@@ -1,4 +1,5 @@
 {
+    "timers.add_message": "New message",
     "timers.all_off_hint": "Timers are switched off – nothing happens in chat. Everything can still be configured.",
     "timers.create": "Create",
     "timers.created": "“%{title}” created.",
@@ -16,7 +17,7 @@
     "timers.field.interval": "Interval (min)",
     "timers.field.keywords": "Stream title keywords",
     "timers.field.keywords_hint": "comma-separated, empty = any",
-    "timers.field.messages": "Messages (one per line, they rotate when posted)",
+    "timers.field.messages": "Messages (they rotate when posted)",
     "timers.field.min_lines": "Min. lines",
     "timers.field.title": "Title",
     "timers.inactive": "inactive",

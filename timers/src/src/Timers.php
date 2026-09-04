@@ -197,7 +197,10 @@ final class Timers
         }
 
         $nachrichten = self::normalizeMessages($eingabe['messages'] ?? null);
-        if ($nachrichten === []) {
+
+        // Leere Zeilen duerfen dabei sein, aber nicht nur leere: ein
+        // Timer ohne Nachricht kann nichts tun.
+        if (self::activeMessages(['messages' => $nachrichten]) === []) {
             return null;
         }
 
@@ -233,14 +236,16 @@ final class Timers
             ? $roh
             : (preg_split('/\r\n|\r|\n/', (string) $roh) ?: []);
 
+        // LEERE ZEILEN BLEIBEN STEHEN. Sie sind kein Versehen: der
+        // Knopf "Neue Nachricht" legt genau so eine an, damit eine
+        // leere Eingabe erscheint, in die man tippen kann. Wuerden sie
+        // hier wegfallen, waere der Knopf wirkungslos - die Zeile
+        // verschwaende beim Speichern sofort wieder.
+        //
+        // Fuer den Betrieb fallen sie ueber activeMessages() weg.
         $nachrichten = [];
         foreach ($zeilen as $zeile) {
-            $text = trim((string) $zeile);
-            if ($text === '') {
-                continue;
-            }
-
-            $nachrichten[] = self::cut($text, self::MAX_MESSAGE);
+            $nachrichten[] = self::cut(trim((string) $zeile), self::MAX_MESSAGE);
 
             if (count($nachrichten) >= self::MAX_MESSAGES) {
                 break;
@@ -248,6 +253,64 @@ final class Timers
         }
 
         return $nachrichten;
+    }
+
+    /**
+     * Die Nachrichten, die wirklich gepostet werden.
+     *
+     * @param array<string, mixed> $timer
+     * @return list<string>
+     */
+    public static function activeMessages(array $timer): array
+    {
+        $nachrichten = is_array($timer['messages'] ?? null) ? $timer['messages'] : [];
+
+        return array_values(array_filter(
+            array_map('strval', $nachrichten),
+            static fn (string $text): bool => trim($text) !== ''
+        ));
+    }
+
+    /**
+     * Eine leere Nachrichtenzeile anhaengen.
+     *
+     * Fuer den Knopf "Neue Nachricht": die Zeile erscheint leer im
+     * Formular, und getippt wird beim naechsten Speichern.
+     *
+     * @param list<string> $nachrichten
+     * @return list<string>
+     */
+    public static function withEmptyMessage(array $nachrichten): array
+    {
+        if (count($nachrichten) >= self::MAX_MESSAGES) {
+            return $nachrichten;
+        }
+
+        $nachrichten[] = '';
+
+        return $nachrichten;
+    }
+
+    /**
+     * Eine Nachrichtenzeile herausnehmen.
+     *
+     * Die letzte bleibt stehen: ein Timer ohne Nachricht kann nichts
+     * tun, und ein Formular, das sich selbst unbrauchbar macht, waere
+     * eine Falle. Die Oberflaeche bietet das Loeschen darum erst ab
+     * zwei Zeilen an - das hier ist das Netz darunter.
+     *
+     * @param list<string> $nachrichten
+     * @return list<string>
+     */
+    public static function withoutMessage(array $nachrichten, int $stelle): array
+    {
+        if (count($nachrichten) <= 1) {
+            return $nachrichten;
+        }
+
+        unset($nachrichten[$stelle]);
+
+        return array_values($nachrichten);
     }
 
     /**
@@ -260,7 +323,10 @@ final class Timers
      */
     public static function messageAt(array $timer, int $index): string
     {
-        $nachrichten = is_array($timer['messages'] ?? null) ? $timer['messages'] : [];
+        // Ueber die nicht leeren: eine leere Platzhalterzeile wuerde
+        // sonst gelegentlich einen Durchgang verschlucken, und niemand
+        // verstuende, warum der Timer einmal ausgesetzt hat.
+        $nachrichten = self::activeMessages($timer);
         if ($nachrichten === []) {
             return '';
         }

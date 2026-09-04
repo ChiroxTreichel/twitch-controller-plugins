@@ -40,10 +40,26 @@
     color: var(--muted);
 }
 
-/* Eine Nachricht je Zeile - lang genug, dass man sie ganz sieht. */
-.timer-messages {
+/*
+ * Eine Eingabe je Nachricht, untereinander. Der Löschen-Knopf steht
+ * rechts daneben und soll oben bündig mit dem Feld sitzen, nicht in
+ * der Mitte - bei zwei Zeilen sähe das sonst verrutscht aus.
+ */
+.timer-message-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 4px 0 12px;
+}
+
+.timer-message-row {
+    gap: 8px;
+    flex-wrap: nowrap;
+    align-items: flex-start;
+}
+
+.timer-message {
     width: 100%;
-    min-height: 74px;
     resize: vertical;
     font-family: inherit;
     line-height: 1.5;

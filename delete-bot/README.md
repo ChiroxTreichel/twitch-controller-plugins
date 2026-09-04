@@ -9,9 +9,13 @@ eine unangenehme Überraschung.
 
 ## Muster
 
-Ein Muster je Zeile. Jedes ist ein **regulärer Ausdruck ohne
-Begrenzer** — genau wie im alten System, vorhandene Listen bleiben also
-gültig.
+Eine Eingabe je Muster, mit **Löschen** für die einzelne Zeile und
+**Muster hinzufügen** zum Anhängen — wie im alten System, und ebenso
+ohne JavaScript: beides sind Absende-Knöpfe im selben Formular.
+
+Jedes Muster ist ein **regulärer Ausdruck ohne Begrenzer**, genau wie
+vorher; vorhandene Listen bleiben also gültig. Ein kaputtes Muster
+bekommt seine Zeile markiert, damit man nicht zählen muss.
 
 ```
 cutt\s*\.\s*ly

@@ -1,7 +1,7 @@
 {
   "slug": "timers",
   "name": "Timer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Wiederkehrende Nachrichten im Chat – aber nur, wenn der Stream läuft. Je Timer ein Intervall, eine Mindestzahl an Chatzeilen und optional Filter auf Stream-Titel und Kategorie. Mehrere Nachrichten rotieren, und ein Timer kann zusätzlich als !befehl abrufbar sein.",
   "author": "Twitch-Controller",
   "requires": {

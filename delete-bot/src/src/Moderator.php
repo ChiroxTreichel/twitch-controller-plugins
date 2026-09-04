@@ -33,7 +33,9 @@ final class Moderator
             return;
         }
 
-        $muster = Words::all($this->app);
+        // active(): die leeren Platzhalterzeilen aus der Oberflaeche
+        // gehoeren nicht in die Pruefung.
+        $muster = Words::active($this->app);
         if ($muster === []) {
             return;
         }

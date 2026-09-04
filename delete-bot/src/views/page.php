@@ -8,7 +8,8 @@ declare(strict_types=1);
  * @var callable $e
  * @var callable $url
  * @var bool $enabled
- * @var list<string> $words
+ * @var list<string> $words   alle Zeilen, leere eingeschlossen
+ * @var list<string> $active  nur die, mit denen geprueft wird
  * @var list<string> $invalid
  * @var string $probe
  * @var array{blocked: bool, pattern: string, normalized: string, invalid: list<string>}|null $result
@@ -72,22 +73,56 @@ $ziel = $url('/chat/delete-bot');
     <h2><?= $e(translate('delete_bot.list')) ?></h2>
     <p class="hint"><?= $e(translate('delete_bot.list_hint')) ?></p>
 
+    <?php /*
+        Eine Eingabe je Muster, wie im alten System - kein Textfeld.
+        Nur so gibt es ein "Loeschen" fuer die einzelne Zeile, und man
+        muss nicht zaehlen, in welcher Zeile das kaputte Muster steht.
+
+        Hinzufuegen und Loeschen sind Absende-Knoepfe im selben
+        Formular: die uebrigen Eingaben gehen dabei nicht verloren, und
+        es braucht kein JavaScript.
+    */ ?>
     <form method="post" action="<?= $e($ziel) ?>">
         <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
         <input type="hidden" name="action" value="save">
 
-        <label class="field">
-            <span class="hint"><?= $e(translate('delete_bot.field.words')) ?></span>
-            <textarea class="input delete-bot-words" name="words" rows="10" spellcheck="false"
-                      placeholder="<?= $e(translate('delete_bot.words_example')) ?>"
-                      <?= $darfAendern ? '' : 'disabled' ?>><?= $e(implode("\n", $words)) ?></textarea>
-        </label>
+        <div class="delete-bot-list">
+            <?php foreach ($words as $i => $wort): ?>
+                <div class="row delete-bot-row">
+                    <input class="input delete-bot-word grow" type="text" spellcheck="false"
+                           name="words[]" value="<?= $e($wort) ?>"
+                           maxlength="200"
+                           placeholder="<?= $e(translate('delete_bot.word_example')) ?>"
+                           <?= $darfAendern ? '' : 'disabled' ?>>
+
+                    <?php if ($wort !== '' && in_array($wort, $invalid, true)): ?>
+                        <span class="badge badge-off" title="<?= $e(translate('delete_bot.invalid_row')) ?>">
+                            <?= $e(translate('delete_bot.invalid_short')) ?>
+                        </span>
+                    <?php endif ?>
+
+                    <?php if ($darfAendern): ?>
+                        <button class="btn btn-ghost btn-small" type="submit"
+                                name="remove" value="<?= $e((string) $i) ?>">
+                            <?= $e(translate('delete_bot.remove_row')) ?>
+                        </button>
+                    <?php endif ?>
+                </div>
+            <?php endforeach ?>
+
+            <?php if ($words === []): ?>
+                <p class="hint"><?= $e(translate('delete_bot.no_words')) ?></p>
+            <?php endif ?>
+        </div>
 
         <div class="row">
             <?php if ($darfAendern): ?>
+                <button class="btn btn-ghost btn-small" type="submit" name="add" value="1">
+                    <?= $e(translate('delete_bot.add_row')) ?>
+                </button>
                 <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
             <?php endif ?>
-            <span class="hint"><?= $e(translate('delete_bot.count', ['count' => (string) count($words)])) ?></span>
+            <span class="hint"><?= $e(translate('delete_bot.count', ['count' => (string) count($active)])) ?></span>
         </div>
     </form>
 </div>

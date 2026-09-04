@@ -108,7 +108,7 @@ final class Runner
             $this->app->log(sprintf(
                 'Timer: "%s" gepostet (Nachricht %d).',
                 (string) $eintrag['title'],
-                $einzeln['message_index'] % max(1, count($eintrag['messages'])) + 1
+                $einzeln['message_index'] % max(1, count(Timers::activeMessages($eintrag))) + 1
             ));
 
             $stand = State::set($stand, $id, [

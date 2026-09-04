@@ -1,21 +1,29 @@
 /*
- * Löschbot: das Musterfeld.
+ * Löschbot: die Musterliste.
  *
- * Feste Zeichenbreite, weil hier reguläre Ausdrücke stehen. In einer
- * Proportionalschrift ist "cutt\s*\.\s*ly" kaum zu lesen, und ein
- * übersehenes Zeichen bedeutet ein Muster, das nie trifft.
+ * Feste Zeichenbreite in den Eingaben, weil dort reguläre Ausdrücke
+ * stehen. In einer Proportionalschrift ist "cutt\s*\.\s*ly" kaum zu
+ * lesen, und ein übersehenes Zeichen bedeutet ein Muster, das nie
+ * trifft.
  */
 
-.delete-bot-words {
-    width: 100%;
-    min-height: 200px;
-    resize: vertical;
+.delete-bot-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 4px 0 16px;
+}
+
+/*
+ * Die Zeilen sitzen dicht: .row bringt normalerweise Abstand für
+ * Knöpfe mit, hier sind es viele kurze Zeilen untereinander.
+ */
+.delete-bot-row {
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+.delete-bot-word {
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.86rem;
-    line-height: 1.6;
-
-    /* Ein Muster gehört in eine Zeile - umgebrochen sähe es aus wie
-       zwei, und die Liste ist zeilenweise zu lesen. */
-    white-space: pre;
-    overflow-x: auto;
 }

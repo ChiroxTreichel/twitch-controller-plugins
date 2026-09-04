@@ -52,8 +52,18 @@ nachfordert — Titel und Kategorie ändern sich mitten im Stream.
 
 ## Nachrichten
 
-Eine je Zeile. Sie rotieren beim Posten: beim ersten Mal die erste,
-dann die zweite, und wieder von vorn.
+Eine Eingabe je Nachricht, mit **Löschen** für die einzelne Zeile und
+**Neue Nachricht** zum Anhängen. Beide sind Absende-Knöpfe im selben
+Formular: die übrigen Eingaben gehen dabei nicht verloren, und es
+braucht kein JavaScript — das alte System löste das mit JS.
+
+Sie rotieren beim Posten: beim ersten Mal die erste, dann die zweite,
+und wieder von vorn. Eine noch leere Zeile wird dabei übersprungen,
+sonst setzte der Timer gelegentlich einen Durchgang aus.
+
+Die **letzte** Nachricht lässt sich nicht löschen — ein Timer ohne
+Nachricht kann nichts tun, und ein Formular, das sich selbst
+unbrauchbar macht, wäre eine Falle.
 
 ## Als Befehl
 

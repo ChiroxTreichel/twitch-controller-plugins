@@ -109,20 +109,60 @@ final class Words
             : (preg_split('/\r\n|\r|\n/', $eingabe) ?: []);
 
         $muster = [];
+        $gesehen = [];
+
+        // Leere Zeilen bleiben stehen - siehe all(). Doppelte fliegen
+        // raus: zweimal dasselbe Muster kostet bei jeder Nachricht
+        // Rechenzeit und aendert nichts.
         foreach ($zeilen as $zeile) {
             $text = self::cut(trim((string) $zeile));
-            if ($text === '') {
-                continue;
+
+            if ($text !== '') {
+                if (isset($gesehen[$text])) {
+                    continue;
+                }
+
+                $gesehen[$text] = true;
             }
 
-            $muster[$text] = true;
+            $muster[] = $text;
 
             if (count($muster) >= self::MAX_WORDS) {
                 break;
             }
         }
 
-        return array_keys($muster);
+        return $muster;
+    }
+
+    /**
+     * Eine leere Zeile anhaengen - fuer den Knopf "Muster hinzufuegen".
+     *
+     * @param list<string> $muster
+     * @return list<string>
+     */
+    public static function withEmptyRow(array $muster): array
+    {
+        if (count($muster) >= self::MAX_WORDS) {
+            return $muster;
+        }
+
+        $muster[] = '';
+
+        return $muster;
+    }
+
+    /**
+     * Eine Zeile herausnehmen.
+     *
+     * @param list<string> $muster
+     * @return list<string>
+     */
+    public static function without(array $muster, int $stelle): array
+    {
+        unset($muster[$stelle]);
+
+        return array_values($muster);
     }
 
     /**
@@ -176,6 +216,14 @@ final class Words
         $kaputt = [];
 
         foreach ($muster as $eines) {
+            // Ein leeres Muster ergibt "//miu" - und das trifft JEDE
+            // Nachricht. Gefiltert wird es schon in active(), aber hier
+            // noch einmal: der Preis eines Fehlers waere, dass der Bot
+            // den ganzen Chat leert.
+            if (trim($eines) === '') {
+                continue;
+            }
+
             if (!self::isValid($eines)) {
                 $kaputt[] = $eines;
                 continue;

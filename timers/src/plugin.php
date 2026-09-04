@@ -238,6 +238,23 @@ $router->post('/chat/timers', static function (Request $request) use ($app, $zur
         return $zurueck(null, translate('common.error.unknown_action'));
     }
 
+    // Die Nachrichten kommen als Feld an: eine Eingabe je Nachricht,
+    // wie im alten System. Nur so gibt es ein "Loeschen" fuer die
+    // einzelne Zeile.
+    $zeilen = $request->post['messages'] ?? [];
+    $nachrichten = is_array($zeilen) ? array_map('strval', array_values($zeilen)) : [];
+
+    // Hinzufuegen und Loeschen laufen ueber dasselbe Formular: die
+    // uebrigen Eingaben gehen dabei nicht verloren, und es braucht kein
+    // JavaScript. Das alte System hat das mit JavaScript geloest - hier
+    // funktioniert es auch ohne.
+    $stelle = $request->input('remove_message');
+    if ($stelle !== '' && is_numeric($stelle)) {
+        $nachrichten = Timers::withoutMessage($nachrichten, (int) $stelle);
+    } elseif ($request->input('add_message') !== '') {
+        $nachrichten = Timers::withEmptyMessage($nachrichten);
+    }
+
     $ergebnis = Timers::save($app, [
         'id'               => $aktion === 'save' ? (string) $request->input('id') : '',
         'title'            => (string) $request->input('title'),
@@ -245,7 +262,7 @@ $router->post('/chat/timers', static function (Request $request) use ($app, $zur
         'min_lines'        => (int) $request->input('min_lines'),
         'title_keywords'   => (string) $request->input('title_keywords'),
         'game'             => (string) $request->input('game'),
-        'messages'         => (string) $request->input('messages'),
+        'messages'         => $nachrichten,
         'enabled'          => $request->input('enabled') !== '',
         'allow_as_command' => $request->input('allow_as_command') !== '',
     ]);
