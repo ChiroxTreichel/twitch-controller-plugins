@@ -9,7 +9,7 @@ declare(strict_types=1);
  * @var callable $url
  * @var bool $enabled
  * @var list<string> $words   alle Zeilen, leere eingeschlossen
- * @var list<string> $active  nur die, mit denen geprueft wird
+ * @var list<string> $usable  nur die, mit denen geprueft wird
  * @var list<string> $invalid
  * @var string $probe
  * @var array{blocked: bool, pattern: string, normalized: string, invalid: list<string>}|null $result
@@ -122,7 +122,7 @@ $ziel = $url('/chat/delete-bot');
                 </button>
                 <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
             <?php endif ?>
-            <span class="hint"><?= $e(translate('delete_bot.count', ['count' => (string) count($active)])) ?></span>
+            <span class="hint"><?= $e(translate('delete_bot.count', ['count' => (string) count($usable)])) ?></span>
         </div>
     </form>
 </div>

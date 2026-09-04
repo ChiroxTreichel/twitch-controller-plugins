@@ -1,7 +1,7 @@
 {
   "slug": "delete-bot",
   "name": "Löschbot",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Löscht Chatnachrichten, die auf eines von mehreren Mustern passen. Mit Testfeld: eine Nachricht eintippen und sehen, ob sie fallen würde, welches Muster greift und wie der Text nach der Normalisierung aussieht.",
   "author": "Twitch-Controller",
   "requires": {

@@ -63,7 +63,16 @@ final class Words
     // -----------------------------------------------------------------
 
     /**
-     * Alle Muster, so wie sie gespeichert sind.
+     * Alle Zeilen, so wie sie gespeichert sind - LEERE EINGESCHLOSSEN.
+     *
+     * Die leeren Zeilen sind kein Versehen: der Knopf "Muster
+     * hinzufuegen" legt genau so eine an, damit eine leere Eingabe
+     * erscheint, in die man tippen kann. Fielen sie hier weg, waere der
+     * Knopf wirkungslos.
+     *
+     * Fuer die Pruefung fallen sie ueber active() weg - dieselbe
+     * Trennung wie im alten System (moderation_words_load gegen
+     * moderation_load_bad_words).
      *
      * @return list<string>
      */
@@ -74,13 +83,23 @@ final class Words
 
         $muster = [];
         foreach ($gespeichert as $wort) {
-            $text = trim((string) $wort);
-            if ($text !== '') {
-                $muster[] = self::cut($text);
-            }
+            $muster[] = self::cut(trim((string) $wort));
         }
 
         return $muster;
+    }
+
+    /**
+     * Die Muster, mit denen wirklich geprueft wird.
+     *
+     * @return list<string>
+     */
+    public static function active(App $app): array
+    {
+        return array_values(array_filter(
+            self::all($app),
+            static fn (string $eines): bool => $eines !== ''
+        ));
     }
 
     /**

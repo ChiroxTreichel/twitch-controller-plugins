@@ -114,7 +114,11 @@ $seite = static function (Request $request) use ($app, $plugin): Response {
         'active'   => 'chat/delete-bot',
         'enabled'  => Words::enabled($app),
         'words'    => $muster,
-        'active'   => $aktive,
+        // NICHT 'active' nennen: so heisst der Menueschluessel fuer die
+        // Markierung in der Seitenleiste, und der stand hier zweimal
+        // im selben Array - der zweite gewinnt, ohne dass PHP etwas
+        // sagt. Der Menuepunkt blieb damit unmarkiert.
+        'usable'   => $aktive,
         'invalid'  => Words::invalid($aktive),
         'probe'    => $probe,
         'result'   => $ergebnis,
