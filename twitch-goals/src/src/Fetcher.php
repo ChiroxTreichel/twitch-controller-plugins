@@ -182,6 +182,30 @@ final class Fetcher
     }
 
     /**
+     * Nur die Einstellungen ins Overlay - Titel und Schalter.
+     *
+     * Ohne die Zahlen, und das ist der ganze Zweck: das Overlay legt
+     * eintreffende Nachrichten uebereinander, statt seinen Zustand zu
+     * ersetzen. Wer also nur einen Titel aendert, laesst die Zahlen
+     * stehen, die dort schon richtig standen.
+     *
+     * Vorher ging hier payload() hinaus, also auch die Zahlen - so wie
+     * sie in dem Moment gespeichert waren. Kurz nach einer Installation
+     * sind das Nullen, weil noch kein Abruf gelaufen ist. Ein Streamer,
+     * der eine Bezeichnung aendert, sah daraufhin 0 von 0 im Overlay -
+     * bis der Takt eine halbe Minute spaeter die echten Zahlen
+     * nachschob. Das Speichern eines Titels hat mit den Zahlen nichts
+     * zu tun und darf sie nicht ueberschreiben.
+     */
+    public function pushSettings(): void
+    {
+        Goals::send($this->app, Config::titles($this->app) + [
+            'follower_enabled' => Config::goalEnabled($this->app, 'follower'),
+            'sub_enabled'      => Config::goalEnabled($this->app, 'sub'),
+        ]);
+    }
+
+    /**
      * Was das Overlay braucht, um die Ziele zu zeichnen.
      *
      * Eine Quelle fuer zwei Wege: push() schickt es durch die Leitung,

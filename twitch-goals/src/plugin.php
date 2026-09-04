@@ -293,8 +293,13 @@ $router->post('/display/goals/twitch', static function (Request $request) use ($
 
     // Die Titel stehen im Overlay - also gleich hinschicken, sonst
     // steht dort der alte, bis sich eine Zahl aendert.
-    $holer = new Fetcher($app);
-    $holer->push($holer->state());
+    //
+    // Nur die Titel und die Schalter, nicht den ganzen Stand: das
+    // Overlay legt Nachrichten uebereinander, die Zahlen bleiben also
+    // stehen. Schickte man hier den gespeicherten Stand mit, wuerde
+    // eine Titelaenderung die Zahlen auf den Wert zuruecksetzen, der
+    // gerade gespeichert ist - kurz nach einer Installation also auf 0.
+    (new Fetcher($app))->pushSettings();
 
     return $zurueck($ziel, ['notice' => translate('twitch_goals.titles_saved')]);
 }, ['auth' => true, 'permission' => 'TwitchGoals.Global.View']);
