@@ -1,0 +1,138 @@
+/* -------------------------------------------------------------------
+ *  Raids: das Kachelgitter
+ *
+ *  Feste Spaltenbreite statt einer Zahl von Spalten: bei zwanzig
+ *  Kanaelen und einem breiten Fenster sollen sechs nebeneinander
+ *  stehen, bei einem schmalen zwei - und niemand soll dafuer
+ *  Haltepunkte pflegen.
+ * ------------------------------------------------------------------- */
+.raid-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+    gap: 10px;
+    margin: 12px 0 0;
+}
+
+.raid-tile {
+    position: relative;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+
+    padding: 12px 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+
+    color: inherit;
+    text-decoration: none;
+    text-align: center;
+}
+
+/* Nur Kacheln, die selbst ein Link sind - im Follow-Reiter sitzt der
+   Link INNEN, damit der Stern daneben anklickbar bleibt. */
+a.raid-tile:hover,
+.raid-tile a:hover {
+    border-color: var(--accent, #7c3aed);
+}
+
+.raid-tile a {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+
+    color: inherit;
+    text-decoration: none;
+}
+
+.raid-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+
+    /* Nicht schrumpfen: ohne das quetscht ein langer Name das Bild. */
+    flex: 0 0 auto;
+}
+
+/* Kein Bild: der erste Buchstabe. Besser als eine leere Flaeche - man
+   erkennt die Kachel am Platz, nicht nur am Namen darunter. */
+.raid-avatar-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--panel-2, rgba(255, 255, 255, .06));
+    font: 600 1.3rem/1 system-ui, sans-serif;
+    color: var(--muted);
+}
+
+.raid-name {
+    font-size: 0.86rem;
+    font-weight: 600;
+
+    /* Lange Namen kuerzen statt umbrechen: sonst sind die Kacheln
+       unterschiedlich hoch, und das Gitter wird unruhig. */
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.raid-meta {
+    font-size: 0.78rem;
+    color: var(--muted);
+
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------
+ *  Der Stern
+ *
+ *  Er sitzt in der Ecke der Kachel und ist ein Absende-Knopf. Ohne
+ *  eigene Flaeche waere er ein 12 Pixel grosses Ziel - im Stream
+ *  trifft man das nicht.
+ * ------------------------------------------------------------------- */
+.raid-star {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 26px;
+    height: 26px;
+    padding: 0;
+
+    background: none;
+    border: 0;
+    border-radius: 50%;
+    cursor: pointer;
+
+    font-size: 1rem;
+    line-height: 1;
+    color: var(--line);
+}
+
+.raid-star:hover {
+    color: var(--muted);
+}
+
+.raid-star.is-on {
+    color: #f5b942;
+}
+
+/* Ein Stern ohne Knopf - wer nicht aendern darf, sieht nur den
+   Zustand. */
+span.raid-star {
+    cursor: default;
+}

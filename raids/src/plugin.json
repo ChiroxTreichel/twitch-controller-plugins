@@ -1,0 +1,16 @@
+{
+  "slug": "raids",
+  "name": "Raids",
+  "version": "1.0.0",
+  "description": "Wem folgt der Kanal, und wer davon hat in den letzten 30 Tagen selbst gestreamt? Diese lassen sich als Favoriten merken, und wer davon gerade live ist, steht auf einen Blick da.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.1.2"
+  },
+  "optional": {},
+  "tags": [
+    "stream",
+    "twitch",
+    "raid"
+  ]
+}
