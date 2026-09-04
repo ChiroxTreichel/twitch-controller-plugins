@@ -23,6 +23,7 @@
     "streaminfo.saved": "Bei Twitch geändert: %{what}.",
     "streaminfo.scope_missing": "Twitch-Freigabe fehlt.",
     "streaminfo.scope_missing_hint": "Ohne die Freigabe „Titel und Kategorie ändern“ lässt sich hier nur ansehen, was gerade läuft. Der Kanal muss dafür einmal neu verbunden werden.",
+    "streaminfo.tab": "Titel & Kategorie",
     "streaminfo.title_heading": "Titel",
     "streaminfo.to_settings": "Zu den Kanal-Einstellungen",
     "streaminfo.unchanged": "Nichts geändert – es stand schon so bei Twitch.",

@@ -68,6 +68,23 @@ final class Tags
     }
 
     /**
+     * Die Liste zum BENUTZEN - ohne leere Zeilen.
+     *
+     * all() behaelt sie, damit "Tag hinzufuegen" eine Zeile anlegen
+     * kann, die das Speichern uebersteht. Hier muessen sie weg: ein
+     * leerer Tag ergaebe den Vorsatz "[]" vor dem Titel.
+     *
+     * @return list<string>
+     */
+    public static function usable(App $app): array
+    {
+        return array_values(array_filter(
+            self::all($app),
+            static fn (string $eines): bool => $eines !== ''
+        ));
+    }
+
+    /**
      * @param array<int|string, mixed> $roh
      * @return list<string>
      */
@@ -81,7 +98,15 @@ final class Tags
             }
 
             $eintrag = self::normalize($eintrag);
+
+            // Leere Zeilen bleiben stehen, damit "Tag hinzufuegen" eine
+            // Zeile anlegen kann, die das Speichern uebersteht - siehe
+            // all() und usable().
             if ($eintrag === '') {
+                if (!in_array('', $sauber, true)) {
+                    $sauber[] = '';
+                }
+
                 continue;
             }
 
@@ -148,7 +173,7 @@ final class Tags
      */
     public static function strip(App $app, string $titel): string
     {
-        return self::stripList(self::all($app), $titel);
+        return self::stripList(self::usable($app), $titel);
     }
 
     /**
@@ -160,7 +185,7 @@ final class Tags
      */
     public static function active(App $app, string $titel): array
     {
-        return self::activeList(self::all($app), $titel);
+        return self::activeList(self::usable($app), $titel);
     }
 
     /**
@@ -175,7 +200,7 @@ final class Tags
      */
     public static function prefix(App $app, string $blank, array $gewaehlt): string
     {
-        return self::prefixList(self::all($app), $blank, $gewaehlt);
+        return self::prefixList(self::usable($app), $blank, $gewaehlt);
     }
 
     // -----------------------------------------------------------------
@@ -237,6 +262,20 @@ final class Tags
      */
     public static function prefixList(array $liste, string $blank, array $gewaehlt): string
     {
+        // Leere Namen fliegen hier noch einmal heraus, obwohl die Wege
+        // ueber die Einstellungen schon usable() nehmen.
+        //
+        // Denn ein leerer Name ergaebe den Vorsatz "[]" vor dem Titel,
+        // und das ist kein Schoenheitsfehler: stripList() liest "[]"
+        // beim naechsten Anzeigen nicht als eigenen Tag weg, also
+        // bliebe er stehen und bekaeme beim Speichern einen zweiten
+        // davor. Eine reine Funktion soll das nicht koennen, egal wer
+        // sie mit welcher Liste aufruft.
+        $liste = array_values(array_filter(
+            $liste,
+            static fn (string $tag): bool => $tag !== ''
+        ));
+
         $namen = [];
 
         foreach ($gewaehlt as $wunsch) {

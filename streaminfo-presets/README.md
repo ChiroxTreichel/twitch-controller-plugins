@@ -9,18 +9,30 @@ sich dieses Plugin einsetzt. Streaminfo selbst weiß nichts davon.
 
 ## Die Liste
 
-Unter **Plugins → Einstellungen → Streaminfo – Vorlagen**. Eine Zeile,
-ein Feld — wie beim Löschbot und bei den Timern. Anhängen und Entfernen
-sind Absende-Knöpfe im selben Formular, also ohne JavaScript.
+Als Reiter **Vorlagen** auf der Streaminfo-Seite — und nicht auf einer
+eigenen Seite unter Plugins → Einstellungen: die Vorlagen pflegt man
+öfter, als „einmal im Monat" es vermuten lässt.
+
+Eine Zeile, ein Feld — wie beim Löschbot und bei den Timern. Anhängen
+und Entfernen sind Absende-Knöpfe im selben Formular, also ohne
+JavaScript.
+
+Eine **leere Zeile bleibt gespeichert**, und das ist keine
+Schlampigkeit: „Vorlage hinzufügen" hängt eine leere Zeile an, schickt
+das Formular ab und lädt die Seite neu. Würde das Speichern sie
+wegputzen, täte der Knopf sichtbar nichts. Zwei leere Zeilen
+untereinander gibt es dafür nicht — das wäre eine Falle statt eines
+Angebots. In der Auswahl erscheint sie nicht, und gezählt wird sie auch
+nicht.
 
 Die Reihenfolge bleibt, wie du sie setzt: was du oft brauchst, stellst
 du nach oben. Sortiert wird nicht — die Reihenfolge ist selbst eine
 Angabe.
 
-Beim Speichern werden leere Zeilen verworfen (so entfernt man eine
-Vorlage auch ohne den Knopf) und zwei gleiche Zeilen zu einer
-zusammengelegt: in der Auswahl wären sie nicht zu unterscheiden, und wer
-eine davon nähme, wüsste nicht, welche er erwischt hat.
+Zwei gleiche Zeilen werden zu einer zusammengelegt: in der Auswahl wären
+sie nicht zu unterscheiden, und wer eine davon nähme, wüsste nicht,
+welche er erwischt hat. Länger als 140 Zeichen wird gekürzt — das ist
+die Grenze von Twitch.
 
 ## Auf der Streaminfo-Seite
 

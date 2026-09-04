@@ -34,6 +34,49 @@ use TwitchController\Core\Http\Request;
 final class Streaminfo
 {
     /**
+     * Die Reiter der Seite.
+     *
+     * Streaminfo bringt einen mit - Titel und Kategorie. Was daran
+     * haengt, kommt als eigener Reiter dazu: die Vorlagen und die Tags
+     * braucht man oft, und sie unter Plugins > Einstellungen zu suchen
+     * ist ein Weg zu viel.
+     *
+     * Dieselbe Verabredung wie bei Goals und Alerts: Schluessel, Titel,
+     * Platz in der Reihe, und eine Funktion, die den Inhalt liefert.
+     * Aufgerufen wird sie nur fuer den offenen Reiter - ein Reiter, der
+     * beim Anzeigen der Seite Arbeit macht, ohne dass man ihn ansieht,
+     * waere ein schlechter Handel.
+     *
+     * @return array<string, array{label: string, order: int, render: callable|null}>
+     */
+    public static function tabs(App $app): array
+    {
+        $tabs = $app->hooks->filter('streaminfo.tabs', []);
+        if (!is_array($tabs)) {
+            return [];
+        }
+
+        $sauber = [];
+
+        foreach ($tabs as $key => $tab) {
+            $key = strtolower(trim((string) $key));
+            if ($key === '' || !is_array($tab)) {
+                continue;
+            }
+
+            $sauber[$key] = [
+                'label'  => trim((string) ($tab['label'] ?? $key)) ?: $key,
+                'order'  => (int) ($tab['order'] ?? 50),
+                'render' => is_callable($tab['render'] ?? null) ? $tab['render'] : null,
+            ];
+        }
+
+        uasort($sauber, static fn (array $a, array $b): int => $a['order'] <=> $b['order']);
+
+        return $sauber;
+    }
+
+    /**
      * Die Bloecke, die andere Plugins ueber dem Titelfeld anzeigen.
      *
      * Geordnet wie bei den Zielen: jeder Beitrag nennt seinen Platz in

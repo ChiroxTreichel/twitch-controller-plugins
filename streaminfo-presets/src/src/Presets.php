@@ -41,17 +41,44 @@ final class Presets
     }
 
     /**
+     * Die Liste zum BEARBEITEN - mit leeren Zeilen.
+     *
+     * Eine leere Zeile bleibt gespeichert, und das ist keine
+     * Schlampigkeit: "Vorlage hinzufuegen" haengt eine leere Zeile an,
+     * schickt das Formular ab und laedt die Seite neu. Wuerde das
+     * Speichern sie wegputzen, taete der Knopf sichtbar nichts - genau
+     * so war es beim ersten Versuch.
+     *
+     * Wer sie BENUTZT, nimmt usable().
+     *
+     * Geputzt wird auch beim Lesen und nicht nur beim Speichern: die
+     * Liste kann aus einer aelteren Fassung kommen oder von Hand in der
+     * Datenbank stehen, und eine Auswahlliste im laufenden Stream ist
+     * der falsche Ort fuer eine Ueberraschung.
+     *
      * @return list<string>
      */
     public static function all(App $app): array
     {
         $roh = $app->settings->get('presets', [], self::scope());
 
-        // Geputzt beim LESEN und nicht nur beim Speichern: die Liste
-        // kann aus einer aelteren Fassung kommen oder von Hand in der
-        // Datenbank stehen, und eine Auswahlliste im laufenden Stream
-        // ist der falsche Ort fuer eine Ueberraschung.
         return self::clean(is_array($roh) ? $roh : []);
+    }
+
+    /**
+     * Die Liste zum BENUTZEN - ohne leere Zeilen.
+     *
+     * Das ist die, die in der Auswahl steht. Eine leere Vorlage waere
+     * dort ein Eintrag, der den Titel loescht.
+     *
+     * @return list<string>
+     */
+    public static function usable(App $app): array
+    {
+        return array_values(array_filter(
+            self::all($app),
+            static fn (string $eines): bool => $eines !== ''
+        ));
     }
 
     /**
@@ -68,13 +95,14 @@ final class Presets
             }
 
             $eintrag = self::normalize($eintrag);
-            if ($eintrag === '') {
-                continue;
-            }
 
             // Doppelte weg: zwei gleiche Zeilen in der Auswahlliste sind
             // nicht zu unterscheiden, und wer eine davon nimmt, weiss
             // nicht, welche er erwischt hat.
+            //
+            // Leere Zeilen bleiben - siehe all(). Sie werden allerdings
+            // auch entdoppelt: zwei leere Zeilen untereinander sind kein
+            // Angebot, sondern eine Falle.
             if (!in_array($eintrag, $sauber, true)) {
                 $sauber[] = $eintrag;
             }

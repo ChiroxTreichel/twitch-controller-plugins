@@ -1,6 +1,6 @@
 <?php
 /**
- * Die gespeicherten Stream-Titel pflegen.
+ * Der Reiter "Vorlagen" auf der Streaminfo-Seite.
  *
  * Eine Zeile, ein Feld - wie beim Loeschbot und bei den Timern. Kein
  * Textfeld mit einem Titel pro Zeile: was man anklicken und einzeln
@@ -11,30 +11,27 @@
  * Server veraendert und zurueckgeschickt - damit funktioniert die Seite
  * auch dann, wenn ein Skript fehlt.
  *
+ * Meldungen zeigt der Rahmen der Streaminfo-Seite, nicht dieser Reiter.
+ *
  * @var callable $e
  * @var callable $url
- * @var list<string> $presets
+ * @var list<string> $presets   zum Bearbeiten, mit leeren Zeilen
+ * @var list<string> $usable    zum Benutzen, ohne leere Zeilen
  * @var int $maxTitle
  * @var int $maxPresets
  * @var bool $canEdit
  * @var string $csrf
- * @var string $notice
- * @var string $error
  */
 
 $ziel = $url('/stream/info/presets');
 ?>
-<h1><?= $e(translate('si_presets.name')) ?></h1>
-<p class="lead"><?= $e(translate('si_presets.lead')) ?></p>
-
-<?php if ($notice !== ''): ?>
-    <div class="note note-ok"><?= $e($notice) ?></div>
-<?php endif ?>
-<?php if ($error !== ''): ?>
-    <div class="note note-error"><?= $e($error) ?></div>
-<?php endif ?>
-
 <div class="card">
+    <div class="card-head">
+        <h2><?= $e(translate('si_presets.name')) ?></h2>
+    </div>
+
+    <p class="hint"><?= $e(translate('si_presets.lead')) ?></p>
+
     <form method="post" action="<?= $e($ziel) ?>">
         <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
 
@@ -76,23 +73,12 @@ $ziel = $url('/stream/info/presets');
                 <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
             <?php endif ?>
 
-            <span class="hint"><?= $e(translate('si_presets.count', ['count' => (string) count($presets)])) ?></span>
+            <?php /*
+                Gezaehlt wird, was in der Auswahl landet - nicht die
+                Zeilen. Eine leere Zeile ist keine Vorlage, und wer sie
+                mitzaehlte, wuerde sich fragen, wo sie geblieben ist.
+            */ ?>
+            <span class="hint"><?= $e(translate('si_presets.count', ['count' => (string) count($usable)])) ?></span>
         </div>
     </form>
-</div>
-
-<div class="card">
-    <h2><?= $e(translate('si_presets.rules')) ?></h2>
-    <ul class="hint">
-        <li><?= $e(translate('si_presets.rule_empty')) ?></li>
-        <li><?= $e(translate('si_presets.rule_double')) ?></li>
-        <li><?= $e(translate('si_presets.rule_order')) ?></li>
-        <li><?= $e(translate('si_presets.rule_length', ['count' => (string) $maxTitle])) ?></li>
-    </ul>
-
-    <div class="row">
-        <a class="btn btn-ghost btn-small" href="<?= $e($url('/stream/info')) ?>">
-            <?= $e(translate('si_presets.to_page')) ?>
-        </a>
-    </div>
 </div>

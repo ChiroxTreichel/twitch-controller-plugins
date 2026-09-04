@@ -23,6 +23,7 @@
     "streaminfo.saved": "Changed on Twitch: %{what}.",
     "streaminfo.scope_missing": "Twitch permission missing.",
     "streaminfo.scope_missing_hint": "Without the “change title and category” permission this page can only show what is currently running. The channel has to be reconnected once.",
+    "streaminfo.tab": "Title & category",
     "streaminfo.title_heading": "Title",
     "streaminfo.to_settings": "Go to channel settings",
     "streaminfo.unchanged": "Nothing changed – Twitch already had it this way.",

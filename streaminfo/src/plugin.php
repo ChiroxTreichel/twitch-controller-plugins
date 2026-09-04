@@ -130,39 +130,87 @@ $router->get('/stream/info/categories', static function (Request $request) use (
 // -------------------------------------------------------------------
 //  Die Seite
 // -------------------------------------------------------------------
-$router->get('/stream/info', static function (Request $request) use ($app, $plugin): Response {
-    $kanal = new Channel($app);
-    $stand = $kanal->info();
+// -------------------------------------------------------------------
+//  Der eigene Reiter: Titel und Kategorie
+// -------------------------------------------------------------------
+// Streaminfo ist selbst ein Reiter unter seinen Reitern, mit order 0 -
+// es ist die Arbeit, fuer die man die Seite aufruft, und steht damit
+// vorn und offen.
+$hooks->on('streaminfo.tabs', static function (array $tabs) use ($app, $plugin): array {
+    $tabs['info'] = [
+        'label' => translate('streaminfo.tab'),
+        'order' => 0,
+        'render' => static function () use ($app, $plugin): string {
+            $kanal = new Channel($app);
+            $stand = $kanal->info()
+                ?? ['title' => '', 'game_id' => '', 'game_name' => '', 'language' => ''];
 
-    $stand ??= ['title' => '', 'game_id' => '', 'game_name' => '', 'language' => ''];
+            // Im Textfeld steht nur der Teil, den man dort bearbeitet.
+            // Was Erweiterungen vorangestellt haben - Tags zum Beispiel -
+            // nehmen sie hier wieder ab; sonst editiert man ihre
+            // Vorsaetze von Hand, und das naechste Speichern setzt sie
+            // ein zweites Mal davor.
+            $blank = Streaminfo::bare($app, $stand['title']);
 
-    // Im Textfeld steht nur der Teil, den man dort bearbeitet. Was
-    // Plugins vorangestellt haben - Tags zum Beispiel - nehmen sie
-    // hier wieder ab; sonst editiert man ihre Vorsaetze von Hand, und
-    // das naechste Speichern setzt sie ein zweites Mal davor.
-    $blank = Streaminfo::bare($app, $stand['title']);
+            return $app->view->from($plugin->directory . '/views')->render('tab', [
+                'current'      => $stand,
+                'bare'         => $blank,
+                'fields'       => Streaminfo::fields($app, [
+                    'title'   => $stand['title'],
+                    'bare'    => $blank,
+                    'canEdit' => permission('Streaminfo.Title.Edit') && $kanal->canManage(),
+                ]),
+                'loadError'    => $kanal->error(),
+                'canManage'    => $kanal->canManage(),
+                'canEditTitle' => permission('Streaminfo.Title.Edit'),
+                'canEditGame'  => permission('Streaminfo.Category.Edit'),
+                'maxTitle'     => Config::MAX_TITLE,
+                'searchUrl'    => $app->url('/stream/info/categories'),
+                'csrf'         => $app->auth->csrfToken(),
+            ], null);
+        },
+    ];
+
+    return $tabs;
+});
+
+// -------------------------------------------------------------------
+//  Die Seite
+// -------------------------------------------------------------------
+$seite = static function (Request $request, array $params = []) use ($app, $plugin): Response {
+    $reiter = Streaminfo::tabs($app);
+
+    // Ein unbekannter Reitername fuehrt auf den ersten und nicht auf
+    // eine Fehlerseite: die Adresse kann aus einem Lesezeichen kommen,
+    // dessen Erweiterung inzwischen entfernt wurde.
+    $gewuenscht = strtolower(trim((string) ($params['tab'] ?? '')));
+    $offen = isset($reiter[$gewuenscht]) ? $gewuenscht : (string) array_key_first($reiter);
+
+    $inhalt = '';
+    if ($offen !== '' && ($reiter[$offen]['render'] ?? null) !== null) {
+        $inhalt = (string) ($reiter[$offen]['render'])();
+    }
 
     return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
-        'title'        => translate('streaminfo.name'),
-        'active'       => 'stream/info',
-        'current'      => $stand,
-        'bare'         => $blank,
-        'fields'       => Streaminfo::fields($app, [
-            'title'   => $stand['title'],
-            'bare'    => $blank,
-            'canEdit' => permission('Streaminfo.Title.Edit') && $kanal->canManage(),
-        ]),
-        'loadError'    => $stand === null ? $kanal->error() : '',
-        'canManage'    => $kanal->canManage(),
-        'canEditTitle' => permission('Streaminfo.Title.Edit'),
-        'canEditGame'  => permission('Streaminfo.Category.Edit'),
-        'maxTitle'     => Config::MAX_TITLE,
-        'searchUrl'    => $app->url('/stream/info/categories'),
-        'csrf'         => $app->auth->csrfToken(),
-        'notice'       => (string) $request->get('notice'),
-        'error'        => (string) $request->get('error'),
+        'title'   => translate('streaminfo.name'),
+        'active'  => 'stream/info',
+        'tabs'    => $reiter,
+        'open'    => $offen,
+        'content' => $inhalt,
+        'notice'  => (string) $request->get('notice'),
+        'error'   => (string) $request->get('error'),
     ]));
-}, ['auth' => true, 'permission' => 'Streaminfo.Global.View']);
+};
+
+// Ohne Reiter zuerst - sonst faengt {tab} den Aufruf.
+$router->get('/stream/info', $seite, [
+    'auth'       => true,
+    'permission' => 'Streaminfo.Global.View',
+]);
+$router->get('/stream/info/{tab}', $seite, [
+    'auth'       => true,
+    'permission' => 'Streaminfo.Global.View',
+]);
 
 $router->post('/stream/info', static function (Request $request) use ($app, $zurueck): Response {
     $ziel = '/stream/info';

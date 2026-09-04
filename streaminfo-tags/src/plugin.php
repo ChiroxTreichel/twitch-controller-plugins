@@ -75,7 +75,8 @@ $hooks->on('plugin.settings', static function (array $links): array {
 //  Die Haken auf der Streaminfo-Seite
 // -------------------------------------------------------------------
 $hooks->on('streaminfo.fields', static function (array $felder, array $kontext) use ($app, $plugin): array {
-    $liste = Tags::all($app);
+    // Die benutzbare Liste: ein leerer Tag ergaebe den Vorsatz "[]".
+    $liste = Tags::usable($app);
 
     // Keine Tags, keine Haken. Ein leerer Kasten waere eine Flaeche,
     // die nichts anbietet.
@@ -125,19 +126,35 @@ $zurueck = static function (string $pfad, array $query = []) use ($app): Respons
     );
 };
 
-$router->get('/stream/info/tags', static function (Request $request) use ($app, $plugin): Response {
-    return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
-        'title'    => translate('si_tags.name'),
-        'active'   => 'stream/info',
-        'tags'     => Tags::all($app),
-        'maxTag'   => Tags::MAX_TAG,
-        'maxTags'  => Tags::MAX_TAGS,
-        'canEdit'  => permission('StreaminfoTags.Global.Edit'),
-        'csrf'     => $app->auth->csrfToken(),
-        'notice'   => (string) $request->get('notice'),
-        'error'    => (string) $request->get('error'),
-    ]));
-}, ['auth' => true, 'permission' => 'StreaminfoTags.Global.Edit']);
+// Ein Reiter auf der Streaminfo-Seite und keine eigene Seite: die Tags
+// aendert man oft, und der Weg ueber Plugins > Einstellungen ist dann
+// einer zu viel.
+//
+// Der Reiter heisst "tags", die Adresse bleibt also /stream/info/tags -
+// dieselbe wie vorher.
+$hooks->on('streaminfo.tabs', static function (array $tabs) use ($app, $plugin): array {
+    if (!permission('StreaminfoTags.Global.Edit')) {
+        return $tabs;
+    }
+
+    $tabs['tags'] = [
+        'label' => translate('si_tags.tab'),
+        'order' => 30,
+        // Wird nur fuer den offenen Reiter aufgerufen.
+        'render' => static fn (): string => $app->view
+            ->from($plugin->directory . '/views')
+            ->render('tab', [
+                'tags'    => Tags::all($app),
+                'usable'  => Tags::usable($app),
+                'maxTag'  => Tags::MAX_TAG,
+                'maxTags' => Tags::MAX_TAGS,
+                'canEdit' => permission('StreaminfoTags.Global.Edit'),
+                'csrf'    => $app->auth->csrfToken(),
+            ], null),
+    ];
+
+    return $tabs;
+});
 
 $router->post('/stream/info/tags', static function (Request $request) use ($app, $zurueck): Response {
     $ziel = '/stream/info/tags';

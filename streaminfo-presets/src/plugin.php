@@ -53,9 +53,10 @@ $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     return $assets;
 });
 
-// Die Liste steht unter Plugins > Einstellungen und nicht auf der
-// Streaminfo-Seite: dort arbeitet man im Stream, und eine Liste, die
-// man einmal im Monat pflegt, hat dort nichts zu suchen.
+// Der Eintrag in der Plugin-Liste zeigt auf denselben Reiter. Zwei
+// Wege zu einer Seite sind kein Widerspruch: in der Plugin-Liste
+// sucht man nach dem Plugin, auf der Streaminfo-Seite nach der
+// Arbeit.
 $hooks->on('plugin.settings', static function (array $links): array {
     $links[Presets::SLUG] = [
         'label' => translate('si_presets.name'),
@@ -69,7 +70,9 @@ $hooks->on('plugin.settings', static function (array $links): array {
 //  Der Block auf der Streaminfo-Seite
 // -------------------------------------------------------------------
 $hooks->on('streaminfo.fields', static function (array $felder, array $kontext) use ($app, $plugin): array {
-    $liste = Presets::all($app);
+    // Die benutzbare Liste: eine leere Vorlage waere in der Auswahl ein
+    // Eintrag, der den Titel loescht.
+    $liste = Presets::usable($app);
 
     // Keine Vorlagen, keine Auswahl. Ein leeres Auswahlfeld waere ein
     // Bedienelement, das nichts anbietet - schlimmer als keines.
@@ -103,19 +106,35 @@ $zurueck = static function (string $pfad, array $query = []) use ($app): Respons
     );
 };
 
-$router->get('/stream/info/presets', static function (Request $request) use ($app, $plugin): Response {
-    return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
-        'title'      => translate('si_presets.name'),
-        'active'     => 'stream/info',
-        'presets'    => Presets::all($app),
-        'maxTitle'   => Presets::MAX_TITLE,
-        'maxPresets' => Presets::MAX_PRESETS,
-        'canEdit'    => permission('StreaminfoPresets.Global.Edit'),
-        'csrf'       => $app->auth->csrfToken(),
-        'notice'     => (string) $request->get('notice'),
-        'error'      => (string) $request->get('error'),
-    ]));
-}, ['auth' => true, 'permission' => 'StreaminfoPresets.Global.Edit']);
+// Ein Reiter auf der Streaminfo-Seite und keine eigene Seite: die
+// Vorlagen pflegt man oefter, als "einmal im Monat" es vermuten laesst,
+// und der Weg ueber Plugins > Einstellungen ist dann einer zu viel.
+//
+// Der Reiter heisst "presets", die Adresse bleibt also /stream/info/presets
+// - dieselbe wie vorher. Wer sie sich gemerkt hat, landet weiter richtig.
+$hooks->on('streaminfo.tabs', static function (array $tabs) use ($app, $plugin): array {
+    if (!permission('StreaminfoPresets.Global.Edit')) {
+        return $tabs;
+    }
+
+    $tabs['presets'] = [
+        'label' => translate('si_presets.tab'),
+        'order' => 20,
+        // Wird nur fuer den offenen Reiter aufgerufen.
+        'render' => static fn (): string => $app->view
+            ->from($plugin->directory . '/views')
+            ->render('tab', [
+                'presets'    => Presets::all($app),
+                'usable'     => Presets::usable($app),
+                'maxTitle'   => Presets::MAX_TITLE,
+                'maxPresets' => Presets::MAX_PRESETS,
+                'canEdit'    => permission('StreaminfoPresets.Global.Edit'),
+                'csrf'       => $app->auth->csrfToken(),
+            ], null),
+    ];
+
+    return $tabs;
+});
 
 $router->post('/stream/info/presets', static function (Request $request) use ($app, $zurueck): Response {
     $ziel = '/stream/info/presets';

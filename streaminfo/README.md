@@ -89,14 +89,34 @@ wäre weniger wert als der Blick auf das, was gerade läuft.
 
 ## Für Erweiterungen
 
-Drei Einhängepunkte, damit Erweiterungen die Seite ergänzen können,
-ohne dass Streaminfo sie kennt:
+Vier Einhängepunkte, damit Erweiterungen die Seite ergänzen können, ohne
+dass Streaminfo sie kennt:
 
 | Hook | Art | Bedeutung |
 | --- | --- | --- |
+| `streaminfo.tabs` | filter | ein eigener Reiter auf der Seite |
 | `streaminfo.fields` | filter | Blöcke über dem Titelfeld |
 | `streaminfo.title_bare` | filter | beim Anzeigen: Vorsätze abnehmen |
 | `streaminfo.title_compose` | filter | beim Speichern: Vorsätze anbauen |
+
+`streaminfo.tabs` ist dieselbe Verabredung wie bei Goals und Alerts:
+Schlüssel, Titel, Platz in der Reihe und eine Funktion für den Inhalt.
+Aufgerufen wird sie nur für den **offenen** Reiter — einer, der beim
+Anzeigen der Seite Arbeit macht, ohne dass man ihn ansieht, wäre ein
+schlechter Handel; hier steckt ein Twitch-Aufruf darin.
+
+Streaminfo ist selbst ein Reiter unter seinen Reitern (`info`,
+order 0): Titel und Kategorie sind die Arbeit, für die man die Seite
+aufruft. Die Leiste erscheint erst ab zwei Reitern — ein einzelner ist
+keine Auswahl.
+
+Der Reiterschlüssel ist die Adresse: `/stream/info/<schlüssel>`. Ein
+unbekannter Schlüssel führt auf den ersten Reiter und nicht auf eine
+Fehlerseite — die Adresse kann aus einem Lesezeichen kommen, dessen
+Erweiterung inzwischen entfernt wurde.
+
+Meldungen (`?notice=` / `?error=`) zeigt der **Rahmen**. Ein Reiter, der
+sie selbst noch einmal anzeigt, zeigt sie zweimal.
 
 `streaminfo.fields` bekommt als zweites Argument den Zusammenhang —
 `title` (der ganze Titel bei Twitch), `bare` (ohne Vorsätze) und

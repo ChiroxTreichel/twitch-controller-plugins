@@ -1,38 +1,43 @@
 <?php
 /**
- * Die eigenen Tags festlegen.
+ * Der Reiter "Tags" auf der Streaminfo-Seite.
  *
- * Eine Zeile, ein Feld - wie beim Loeschbot und bei den Timern.
- * Anhaengen und Entfernen laufen ueber das Formular, nicht ueber
- * JavaScript.
+ * Eine Zeile, ein Feld; anhaengen und entfernen ohne JavaScript.
  *
  * Die Reihenfolge hier ist die Reihenfolge im Titel: der oberste Tag
  * steht vorn. Darum wird nicht sortiert.
  *
+ * Meldungen zeigt der Rahmen der Streaminfo-Seite, nicht dieser Reiter.
+ *
  * @var callable $e
  * @var callable $url
- * @var list<string> $tags
+ * @var list<string> $tags     zum Bearbeiten, mit leeren Zeilen
+ * @var list<string> $usable   zum Benutzen, ohne leere Zeilen
  * @var int $maxTag
  * @var int $maxTags
  * @var bool $canEdit
  * @var string $csrf
- * @var string $notice
- * @var string $error
  */
 
 $ziel = $url('/stream/info/tags');
 ?>
-<h1><?= $e(translate('si_tags.name')) ?></h1>
-<p class="lead"><?= $e(translate('si_tags.lead')) ?></p>
-
-<?php if ($notice !== ''): ?>
-    <div class="note note-ok"><?= $e($notice) ?></div>
-<?php endif ?>
-<?php if ($error !== ''): ?>
-    <div class="note note-error"><?= $e($error) ?></div>
-<?php endif ?>
-
 <div class="card">
+    <div class="card-head">
+        <h2><?= $e(translate('si_tags.name')) ?></h2>
+    </div>
+
+    <p class="hint"><?= $e(translate('si_tags.lead')) ?></p>
+
+    <?php /*
+        Ein Beispiel statt einer Erklaerung: was vor dem Titel steht,
+        sieht man in einer Zeile schneller als in drei Saetzen. Die
+        genauen Regeln - fremde Klammern, Schreibweise, Reihenfolge -
+        stehen in der README des Plugins und nicht hier: auf einer Seite,
+        die man im Stream benutzt, ist eine Liste von fuenf Regeln im
+        Weg.
+    */ ?>
+    <p class="hint mono"><?= $e(translate('si_tags.example_line')) ?></p>
+
     <form method="post" action="<?= $e($ziel) ?>">
         <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
 
@@ -70,31 +75,11 @@ $ziel = $url('/stream/info/tags');
                 <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
             <?php endif ?>
 
-            <span class="hint"><?= $e(translate('si_tags.count', ['count' => (string) count($tags)])) ?></span>
+            <?php /*
+                Gezaehlt wird, was als Haken erscheint - nicht die
+                Zeilen. Eine leere Zeile ist kein Tag.
+            */ ?>
+            <span class="hint"><?= $e(translate('si_tags.count', ['count' => (string) count($usable)])) ?></span>
         </div>
     </form>
-</div>
-
-<div class="card">
-    <h2><?= $e(translate('si_tags.how')) ?></h2>
-
-    <?php /*
-        Ein Beispiel statt einer Erklaerung: was vor dem Titel steht,
-        sieht man in einer Zeile schneller als in drei Saetzen.
-    */ ?>
-    <pre class="mono"><?= $e(translate('si_tags.example_result')) ?></pre>
-
-    <ul class="hint">
-        <li><?= $e(translate('si_tags.rule_order')) ?></li>
-        <li><?= $e(translate('si_tags.rule_brackets')) ?></li>
-        <li><?= $e(translate('si_tags.rule_foreign')) ?></li>
-        <li><?= $e(translate('si_tags.rule_case')) ?></li>
-        <li><?= $e(translate('si_tags.rule_length', ['count' => (string) $maxTag])) ?></li>
-    </ul>
-
-    <div class="row">
-        <a class="btn btn-ghost btn-small" href="<?= $e($url('/stream/info')) ?>">
-            <?= $e(translate('si_tags.to_page')) ?>
-        </a>
-    </div>
 </div>

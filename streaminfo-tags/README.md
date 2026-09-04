@@ -19,8 +19,13 @@ Braucht **Streaminfo ab 1.1.0** — dort sind die Einhängepunkte.
 
 ## Die Liste
 
-Unter **Plugins → Einstellungen → Streaminfo – Tags**. Eine Zeile, ein
-Feld; anhängen und entfernen ohne JavaScript.
+Als Reiter **Tags** auf der Streaminfo-Seite — die Tags ändert man oft,
+und der Weg über Plugins → Einstellungen wäre einer zu viel.
+
+Eine Zeile, ein Feld; anhängen und entfernen ohne JavaScript. Eine leere
+Zeile bleibt gespeichert, damit „Tag hinzufügen" eine Zeile anlegen
+kann, die das Speichern übersteht; als Haken erscheint sie nicht — ein
+leerer Tag ergäbe den Vorsatz `[]` vor dem Titel.
 
 Die Reihenfolge hier ist die Reihenfolge im Titel — der oberste Tag
 steht vorn. Deshalb wird nicht sortiert.
