@@ -17,10 +17,15 @@
  * eines ist bequemer - darum ist das hier eine Zugabe und keine
  * Voraussetzung.
  *
- * Ein gemeinsames Skript fuer beide Erweiterungen waere eine
- * Verabredung, die keines von ihnen kuendigen kann. Darum steht
- * dasselbe kleine Stueck in beiden - siehe
- * streaminfo-tags/assets/rows.js.
+ * Warum es HIER steht und nicht in den Erweiterungen: es stand kurz in
+ * beiden, in Vorlagen und in Tags. Beide Kopien werden auf jeder Seite
+ * geladen, beide hoeren auf document - und jeder Klick haengte zwei
+ * Zeilen an. Zwei gleiche Zuhoerer sind kein Doppel, sondern ein
+ * Fehler.
+ *
+ * Streaminfo ist der richtige Platz: es besitzt den Rahmen, in dem die
+ * Reiter stehen, und beide Erweiterungen setzen es ohnehin voraus. Sie
+ * markieren nur noch ihren Knopf - siehe README, "Fuer Erweiterungen".
  */
 (function () {
     'use strict';

@@ -118,6 +118,33 @@ Erweiterung inzwischen entfernt wurde.
 Meldungen (`?notice=` / `?error=`) zeigt der **Rahmen**. Ein Reiter, der
 sie selbst noch einmal anzeigt, zeigt sie zweimal.
 
+### Zeilen anhängen
+
+Wer in seinem Reiter eine Liste pflegt — eine Zeile, ein Feld —, bekommt
+das Anhängen geschenkt. Zwei Angaben genügen:
+
+```html
+<button type="submit" name="add" value="1"
+        data-add-row="tags[]" data-max="30">Tag hinzufügen</button>
+
+<template data-row-template>
+    <div class="row"><input class="input grow" type="text" name="tags[]"></div>
+</template>
+```
+
+`assets/rows.js` hängt dann einen Klon der `<template>` an, statt das
+Formular abzuschicken. Der Knopf **bleibt** ein Absende-Knopf: ohne
+JavaScript geht er zum Server, der die Zeile anhängt — er versagt also
+nicht still. Fehlt die `<template>`, passiert dasselbe.
+
+Die Zeile kommt aus der `<template>` und nicht aus dem Skript, damit sie
+Klassen, Grenzen und Platzhalter von selbst mitbringt; ein im Skript
+zusammengebautes Feld wäre eine zweite Wahrheit neben der Vorlage.
+
+Das Skript steht **hier** und nicht in den Erweiterungen. Es stand kurz
+in beiden — und weil beide Kopien auf jeder Seite geladen werden und
+beide auf `document` hören, hängte jeder Klick zwei Zeilen an.
+
 `streaminfo.fields` bekommt als zweites Argument den Zusammenhang —
 `title` (der ganze Titel bei Twitch), `bare` (ohne Vorsätze) und
 `canEdit`. Jeder Beitrag nennt seinen Platz in der Reihe, damit die

@@ -88,6 +88,10 @@ $hooks->on('admin.nav', static function (array $nav): array {
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/streaminfo/assets/streaminfo.css');
     $assets['js'][] = $app->asset('/plugin/streaminfo/assets/streaminfo.js');
+    // Zeilen anhaengen, fuer die Reiter der Erweiterungen. Hier und
+    // nicht dort: zwei Kopien desselben Zuhoerers haengten je Klick
+    // zwei Zeilen an.
+    $assets['js'][] = $app->asset('/plugin/streaminfo/assets/rows.js');
 
     return $assets;
 });

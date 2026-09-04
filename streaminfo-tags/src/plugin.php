@@ -58,7 +58,6 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/streaminfo-tags/assets/tags.css');
     $assets['js'][] = $app->asset('/plugin/streaminfo-tags/assets/tags.js');
-    $assets['js'][] = $app->asset('/plugin/streaminfo-tags/assets/rows.js');
 
     return $assets;
 });
