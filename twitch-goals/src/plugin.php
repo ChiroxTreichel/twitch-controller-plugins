@@ -167,6 +167,9 @@ $hooks->on('goals.tabs', static function (array $tabs) use ($app, $plugin): arra
                 'titles'   => Config::titles($app),
                 'state'    => $stand,
                 'switches' => Config::switches($app),
+                // Welche Schalter greifen ins Leere - siehe
+                // Config::deadSwitches().
+                'deadSwitches' => Config::deadSwitches($app),
                 'custom'   => Config::isCustom($app),
                 'maxTitle' => Config::MAX_TITLE,
                 'csrf'     => $app->auth->csrfToken(),

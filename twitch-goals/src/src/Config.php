@@ -164,6 +164,37 @@ final class Config
     }
 
     /**
+     * Welche Schalter wirken ueberhaupt?
+     *
+     * Der Schalter blendet im Overlay den Abschnitt mit
+     * data-goal="<art>" aus. Steht die Markierung nicht im Geruest,
+     * kippt der Schalter, speichert, meldet Erfolg - und tut nichts.
+     *
+     * Genau das ist passiert: wer sein Geruest gespeichert hat, bevor
+     * es data-goal gab, hat es ohne die Markierung liegen. Die
+     * Pflichtliste greift erst beim naechsten Speichern, und bis dahin
+     * luegt der Schalter.
+     *
+     * Darum diese Frage - die Oberflaeche stellt sie neben dem
+     * Schalter, nicht auf einer anderen Seite.
+     *
+     * @return list<string> die Arten, deren Schalter ohne Wirkung ist
+     */
+    public static function deadSwitches(App $app): array
+    {
+        $html = self::html($app);
+        $tot = [];
+
+        foreach (self::KINDS as $art) {
+            if (Goals::missing($html, [], [], [$art]) !== []) {
+                $tot[] = $art;
+            }
+        }
+
+        return $tot;
+    }
+
+    /**
      * @return array<string, bool>
      */
     public static function switches(App $app): array

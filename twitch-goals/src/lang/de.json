@@ -42,6 +42,7 @@
     "twitch_goals.settings_title": "Twitch-Goals – Aussehen",
     "twitch_goals.show_in_overlay": "Im Overlay zeigen",
     "twitch_goals.sub": "Sub-Ziel",
+    "twitch_goals.switch_dead": "Dieser Schalter wirkt nicht: im gespeicherten Gerüst fehlt %{element}. Ohne diese Markierung weiß das Overlay nicht, was es ausblenden soll.",
     "twitch_goals.titles_saved": "Titel gespeichert.",
     "twitch_goals.to_appearance": "Aussehen",
     "twitch_goals.to_values": "Werte"

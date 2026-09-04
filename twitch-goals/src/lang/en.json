@@ -42,6 +42,7 @@
     "twitch_goals.settings_title": "Twitch goals – appearance",
     "twitch_goals.show_in_overlay": "Show in the overlay",
     "twitch_goals.sub": "Sub goal",
+    "twitch_goals.switch_dead": "This switch has no effect: the saved markup is missing %{element}. Without that marker the overlay does not know what to hide.",
     "twitch_goals.titles_saved": "Titles saved.",
     "twitch_goals.to_appearance": "Appearance",
     "twitch_goals.to_values": "Values"

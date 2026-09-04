@@ -15,7 +15,8 @@ declare(strict_types=1);
  * @var callable $url
  * @var array{follower_title: string, sub_title: string} $titles
  * @var array{follower_current: int, follower_goal: int, sub_current: int, sub_goal: int, checked_at: int} $state
- * @var array<string, bool> $switches  Ziel => im Overlay zeigen
+ * @var array<string, bool> $switches
+ * @var list<string> $deadSwitches  Arten, deren Schalter ohne Wirkung ist  Ziel => im Overlay zeigen
  * @var bool $custom
  * @var int $maxTitle
  * @var string $csrf
@@ -82,6 +83,28 @@ $hinweis = static function (int $zielwert) use ($e): string {
             <p class="hint"><?= $hinweis($state['follower_goal']) ?></p>
         <?php endif ?>
 
+        <?php /*
+            Ein Schalter, der nichts tut, muss es sagen.
+
+            Er blendet im Overlay den Abschnitt mit data-goal="<art>"
+            aus. Wer sein Geruest gespeichert hat, bevor es diese
+            Markierung gab, hat es ohne sie liegen - dann kippt der
+            Schalter, speichert, meldet Erfolg und wirkt nicht.
+
+            Der Hinweis steht hier und nicht auf der Aussehen-Seite:
+            man liest ihn dort, wo man den Schalter umlegt.
+        */ ?>
+        <?php $totWarnung = static function (string $art) use ($e, $url, $deadSwitches): string {
+            if (!in_array($art, $deadSwitches ?? [], true)) {
+                return '';
+            }
+
+            return '<p class="note note-warn">'
+                . $e(translate('twitch_goals.switch_dead', ['element' => 'data-goal="' . $art . '"']))
+                . ' <a href="' . $e($url('/display/goals/twitch/appearance')) . '">'
+                . $e(translate('twitch_goals.to_appearance')) . '</a></p>';
+        }; ?>
+
         <label class="switch-field">
             <input type="checkbox" name="follower_enabled" value="1"
                    <?= $switches['follower'] ? 'checked' : '' ?>
@@ -89,6 +112,7 @@ $hinweis = static function (int $zielwert) use ($e): string {
             <span class="switch-track"><span class="switch-knob"></span></span>
             <span><?= $e(translate('twitch_goals.show_in_overlay')) ?></span>
         </label>
+        <?= $totWarnung('follower') ?>
 
         <h2><?= $e(translate('twitch_goals.sub')) ?></h2>
         <div class="row">
@@ -121,6 +145,7 @@ $hinweis = static function (int $zielwert) use ($e): string {
             <span class="switch-track"><span class="switch-knob"></span></span>
             <span><?= $e(translate('twitch_goals.show_in_overlay')) ?></span>
         </label>
+        <?= $totWarnung('sub') ?>
 
         <?php if ($darfAendern): ?>
             <div class="row">
