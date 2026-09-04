@@ -146,7 +146,7 @@ $router->get('/stream/info', static function (Request $request) use ($app, $plug
         'csrf'         => $app->auth->csrfToken(),
         'notice'       => (string) $request->get('notice'),
         'error'        => (string) $request->get('error'),
-    ], null));
+    ]));
 }, ['auth' => true, 'permission' => 'Streaminfo.Global.View']);
 
 $router->post('/stream/info', static function (Request $request) use ($app, $zurueck): Response {
