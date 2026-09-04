@@ -1,0 +1,71 @@
+/* -------------------------------------------------------------------
+ *  Streaminfo: die Vorschlagsliste unter dem Kategorie-Feld
+ *
+ *  Sie haengt am Feld und nicht am Fensterrand: position:absolute in
+ *  einem Elternteil mit position:relative wandert beim Scrollen von
+ *  selbst mit. Das alte System rechnete die Stelle bei jedem Scrollen
+ *  und jeder Fenstergroesse neu aus - drei Ereignisbehandlungen fuer
+ *  etwas, das der Browser umsonst macht.
+ * ------------------------------------------------------------------- */
+.streaminfo-search {
+    position: relative;
+}
+
+.streaminfo-suggest {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+
+    margin: 4px 0 0;
+    padding: 4px;
+    list-style: none;
+
+    max-height: 280px;
+    overflow-y: auto;
+
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+
+.streaminfo-suggest li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+/* Zeigefinger und Tastatur fuehren zum gleichen Aussehen - sonst sieht
+   man bei den Pfeiltasten nicht, wo man steht. */
+.streaminfo-suggest li:hover,
+.streaminfo-suggest li.is-active {
+    background: var(--panel-2, rgba(255, 255, 255, .06));
+}
+
+.streaminfo-suggest img {
+    width: 28px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 3px;
+
+    /* Nicht schrumpfen: ohne das quetscht ein langer Spielname das
+       Bild auf null, und die Zeilen stehen ungleich. */
+    flex: 0 0 auto;
+}
+
+.streaminfo-suggest-name {
+    flex: 1;
+    min-width: 0;
+
+    /* Lange Namen kuerzen statt umbrechen - eine Vorschlagsliste mit
+       zweizeiligen Eintraegen liest sich im Stream nicht. */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}

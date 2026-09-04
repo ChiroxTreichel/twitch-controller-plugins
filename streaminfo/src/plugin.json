@@ -1,0 +1,15 @@
+{
+  "slug": "streaminfo",
+  "name": "Streaminfo",
+  "version": "1.0.0",
+  "description": "Titel und Kategorie des laufenden Streams ändern, ohne Twitch zu öffnen. Mit vordefinierten Titeln zum Auswählen und einer Suche über Twitchs Kategorien.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.1.0"
+  },
+  "optional": {},
+  "tags": [
+    "stream",
+    "twitch"
+  ]
+}
