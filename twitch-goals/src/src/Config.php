@@ -6,6 +6,7 @@ namespace TwitchController\Plugin\TwitchGoals;
 
 use TwitchController\Core\App;
 use TwitchController\Core\Config\Settings;
+use TwitchController\Core\Overlay\Bus;
 use TwitchController\Plugin\Goals\Goals;
 
 /**
@@ -254,6 +255,12 @@ final class Config
             // Browserquelle neu angelegt wird.
             'updated_at' => time(),
         ], self::scope());
+
+        // Der Stempel steckt in der Adresse des Stylesheets - eine
+        // laufende Seite haelt aber ihre alte Adresse fest. Also muss
+        // sie neu laden, sonst sieht man das neue Aussehen erst nach
+        // einem Griff in OBS.
+        (new Bus($app))->invalidate();
 
         return Goals::missing(
             $html === '' ? self::defaultHtml() : $html,

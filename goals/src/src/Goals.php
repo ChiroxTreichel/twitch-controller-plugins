@@ -86,6 +86,16 @@ final class Goals
     public static function setEnabled(App $app, bool $an): void
     {
         $app->settings->set('enabled', $an, self::scope());
+
+        // Laufende Browserquellen neu laden lassen: Platz und Dateien
+        // der Ziele haengen an diesem Schalter (siehe overlay.slots und
+        // overlay.assets in plugin.php). Eine Seite, die schon laeuft,
+        // behaelt beides sonst, bis man die Quelle in OBS von Hand
+        // aktualisiert.
+        //
+        // Hier und nicht beim Schalter in plugin.php: so gilt es fuer
+        // jeden Weg, der das Plugin umschaltet.
+        (new Bus($app))->invalidate();
     }
 
     // -----------------------------------------------------------------

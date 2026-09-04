@@ -26,6 +26,7 @@ declare(strict_types=1);
 
 use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
+use TwitchController\Core\Overlay\Bus;
 use TwitchController\Plugin\Alerts\Alerts;
 
 /** @var \TwitchController\Core\App $app */
@@ -295,6 +296,17 @@ $router->post('/display/alerts', static function (Request $request) use ($app, $
 
     $an = !Alerts::enabled($app);
     $app->settings->set('enabled', $an, $scope);
+
+    // Laufende Browserquellen neu laden lassen.
+    //
+    // Das Abschalten haelt neue Alerts sofort auf - Alerts::send()
+    // fragt den Schalter. Was es NICHT aufhaelt, ist die
+    // Warteschlange im Browser: dort stehen die Alerts schon, und bei
+    // einem Follow-Bot-Angriff sind das hunderte, die brav
+    // nacheinander ihre Sekunden abspielen. Bisher blieb nur, die
+    // Browserquelle in OBS zu leeren - genau in dem Moment, in dem man
+    // etwas anderes zu tun hat.
+    (new Bus($app))->invalidate();
 
     // Der Schalter steht auch in der Seitenleiste, also auf jeder
     // Seite. Ein fester Rueckweg zu /display/alerts wuerde einen von
