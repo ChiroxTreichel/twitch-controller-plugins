@@ -1,0 +1,28 @@
+/*
+ * Goals im Overlay: nur der Rahmen.
+ *
+ * Wie die Ziele AUSSEHEN, steht in den Einstellungen des jeweiligen
+ * Ziel-Plugins und kommt über /display/goals/style.css. Hier steht
+ * ausschließlich, wo die Fläche sitzt - das ist Sache des Rahmens und
+ * soll sich nicht verstellen lassen, wenn jemand sein Geschmacks-CSS
+ * neu schreibt.
+ */
+
+#ov-slot-goals {
+    /* Der Abstand von oben ist einstellbar - siehe overlay.slots. */
+    top: var(--goals-offset-top, 20px);
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 22px;
+}
+
+/*
+ * Nichts im Overlay nimmt Klicks an: es liegt über dem Spielbild, und
+ * OBS soll darunter weiterreichen. .ov-slot setzt das schon, hier
+ * steht es für die eingesetzten Kinder nochmal.
+ */
+#ov-slot-goals * {
+    pointer-events: none;
+}

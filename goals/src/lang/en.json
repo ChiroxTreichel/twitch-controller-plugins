@@ -1,0 +1,22 @@
+{
+    "goals.all_off_hint": "Goals are switched off – the area in the overlay is empty. Everything can still be configured.",
+    "goals.field.hint": "Relative to the overlay stage, not to the window in OBS – the area therefore looks the same everywhere.",
+    "goals.field.offset_top": "Distance from the top",
+    "goals.field.width": "Width in pixels",
+    "goals.lead": "The frame for goals. What appears inside comes from the goal plugins.",
+    "goals.name": "Goals",
+    "goals.nav.display": "Display",
+    "goals.no_tabs": "No goal plugin is installed yet. This one only provides the frame.",
+    "goals.off": "off",
+    "goals.on": "on",
+    "goals.perm.edit": "may configure the area.",
+    "goals.perm.toggle": "may switch the goals on and off.",
+    "goals.perm.view": "may see the goals.",
+    "goals.saved": "Saved.",
+    "goals.settings": "Settings",
+    "goals.settings_lead": "Size and position of the area in the overlay. How the goals look is set in the respective goal plugin.",
+    "goals.settings_title": "Goals – settings",
+    "goals.toggle_hint": "Switch goals on or off. The settings are kept.",
+    "goals.turned_off": "Goals are off.",
+    "goals.turned_on": "Goals are on."
+}

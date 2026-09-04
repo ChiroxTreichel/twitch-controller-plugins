@@ -1,0 +1,22 @@
+{
+    "goals.all_off_hint": "Die Ziele sind ausgeschaltet – im Overlay ist die Fläche leer. Einstellen lässt sich trotzdem alles.",
+    "goals.field.hint": "Bezogen auf die Bühne des Overlays, nicht auf das Fenster in OBS – die Fläche sieht damit überall gleich aus.",
+    "goals.field.offset_top": "Abstand von oben",
+    "goals.field.width": "Breite in Pixeln",
+    "goals.lead": "Der Rahmen für Ziele. Was darin steht, bringen die Ziel-Plugins mit.",
+    "goals.name": "Goals",
+    "goals.nav.display": "Anzeigen",
+    "goals.no_tabs": "Es ist noch kein Ziel-Plugin installiert. Dieses hier stellt nur den Rahmen.",
+    "goals.off": "aus",
+    "goals.on": "an",
+    "goals.perm.edit": "darf die Fläche einstellen.",
+    "goals.perm.toggle": "darf die Ziele ein- und ausschalten.",
+    "goals.perm.view": "darf die Ziele sehen.",
+    "goals.saved": "Gespeichert.",
+    "goals.settings": "Einstellungen",
+    "goals.settings_lead": "Größe und Lage der Fläche im Overlay. Wie die Ziele aussehen, steht beim jeweiligen Ziel-Plugin.",
+    "goals.settings_title": "Goals – Einstellungen",
+    "goals.toggle_hint": "Ziele ein- oder ausschalten. Die Einstellungen bleiben stehen.",
+    "goals.turned_off": "Die Ziele sind aus.",
+    "goals.turned_on": "Die Ziele sind an."
+}
