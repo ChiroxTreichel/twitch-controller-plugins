@@ -32,11 +32,20 @@ final class Fetcher
     /**
      * Wie oft hoechstens bei Twitch nachgefragt wird.
      *
-     * Eine Minute: haeufiger braucht es nicht, weil die Abos die
-     * Aenderungen sofort melden - das Nachfragen ist nur das Netz
-     * darunter.
+     * Dreissig Sekunden - dasselbe, was der Knopf "Jetzt abrufen"
+     * macht, nur von selbst. Die Abos melden Aenderungen ohnehin
+     * sofort; das Nachfragen faengt ab, was dabei verloren geht (ein
+     * Neustart, ein verpasster Webhook, ein Ziel, das auf Twitch neu
+     * angelegt wurde).
+     *
+     * Kosten: hoechstens drei Aufrufe je halbe Minute. Twitch rechnet
+     * in Punkten pro Minute und liegt damit weit darueber.
+     *
+     * Der Hintergrundprozess taktet schneller (WORKER_INTERVAL, in der
+     * Voreinstellung 15 Sekunden), deshalb greift diese Grenze und
+     * nicht der Takt.
      */
-    private const POLL_SECONDS = 60;
+    private const POLL_SECONDS = 30;
 
     public function __construct(private readonly App $app)
     {
@@ -169,12 +178,36 @@ final class Fetcher
      */
     public function push(array $stand): void
     {
-        Goals::send($this->app, Config::titles($this->app) + [
+        Goals::send($this->app, $this->payload($stand));
+    }
+
+    /**
+     * Was das Overlay braucht, um die Ziele zu zeichnen.
+     *
+     * Eine Quelle fuer zwei Wege: push() schickt es durch die Leitung,
+     * und der Hook goals.state gibt dasselbe beim Laden der Seite mit.
+     * Getrennt gebaut wuerden die zwei mit der Zeit auseinanderlaufen -
+     * ein Feld hier ergaenzt, dort vergessen, und dann zeigt das
+     * Overlay bis zur ersten Aenderung etwas anderes als danach.
+     *
+     * @param array{follower_current: int, follower_goal: int, sub_current: int, sub_goal: int, checked_at: int} $stand
+     * @return array<string, mixed>
+     */
+    public function payload(array $stand): array
+    {
+        return Config::titles($this->app) + [
             'follower_current' => $stand['follower_current'],
             'follower_goal'    => $stand['follower_goal'],
             'sub_current'      => $stand['sub_current'],
             'sub_goal'         => $stand['sub_goal'],
-        ]);
+
+            // Die beiden Schalter gehen mit ins Overlay: dort wird der
+            // Abschnitt ausgeblendet, statt hier das Geruest zu
+            // beschneiden. Am HTML des Betreibers herumzuschneiden
+            // waere nicht verlaesslich - er darf es frei schreiben.
+            'follower_enabled' => Config::goalEnabled($this->app, 'follower'),
+            'sub_enabled'      => Config::goalEnabled($this->app, 'sub'),
+        ];
     }
 
     // -----------------------------------------------------------------

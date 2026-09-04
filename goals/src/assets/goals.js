@@ -15,6 +15,7 @@
  *        data-bind="follower_current"   Wert wird als Text eingesetzt
  *        data-format="int"              wie er geschrieben wird
  *        data-fill="follower"           Breite in Prozent des Ziels
+ *        data-goal="follower"           gehoert zu diesem Ziel
  *
  * Der Zustand wird ergaenzt, nicht ersetzt: eine Nachricht kann nur
  * "follower_current" enthalten, ohne die uebrigen Werte zu kennen.
@@ -45,7 +46,24 @@
         euro: function (v) { return nfEuro.format(Number(v || 0)) + '€'; }
     };
 
+    /*
+     * Der Anfangszustand kommt MIT der Seite - von der Route
+     * /display/goals/markup.js, die vor dieser Datei geladen wird.
+     *
+     * Er muss von dort kommen: die Leitung ins Overlay beginnt bei der
+     * hoechsten bekannten Nachrichtennummer und spielt nichts nach.
+     * Ohne ihn stuenden nach jedem Laden Nullen und leere Titel da, bis
+     * sich zufaellig ein Wert aendert - und bei einem Ziel, das eine
+     * Woche lang gleich bleibt, ist das die ganze Woche.
+     */
     var zustand = {};
+
+    if (window.GOALS_STATE && typeof window.GOALS_STATE === 'object') {
+        var anfang = Object.keys(window.GOALS_STATE);
+        for (var a = 0; a < anfang.length; a++) {
+            zustand[anfang[a]] = window.GOALS_STATE[anfang[a]];
+        }
+    }
 
     function anteil(aktuell, ziel) {
         var z = Number(ziel || 0);
@@ -81,6 +99,26 @@
             var format = formate[el.getAttribute('data-format') || 'raw'] || formate.raw;
 
             el.textContent = format(zustand[name]);
+        }
+
+        /*
+         * Einzeln abschaltbare Abschnitte.
+         *
+         * Ein Ziel kann aus sein, ohne dass das ganze Plugin aus ist.
+         * Verborgen wird hier und nicht durch Beschneiden des HTML:
+         * das Geruest schreibt der Betreiber frei, und daran
+         * herumzuschneiden waere nicht verlaesslich.
+         *
+         * Nur ein ausdrueckliches false verbirgt. Fehlt der Wert -
+         * etwa weil noch keine Nachricht kam -, bleibt der Abschnitt
+         * sichtbar: lieber ein Ziel zu sehen als eine leere Flaeche.
+         */
+        var abschnitte = wurzel.querySelectorAll('[data-goal]');
+        for (var k = 0; k < abschnitte.length; k++) {
+            var abschnitt = abschnitte[k];
+            var art = abschnitt.getAttribute('data-goal');
+
+            abschnitt.hidden = zustand[art + '_enabled'] === false;
         }
 
         var balken = wurzel.querySelectorAll('[data-fill]');

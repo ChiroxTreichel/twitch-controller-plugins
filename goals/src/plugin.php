@@ -135,15 +135,32 @@ $router->get('/display/goals/style.css', static function () use ($app): Response
 }, ['auth' => true, 'permission' => 'Account.Overlay.View']);
 
 $router->get('/display/goals/markup.js', static function () use ($app): Response {
-    // Nur eine Zuweisung. Das Einsetzen macht goals.js - so bleibt der
-    // Code in einer Datei, die man lesen und pruefen kann, und hier
-    // steht nur der Wert.
+    // Zwei Zuweisungen. Das Einsetzen und Binden macht goals.js - so
+    // bleibt der Code in Dateien, die man lesen und pruefen kann, und
+    // hier stehen nur die Werte.
+    //
+    // Der Zustand muss MIT der Seite hinaus. Die Leitung ins Overlay
+    // beginnt bei der hoechsten bekannten Nachrichtennummer und spielt
+    // nichts nach - fuer Alerts richtig, sonst holte eine neu
+    // gestartete Browserquelle die letzte Viertelstunde nach. Fuer
+    // Ziele falsch: sie stehen dauerhaft da. Ohne Anfangszustand zeigte
+    // das Overlay nach jedem Laden Nullen und leere Titel, bis sich
+    // zufaellig ein Wert aenderte.
+    $flaggen = JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES;
+
     $js = 'window.GOALS_HTML = '
-        . json_encode(Goals::markup($app)['html'], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES)
-        . ";\n";
+        . json_encode(Goals::markup($app)['html'], $flaggen) . ";
+"
+        . 'window.GOALS_STATE = '
+        . json_encode(Goals::state($app), $flaggen) . ";
+";
 
     return Response::html($js, 200, [
         'Content-Type' => 'application/javascript; charset=utf-8',
+        // Nicht zwischenspeichern: hier stehen die aktuellen Zahlen.
+        // Der Stempel in der Adresse folgt dem AUSSEHEN und wuerde sich
+        // bei einer neuen Zahl nicht aendern.
+        'Cache-Control' => 'no-store',
     ]);
 }, ['auth' => true, 'permission' => 'Account.Overlay.View']);
 

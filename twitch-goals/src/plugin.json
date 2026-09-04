@@ -1,12 +1,12 @@
 {
   "slug": "twitch-goals",
   "name": "Twitch-Goals",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Follower- und Sub-Ziel mit den Zahlen direkt von Twitch, dauerhaft aktuell. Aussehen frei einstellbar: HTML und CSS des Gerüsts stehen in den Einstellungen, mit dem Aussehen des alten Systems als Vorgabe.",
   "author": "Twitch-Controller",
   "requires": {
     "core": ">=2.0.0",
-    "goals": ">=1.0.0"
+    "goals": ">=1.1.0"
   },
   "optional": {},
   "tags": [

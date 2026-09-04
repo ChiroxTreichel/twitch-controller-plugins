@@ -17,6 +17,7 @@ declare(strict_types=1);
  * @var list<string> $missing
  * @var array<string, string> $required  Name => Klarname
  * @var array<string, string> $fills
+ * @var array<string, string> $goals
  * @var string $csrf
  * @var string $notice
  * @var string $error
@@ -73,6 +74,12 @@ $ziel = $url('/display/goals/twitch/appearance');
             <?php foreach ($fills as $name => $klarname): ?>
                 <tr>
                     <td><span class="mono">data-fill="<?= $e((string) $name) ?>"</span></td>
+                    <td><?= $e($klarname) ?></td>
+                </tr>
+            <?php endforeach ?>
+            <?php foreach ($goals as $name => $klarname): ?>
+                <tr>
+                    <td><span class="mono">data-goal="<?= $e((string) $name) ?>"</span></td>
                     <td><?= $e($klarname) ?></td>
                 </tr>
             <?php endforeach ?>

@@ -15,6 +15,7 @@ declare(strict_types=1);
  * @var callable $url
  * @var array{follower_title: string, sub_title: string} $titles
  * @var array{follower_current: int, follower_goal: int, sub_current: int, sub_goal: int, checked_at: int} $state
+ * @var array<string, bool> $switches  Ziel => im Overlay zeigen
  * @var bool $custom
  * @var int $maxTitle
  * @var string $csrf
@@ -81,6 +82,14 @@ $hinweis = static function (int $zielwert) use ($e): string {
             <p class="hint"><?= $hinweis($state['follower_goal']) ?></p>
         <?php endif ?>
 
+        <label class="switch-field">
+            <input type="checkbox" name="follower_enabled" value="1"
+                   <?= $switches['follower'] ? 'checked' : '' ?>
+                   <?= $darfAendern ? '' : 'disabled' ?>>
+            <span class="switch-track"><span class="switch-knob"></span></span>
+            <span><?= $e(translate('twitch_goals.show_in_overlay')) ?></span>
+        </label>
+
         <h2><?= $e(translate('twitch_goals.sub')) ?></h2>
         <div class="row">
             <label class="field grow">
@@ -104,6 +113,14 @@ $hinweis = static function (int $zielwert) use ($e): string {
         <?php if ($hinweis($state['sub_goal']) !== ''): ?>
             <p class="hint"><?= $hinweis($state['sub_goal']) ?></p>
         <?php endif ?>
+
+        <label class="switch-field">
+            <input type="checkbox" name="sub_enabled" value="1"
+                   <?= $switches['sub'] ? 'checked' : '' ?>
+                   <?= $darfAendern ? '' : 'disabled' ?>>
+            <span class="switch-track"><span class="switch-knob"></span></span>
+            <span><?= $e(translate('twitch_goals.show_in_overlay')) ?></span>
+        </label>
 
         <?php if ($darfAendern): ?>
             <div class="row">

@@ -47,6 +47,8 @@ use TwitchController\Core\Overlay\Bus;
  *   data-bind="follower_current"   der Wert wird als Text eingesetzt
  *   data-format="int"              wie er geschrieben wird
  *   data-fill="follower"           Breite in Prozent des Ziels
+ *   data-goal="follower"           gehoert zu diesem Ziel; wird
+ *                                  verborgen, wenn es aus ist
  *
  * Damit man sich die Anzeige nicht versehentlich zerstoert, nennt
  * jedes Ziel-Plugin seine Pflichtelemente. Fehlt eines, sagt die
@@ -245,6 +247,29 @@ final class Goals
     }
 
     /**
+     * Der Zustand, den eine frisch verbundene Anzeige braucht.
+     *
+     * Die Leitung ins Overlay spielt NICHTS nach: sie beginnt bei der
+     * hoechsten bekannten Nachrichtennummer, damit eine Browserquelle
+     * nach einem Neustart nicht die Alerts der letzten Viertelstunde
+     * nachholt. Fuer Alerts ist das richtig - fuer Ziele falsch: sie
+     * stehen dauerhaft da, und ohne Anfangszustand zeigte das Overlay
+     * nach jedem Laden Nullen und leere Titel, bis sich zufaellig ein
+     * Wert aendert.
+     *
+     * Darum liefert jedes Ziel-Plugin hier seinen letzten bekannten
+     * Stand, und der geht mit der Seite hinaus.
+     *
+     * @return array<string, mixed>
+     */
+    public static function state(App $app): array
+    {
+        $zustand = $app->hooks->filter('goals.state', []);
+
+        return is_array($zustand) ? $zustand : [];
+    }
+
+    /**
      * Ein Zeitstempel, der sich bei jeder Aenderung aendert.
      *
      * Das Stylesheet der Ziele kommt aus den Einstellungen und ist
@@ -296,10 +321,15 @@ final class Goals
      *
      * @param list<string> $bindings Namen fuer data-bind
      * @param list<string> $fills    Namen fuer data-fill
+     * @param list<string> $goals    Namen fuer data-goal
      * @return list<string> die fehlenden, als data-bind="x" geschrieben
      */
-    public static function missing(string $html, array $bindings, array $fills = []): array
-    {
+    public static function missing(
+        string $html,
+        array $bindings,
+        array $fills = [],
+        array $goals = []
+    ): array {
         $fehlend = [];
 
         foreach ($bindings as $name) {
@@ -311,6 +341,12 @@ final class Goals
         foreach ($fills as $name) {
             if (!self::hasAttribute($html, 'data-fill', (string) $name)) {
                 $fehlend[] = 'data-fill="' . $name . '"';
+            }
+        }
+
+        foreach ($goals as $name) {
+            if (!self::hasAttribute($html, 'data-goal', (string) $name)) {
+                $fehlend[] = 'data-goal="' . $name . '"';
             }
         }
 

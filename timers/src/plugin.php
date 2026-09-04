@@ -84,7 +84,13 @@ $hooks->on('admin.assets', static function (array $assets) use ($app): array {
 // -------------------------------------------------------------------
 //  Was der Kern nicht abonniert
 // -------------------------------------------------------------------
-$hooks->on('core.eventsub.subscriptions', static function (array $subs, string $broadcasterId): array {
+$hooks->on('core.eventsub.subscriptions', static function (array $subs, string $broadcasterId) use ($app): array {
+    // Nur wenn die Timer eingeschaltet sind - ein Abo fuer etwas, das
+    // bewusst aus ist, waere Verkehr ohne Zweck.
+    if (!Timers::enabled($app)) {
+        return $subs;
+    }
+
     // Titel und Kategorie aendern sich mitten im Stream. Ohne dieses
     // Abo greift ein Timer, der auf "Farming" wartet, nach einem
     // Wechsel weiter - oder nie. Braucht keinen Scope.

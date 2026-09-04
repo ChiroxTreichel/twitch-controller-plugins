@@ -45,6 +45,21 @@ final class Config
     ];
 
     /**
+     * Die Abschnitte, die sich einzeln abschalten lassen.
+     *
+     * data-goal="follower" markiert, was zum Follower-Ziel gehoert.
+     * Ohne diese Markierung wuesste das Overlay nicht, was es
+     * ausblenden soll - der Schalter waere dann ohne Wirkung, und das
+     * merkt man erst im Stream.
+     *
+     * Darum steht sie in der Pflichtliste: lieber eine Meldung beim
+     * Speichern als ein Schalter, der nichts tut.
+     *
+     * @var list<string>
+     */
+    public const REQUIRED_GOALS = ['follower', 'sub'];
+
+    /**
      * Die Balken, die vorkommen muessen.
      *
      * data-fill="follower" rechnet mit follower_current und
@@ -82,6 +97,17 @@ final class Config
     /**
      * @return array<string, string>
      */
+    public static function goalLabels(): array
+    {
+        return [
+            'follower' => translate('twitch_goals.goal.follower'),
+            'sub'      => translate('twitch_goals.goal.sub'),
+        ];
+    }
+
+    /**
+     * @return array<string, string>
+     */
     public static function fillLabels(): array
     {
         return [
@@ -97,6 +123,56 @@ final class Config
     public static function scope(): string
     {
         return Settings::pluginScope(self::SLUG);
+    }
+
+    // -----------------------------------------------------------------
+    //  Die zwei Ziele einzeln
+    // -----------------------------------------------------------------
+
+    /**
+     * Die Arten, die dieses Plugin anzeigt.
+     *
+     * @var list<string>
+     */
+    public const KINDS = ['follower', 'sub'];
+
+    /**
+     * Ist dieses Ziel eingeschaltet?
+     *
+     * Voreinstellung an: wer das Plugin installiert, will beide Ziele.
+     *
+     * Ausgeschaltet heisst NICHT "nicht abrufen": helix/goals liefert
+     * beide in einem Aufruf, und im Reiter soll die Zahl weiter
+     * stehen. Es heisst nur, dass der Abschnitt im Overlay verborgen
+     * wird - siehe assets/goals.js im Plugin Goals.
+     */
+    public static function goalEnabled(App $app, string $art): bool
+    {
+        if (!in_array($art, self::KINDS, true)) {
+            return false;
+        }
+
+        return $app->settings->bool($art . '_enabled', true, self::scope());
+    }
+
+    public static function setGoalEnabled(App $app, string $art, bool $an): void
+    {
+        if (in_array($art, self::KINDS, true)) {
+            $app->settings->set($art . '_enabled', $an, self::scope());
+        }
+    }
+
+    /**
+     * @return array<string, bool>
+     */
+    public static function switches(App $app): array
+    {
+        $schalter = [];
+        foreach (self::KINDS as $art) {
+            $schalter[$art] = self::goalEnabled($app, $art);
+        }
+
+        return $schalter;
     }
 
     // -----------------------------------------------------------------
@@ -182,7 +258,8 @@ final class Config
         return Goals::missing(
             $html === '' ? self::defaultHtml() : $html,
             self::REQUIRED_BINDINGS,
-            self::REQUIRED_FILLS
+            self::REQUIRED_FILLS,
+            self::REQUIRED_GOALS
         );
     }
 
@@ -206,7 +283,7 @@ final class Config
     {
         return <<<'HTML'
 <div class="goal-strip">
-    <section class="goal goal-small">
+    <section class="goal goal-small" data-goal="follower">
         <div class="goal-bar bg-brown">
             <span class="goal-fill fg-follow" data-fill="follower"></span>
             <div class="goal-row small">
@@ -217,7 +294,7 @@ final class Config
         </div>
     </section>
 
-    <section class="goal goal-small">
+    <section class="goal goal-small" data-goal="sub">
         <div class="goal-bar bg-brown">
             <span class="goal-fill fg-sub" data-fill="sub"></span>
             <div class="goal-row small">

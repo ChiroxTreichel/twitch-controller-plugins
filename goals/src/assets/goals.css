@@ -26,3 +26,15 @@
 #ov-slot-goals * {
     pointer-events: none;
 }
+
+/*
+ * Ein abgeschalteter Abschnitt bleibt verborgen.
+ *
+ * [hidden] ist nur eine Vorgabe des Browsers - ein "display: flex" im
+ * Geschmacks-CSS des Betreibers gewinnt sonst dagegen, und der
+ * Schalter täte scheinbar nichts. Darum hier mit !important, und
+ * bewusst nur innerhalb dieser Fläche.
+ */
+#ov-slot-goals [hidden] {
+    display: none !important;
+}

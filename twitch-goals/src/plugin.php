@@ -59,7 +59,14 @@ $hooks->on('admin.assets', static function (array $assets) use ($app): array {
 // -------------------------------------------------------------------
 //  Was Twitch dafuer verlangt
 // -------------------------------------------------------------------
-$hooks->on('core.twitch.broadcaster_scopes', static function (array $scopes): array {
+$hooks->on('core.twitch.broadcaster_scopes', static function (array $scopes) use ($app): array {
+    // Nur wenn die Ziele eingeschaltet sind. Sonst mahnt die
+    // Oberflaeche eine Freigabe fuer etwas an, das bewusst aus ist -
+    // und wer sie erteilt, merkt keinen Unterschied.
+    if (!Goals::enabled($app)) {
+        return $scopes;
+    }
+
     // Ohne channel:read:goals liefert helix/goals nichts und die Abos
     // channel.goal.* lehnt Twitch ab.
     $scopes[] = 'channel:read:goals';
@@ -67,7 +74,11 @@ $hooks->on('core.twitch.broadcaster_scopes', static function (array $scopes): ar
     return $scopes;
 });
 
-$hooks->on('core.eventsub.subscriptions', static function (array $subs, string $broadcasterId): array {
+$hooks->on('core.eventsub.subscriptions', static function (array $subs, string $broadcasterId) use ($app): array {
+    if (!Goals::enabled($app)) {
+        return $subs;
+    }
+
     $kanal = ['broadcaster_user_id' => $broadcasterId];
 
     // begin und end braucht es genauso wie progress: wird ein Ziel neu
@@ -115,6 +126,22 @@ $hooks->on('goals.markup', static function (array $teile) use ($app): array {
     return $teile;
 });
 
+$hooks->on('goals.state', static function (array $zustand) use ($app): array {
+    // Der letzte bekannte Stand, damit das Overlay beim Laden schon
+    // etwas anzeigt.
+    //
+    // Ohne das stand nach jedem Laden 0 von 0 in beiden Balken, und die
+    // Titel waren leer - bis zufaellig eine Aenderung durch die Leitung
+    // kam. Die Leitung selbst spielt nichts nach, siehe Goals::state().
+    //
+    // Gelesen und nicht abgefragt: das ist der Weg, den jeder
+    // Seitenaufruf des Overlays nimmt, und Twitch soll dabei nicht
+    // befragt werden. Das Nachfragen erledigt cron.tick, gedrosselt.
+    $abrufer = new Fetcher($app);
+
+    return $zustand + $abrufer->payload($abrufer->state());
+});
+
 $hooks->on('goals.stamp', static function (mixed $stempel) use ($app): int {
     // Der spaeteste gewinnt: aendert ein Ziel-Plugin sein Aussehen,
     // soll OBS das Stylesheet neu holen - egal welches es war.
@@ -139,6 +166,7 @@ $hooks->on('goals.tabs', static function (array $tabs) use ($app, $plugin): arra
             return $app->view->from($plugin->directory . '/views')->render('tab', [
                 'titles'   => Config::titles($app),
                 'state'    => $stand,
+                'switches' => Config::switches($app),
                 'custom'   => Config::isCustom($app),
                 'maxTitle' => Config::MAX_TITLE,
                 'csrf'     => $app->auth->csrfToken(),
@@ -176,9 +204,15 @@ $router->get('/display/goals/twitch/appearance', static function (Request $reque
         'html'     => $html,
         'css'      => Config::css($app),
         'custom'   => Config::isCustom($app),
-        'missing'  => Goals::missing($html, Config::REQUIRED_BINDINGS, Config::REQUIRED_FILLS),
+        'missing'  => Goals::missing(
+            $html,
+            Config::REQUIRED_BINDINGS,
+            Config::REQUIRED_FILLS,
+            Config::REQUIRED_GOALS
+        ),
         'required' => Config::bindingLabels(),
         'fills'    => Config::fillLabels(),
+        'goals'    => Config::goalLabels(),
         'csrf'     => $app->auth->csrfToken(),
         'notice'   => (string) $request->get('notice'),
         'error'    => (string) $request->get('error'),
@@ -246,6 +280,13 @@ $router->post('/display/goals/twitch', static function (Request $request) use ($
         'follower_title' => trim((string) $request->input('follower_title')),
         'sub_title'      => trim((string) $request->input('sub_title')),
     ], Config::scope());
+
+    // Ein nicht angehaktes Kaestchen schickt der Browser gar nicht
+    // mit - ein fehlender Wert heisst also "aus" und nicht
+    // "unveraendert".
+    foreach (Config::KINDS as $art) {
+        Config::setGoalEnabled($app, $art, $request->input($art . '_enabled') !== '');
+    }
 
     // Die Titel stehen im Overlay - also gleich hinschicken, sonst
     // steht dort der alte, bis sich eine Zahl aendert.
