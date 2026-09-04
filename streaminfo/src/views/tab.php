@@ -83,6 +83,22 @@ $spielAendern = $canEditGame && $canManage;
             </label>
         </div>
 
+        <?php /*
+            Die Vorschau: was am Ende zu Twitch geht.
+
+            Sie gehoert hierher und nicht zu einer Erweiterung - der
+            fertige Titel ist Streaminfos Sache. Was Erweiterungen
+            voranstellen, tragen sie ueber verborgene Felder bei; siehe
+            assets/streaminfo.js und README, "Fuer Erweiterungen".
+
+            Gefuellt wird sie per JavaScript. Ohne das bleibt sie leer -
+            sie ist eine Hilfe, keine Voraussetzung.
+        */ ?>
+        <p class="streaminfo-preview hint" id="streaminfo-preview"
+           data-title="streaminfo-title"
+           data-max="<?= $e((string) $maxTitle) ?>"
+           data-over="<?= $e(translate('streaminfo.preview_over')) ?>"></p>
+
         <h2><?= $e(translate('streaminfo.category_heading')) ?></h2>
 
         <?php /*

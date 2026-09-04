@@ -14,7 +14,88 @@
     'use strict';
 
     function start() {
+        vorschau();
         kategorieSuche();
+    }
+
+    // ---------------------------------------------------------------
+    //  Die Vorschau des fertigen Titels
+    // ---------------------------------------------------------------
+    /*
+     * Zusammengesetzt aus dem, was Erweiterungen voranstellen, und dem
+     * Titelfeld. Der Beitrag einer Erweiterung steht in einem
+     * verborgenen Feld mit data-title-prefix - sie haelt es aktuell,
+     * diese Funktion liest es.
+     *
+     * Warum ueber das Dokument und nicht ueber eine Verabredung in
+     * JavaScript: ein window.Streaminfo.irgendwas waere eine Abhaengigkeit
+     * von der Ladereihenfolge und davon, dass es dieses Skript ueberhaupt
+     * gibt. Ein Feld im Formular ist beides nicht - wer nichts beitraegt,
+     * setzt kein Feld, und fertig.
+     *
+     * Gezaehlt werden Zeichen, nicht Bytes: length auf der Zeichenkette
+     * waere bei Umlauten und Emoji zu hoch, und der Zaehler soll dasselbe
+     * sagen wie Twitch.
+     */
+    function vorschau() {
+        var anzeige = document.getElementById('streaminfo-preview');
+        if (!anzeige) {
+            return;
+        }
+
+        var feld = document.getElementById(anzeige.dataset.title || '');
+        if (!feld) {
+            return;
+        }
+
+        var formular = feld.form || feld.closest('form');
+        var grenze = parseInt(anzeige.dataset.max, 10) || 140;
+        var warnung = anzeige.dataset.over || '';
+
+        function zeichnen() {
+            var vorsatz = '';
+
+            if (formular) {
+                // In der Reihenfolge des Dokuments: dieselbe, in der die
+                // Bloecke der Erweiterungen stehen.
+                Array.prototype.forEach.call(
+                    formular.querySelectorAll('[data-title-prefix]'),
+                    function (teil) {
+                        vorsatz += teil.value || '';
+                    }
+                );
+            }
+
+            var ganz = (vorsatz + ' ' + feld.value).trim();
+            var laenge = Array.from(ganz).length;
+
+            if (ganz === '') {
+                anzeige.textContent = '';
+                anzeige.classList.remove('is-over');
+
+                return;
+            }
+
+            anzeige.textContent = ganz + '  (' + laenge + '/' + grenze + ')';
+
+            if (laenge > grenze) {
+                anzeige.classList.add('is-over');
+                anzeige.textContent += '  ' + warnung;
+            } else {
+                anzeige.classList.remove('is-over');
+            }
+        }
+
+        feld.addEventListener('input', zeichnen);
+
+        // Auf Aenderungen im ganzen Formular: eine Erweiterung, die ihr
+        // verborgenes Feld nachfuehrt, loest dort ein input-Ereignis aus.
+        if (formular) {
+            formular.addEventListener('input', zeichnen);
+            formular.addEventListener('change', zeichnen);
+        }
+
+        zeichnen();
     }
 
     // ---------------------------------------------------------------

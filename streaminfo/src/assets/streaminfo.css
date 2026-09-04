@@ -69,3 +69,54 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
+
+/* -------------------------------------------------------------------
+ *  Die Vorschau des fertigen Titels
+ *
+ *  Sie steht unter dem Titelfeld und zeigt, was zu Twitch geht - samt
+ *  dem, was Erweiterungen voranstellen. Siehe assets/streaminfo.js.
+ * ------------------------------------------------------------------- */
+.streaminfo-preview {
+    margin: 6px 0 16px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    word-break: break-word;
+
+    /* Platz halten, auch wenn sie leer ist: sonst springt alles
+       darunter, sobald der erste Buchstabe getippt wird. */
+    min-height: 1.4em;
+}
+
+.streaminfo-preview.is-over {
+    color: var(--warn, #f59e0b);
+}
+
+/* -------------------------------------------------------------------
+ *  Eine Liste aus Zeilen - fuer die Reiter der Erweiterungen
+ *
+ *  .row allein ist eine waagerechte Reihe ohne Abstand nach oben oder
+ *  unten. Untereinander gestellt kleben die Zeilen darum aneinander,
+ *  und die erste klebt an dem, was darueber steht.
+ *
+ *  Hier und nicht in den Erweiterungen: dasselbe Stylesheet in zwei
+ *  Plugins waere eine Kopie, und Kopien laufen auseinander. Streaminfo
+ *  besitzt den Rahmen, in dem die Reiter stehen - siehe auch rows.js.
+ * ------------------------------------------------------------------- */
+.streaminfo-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin: 10px 0 16px;
+}
+
+/* Die Zeilen sollen nicht umbrechen: Feld und Knopf gehoeren
+   nebeneinander, auch wenn der Titel lang ist. */
+.streaminfo-rows .row {
+    gap: 8px;
+    flex-wrap: nowrap;
+}
+
+/* Der Hinweis "noch keine Zeile" steht an derselben Stelle wie eine
+   Zeile - ohne das sitzt er weiter links als die Felder. */
+.streaminfo-rows .hint {
+    margin: 0;
+}

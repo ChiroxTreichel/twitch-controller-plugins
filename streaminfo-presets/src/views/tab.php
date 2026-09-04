@@ -35,6 +35,7 @@ $ziel = $url('/stream/info/presets');
     <form method="post" action="<?= $e($ziel) ?>">
         <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
 
+        <div class="streaminfo-rows">
         <?php foreach ($presets as $i => $vorlage): ?>
             <div class="row">
                 <input class="input grow" type="text" name="presets[]"
@@ -74,6 +75,8 @@ $ziel = $url('/stream/info/presets');
         <?php if ($presets === []): ?>
             <p class="hint" data-empty-hint><?= $e(translate('si_presets.empty')) ?></p>
         <?php endif ?>
+
+        </div>
 
         <div class="row">
             <?php if ($canEdit): ?>

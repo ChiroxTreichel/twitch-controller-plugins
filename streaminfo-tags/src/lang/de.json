@@ -11,6 +11,5 @@
     "si_tags.perm.edit": "darf die eigenen Tags festlegen.",
     "si_tags.remove_row": "Entfernen",
     "si_tags.saved": "Tags gespeichert. Der laufende Titel bleibt unberührt – er ändert sich erst beim nächsten Speichern in der Streaminfo.",
-    "si_tags.tab": "Tags",
-    "si_tags.too_long": "– Twitch kürzt das."
+    "si_tags.tab": "Tags"
 }

@@ -19,6 +19,7 @@
     "streaminfo.perm.category": "may change the category (e.g. the game) of the running stream.",
     "streaminfo.perm.title": "may change the title of the running stream.",
     "streaminfo.perm.view": "may see the current stream title and category.",
+    "streaminfo.preview_over": "– Twitch will truncate this.",
     "streaminfo.read_only": "You may view the stream info, but not change it.",
     "streaminfo.saved": "Changed on Twitch: %{what}.",
     "streaminfo.scope_missing": "Twitch permission missing.",

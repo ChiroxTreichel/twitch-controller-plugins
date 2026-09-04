@@ -31,16 +31,16 @@
     </div>
 
     <?php /*
-        Die Vorschau. Sie zeigt, was zu Twitch geht - und dass die Tags
-        Platz vom Titel nehmen. Ohne sie merkt man erst nach dem
-        Speichern, dass der Titel gekuerzt wurde.
+        Der Beitrag dieser Erweiterung zum fertigen Titel.
 
-        Gefuellt wird sie per JavaScript. Ohne das bleibt hier der
-        Anfangswert stehen, den der Server gesetzt hat; falsch waere er
-        nur, wenn man etwas aendert, ohne zu speichern.
+        Ein verborgenes Feld, das assets/tags.js aktuell haelt. Die
+        Vorschau gehoert Streaminfo - der fertige Titel ist seine Sache -
+        und liest alle Felder mit data-title-prefix in der Reihenfolge
+        des Dokuments.
+
+        Ohne name= wird es nicht abgeschickt: was gilt, sind die Haken,
+        und gerechnet wird auf dem Server. Dieses Feld ist nur fuer die
+        Anzeige.
     */ ?>
-    <p class="si-tags-preview hint" id="si-tags-preview"
-       data-title="streaminfo-title"
-       data-max="140"
-       data-over="<?= $e(translate('si_tags.too_long')) ?>"></p>
+    <input type="hidden" data-title-prefix value="">
 </div>

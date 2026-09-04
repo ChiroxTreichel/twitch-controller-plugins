@@ -11,6 +11,5 @@
     "si_tags.perm.edit": "may define the own tags.",
     "si_tags.remove_row": "Remove",
     "si_tags.saved": "Tags saved. The running title is untouched – it only changes the next time you save on the stream info page.",
-    "si_tags.tab": "Tags",
-    "si_tags.too_long": "– Twitch will truncate this."
+    "si_tags.tab": "Tags"
 }

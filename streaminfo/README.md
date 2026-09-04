@@ -118,6 +118,34 @@ Erweiterung inzwischen entfernt wurde.
 Meldungen (`?notice=` / `?error=`) zeigt der **Rahmen**. Ein Reiter, der
 sie selbst noch einmal anzeigt, zeigt sie zweimal.
 
+### Etwas vor den Titel stellen
+
+Unter dem Titelfeld steht eine Vorschau: der fertige Titel mit
+Zeichenzähler, und eine Warnung, wenn er über 140 kommt. Sie gehört
+Streaminfo — der fertige Titel ist seine Sache.
+
+Eine Erweiterung, die etwas voranstellt, trägt ihren Teil über ein
+verborgenes Feld bei:
+
+```html
+<input type="hidden" data-title-prefix value="[VTuber][German]">
+```
+
+Die Vorschau liest **alle** solchen Felder in der Reihenfolge des
+Dokuments, setzt ein Leerzeichen und dann den Titel. Wer sein Feld per
+JavaScript nachführt, löst darauf ein `input`-Ereignis aus — die
+Vorschau hört auf das Formular.
+
+Kein `name` am Feld: es wird nicht abgeschickt. Was beim Speichern gilt,
+ist `streaminfo.title_compose` auf dem Server; das Feld ist nur für die
+Anzeige. Zwei Rechenwege für dasselbe Ergebnis liefen sonst
+auseinander.
+
+Über das Dokument und nicht über eine Verabredung in JavaScript: ein
+`window.Streaminfo.…` wäre eine Abhängigkeit von der Ladereihenfolge und
+davon, dass das andere Skript überhaupt existiert. Ein Feld im Formular
+ist beides nicht.
+
 ### Zeilen anhängen
 
 Wer in seinem Reiter eine Liste pflegt — eine Zeile, ein Feld —, bekommt

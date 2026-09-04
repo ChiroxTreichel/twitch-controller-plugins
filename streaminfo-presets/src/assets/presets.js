@@ -23,7 +23,29 @@
             return;
         }
 
+        /*
+         * Steht eine echte Vorlage in der Auswahl, verschwindet das
+         * Titelfeld - man hat den Titel dann schon gewaehlt, und ein
+         * Feld daneben ist eine zweite Wahrheit.
+         *
+         * Verborgen und NICHT abgeschaltet: ein abgeschaltetes Feld
+         * schickt der Browser nicht mit, und dann kaeme beim Speichern
+         * ein leerer Titel an - also "nicht anfassen", und die Vorlage
+         * waere ohne Wirkung.
+         */
+        var zeile = feld.closest('.row');
+
+        function zeigen() {
+            if (!zeile) {
+                return;
+            }
+
+            zeile.hidden = auswahl.value !== '';
+        }
+
         auswahl.addEventListener('change', function () {
+            zeigen();
+
             if (auswahl.value === '') {
                 /*
                  * "Eigener Text": das Feld behaelt, was darin steht, und
@@ -59,6 +81,10 @@
 
             auswahl.selectedIndex = 0;
         });
+
+        // Beim Laden: passt der Titel zu einer Vorlage, ist das Feld
+        // von Anfang an verborgen.
+        zeigen();
     }
 
     if (document.readyState === 'loading') {

@@ -41,6 +41,7 @@ $ziel = $url('/stream/info/tags');
     <form method="post" action="<?= $e($ziel) ?>">
         <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
 
+        <div class="streaminfo-rows">
         <?php foreach ($tags as $i => $tag): ?>
             <div class="row">
                 <input class="input grow" type="text" name="tags[]"
@@ -76,6 +77,8 @@ $ziel = $url('/stream/info/tags');
         <?php if ($tags === []): ?>
             <p class="hint" data-empty-hint><?= $e(translate('si_tags.empty')) ?></p>
         <?php endif ?>
+
+        </div>
 
         <div class="row">
             <?php if ($canEdit): ?>
