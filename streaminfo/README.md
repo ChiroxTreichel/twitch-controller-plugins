@@ -87,6 +87,43 @@ oben auf jeder Seite und noch einmal ausführlich auf dieser.
 wenn das Speichern gesperrt ist — ein leeres Formular mit einer Warnung
 wäre weniger wert als der Blick auf das, was gerade läuft.
 
+## Für Erweiterungen
+
+Drei Einhängepunkte, damit Erweiterungen die Seite ergänzen können,
+ohne dass Streaminfo sie kennt:
+
+| Hook | Art | Bedeutung |
+| --- | --- | --- |
+| `streaminfo.fields` | filter | Blöcke über dem Titelfeld |
+| `streaminfo.title_bare` | filter | beim Anzeigen: Vorsätze abnehmen |
+| `streaminfo.title_compose` | filter | beim Speichern: Vorsätze anbauen |
+
+`streaminfo.fields` bekommt als zweites Argument den Zusammenhang —
+`title` (der ganze Titel bei Twitch), `bare` (ohne Vorsätze) und
+`canEdit`. Jeder Beitrag nennt seinen Platz in der Reihe, damit die
+Seite nicht von der Ladereihenfolge der Plugins abhängt:
+
+```php
+$hooks->on('streaminfo.fields', static function (array $felder, array $kontext) use ($app): array {
+    $felder['mein-plugin'] = ['order' => 30, 'html' => '…'];
+
+    return $felder;
+});
+```
+
+**`title_bare` und `title_compose` müssen zueinander passen.** Was
+`compose` anbaut, muss `bare` abbauen — und nur das Eigene. Bliebe ein
+Vorsatz beim Anzeigen stehen, würde ihn das nächste Speichern ein
+zweites Mal davorsetzen: aus `[VTuber] Titel` würde
+`[VTuber] [VTuber] Titel`, und beim nächsten Mal wieder eins mehr.
+
+Zusammengesetzt wird **vor** dem Kürzen auf 140 Zeichen. Ein Vorsatz
+nimmt dem Titel also Platz weg, statt selbst abgeschnitten zu werden.
+
+Zwei Erweiterungen benutzen das: **Streaminfo – Vorlagen** (gespeicherte
+Titel zur Auswahl) und **Streaminfo – Tags** (Tags in eckigen Klammern
+vor dem Titel).
+
 ## Was das Plugin speichert
 
 Nichts. Keine Tabelle, keine Einstellung — alles steht bei Twitch.

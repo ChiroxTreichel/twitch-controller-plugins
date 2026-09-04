@@ -1,0 +1,16 @@
+{
+  "slug": "streaminfo-presets",
+  "name": "Streaminfo – Vorlagen",
+  "version": "1.0.0",
+  "description": "Gespeicherte Stream-Titel zum Auswählen. Auf der Streaminfo-Seite steht dann eine Liste über dem Titelfeld – im Stream sucht niemand nach der richtigen Schreibweise von „FFXIV – FATEs“.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.1.0",
+    "streaminfo": ">=1.1.0"
+  },
+  "optional": {},
+  "tags": [
+    "stream",
+    "twitch"
+  ]
+}

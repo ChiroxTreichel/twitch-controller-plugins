@@ -34,6 +34,7 @@ use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
 use TwitchController\Plugin\Streaminfo\Channel;
 use TwitchController\Plugin\Streaminfo\Config;
+use TwitchController\Plugin\Streaminfo\Streaminfo;
 
 // -------------------------------------------------------------------
 //  Rechte
@@ -133,10 +134,24 @@ $router->get('/stream/info', static function (Request $request) use ($app, $plug
     $kanal = new Channel($app);
     $stand = $kanal->info();
 
+    $stand ??= ['title' => '', 'game_id' => '', 'game_name' => '', 'language' => ''];
+
+    // Im Textfeld steht nur der Teil, den man dort bearbeitet. Was
+    // Plugins vorangestellt haben - Tags zum Beispiel - nehmen sie
+    // hier wieder ab; sonst editiert man ihre Vorsaetze von Hand, und
+    // das naechste Speichern setzt sie ein zweites Mal davor.
+    $blank = Streaminfo::bare($app, $stand['title']);
+
     return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
         'title'        => translate('streaminfo.name'),
         'active'       => 'stream/info',
-        'current'      => $stand ?? ['title' => '', 'game_id' => '', 'game_name' => '', 'language' => ''],
+        'current'      => $stand,
+        'bare'         => $blank,
+        'fields'       => Streaminfo::fields($app, [
+            'title'   => $stand['title'],
+            'bare'    => $blank,
+            'canEdit' => permission('Streaminfo.Title.Edit') && $kanal->canManage(),
+        ]),
         'loadError'    => $stand === null ? $kanal->error() : '',
         'canManage'    => $kanal->canManage(),
         'canEditTitle' => permission('Streaminfo.Title.Edit'),
@@ -170,7 +185,12 @@ $router->post('/stream/info', static function (Request $request) use ($app, $zur
     }
 
     if (permission('Streaminfo.Title.Edit')) {
-        $titel = Config::normalizeTitle((string) $request->input('title'));
+        // Erst zusammensetzen, dann putzen: ein Plugin darf einen
+        // Vorsatz anbauen, aber keinen Titel entstehen lassen, der
+        // laenger ist als Twitch erlaubt.
+        $titel = Config::normalizeTitle(
+            Streaminfo::compose($app, (string) $request->input('title'), $request)
+        );
 
         // Leer heisst "nicht anfassen" und nicht "Titel loeschen":
         // Twitch lehnt einen leeren Titel ohnehin ab, und ein Formular,

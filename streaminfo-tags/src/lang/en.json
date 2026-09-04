@@ -1,0 +1,22 @@
+{
+    "si_tags.add_row": "Add tag",
+    "si_tags.count": "%{count} tag(s)",
+    "si_tags.empty": "No tags yet. While the list is empty, no tick boxes appear on the stream info page.",
+    "si_tags.example": "e.g. “VTuber”",
+    "si_tags.example_result": "[x] VTuber\n[x] German\n[ ] Boredom\n\n[VTuber][German] This is my title",
+    "si_tags.field": "Tags",
+    "si_tags.full": "More than %{count} tags make the row hard to read.",
+    "si_tags.how": "How it looks in the title",
+    "si_tags.lead": "Define your own tags. On the stream info page they can be ticked individually; the ticked ones appear in square brackets before the title.",
+    "si_tags.name": "Stream info – tags",
+    "si_tags.perm.edit": "may define the own tags.",
+    "si_tags.remove_row": "Remove",
+    "si_tags.rule_brackets": "Square brackets in a tag name are removed: the prefix in the title is itself a bracket and could not be read back unambiguously.",
+    "si_tags.rule_case": "Reading back ignores upper and lower case: if the title says “[german]”, the “German” box is ticked.",
+    "si_tags.rule_foreign": "Brackets that do not contain a known tag stay part of the title – “[Notice] rebuild” is left alone.",
+    "si_tags.rule_length": "Longer than %{count} characters is truncated – whatever sits before the title takes space away from it.",
+    "si_tags.rule_order": "The order here is the order in the title – the topmost tag comes first.",
+    "si_tags.saved": "Tags saved. The running title is untouched – it only changes the next time you save on the stream info page.",
+    "si_tags.to_page": "Go to stream info",
+    "si_tags.too_long": "– Twitch will truncate this."
+}

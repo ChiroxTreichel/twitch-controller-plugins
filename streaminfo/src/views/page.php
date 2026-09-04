@@ -5,6 +5,8 @@
  * @var callable $e
  * @var callable $url
  * @var array{title: string, game_id: string, game_name: string, language: string} $current
+ * @var string $bare         Der Titel ohne die Vorsaetze anderer Plugins
+ * @var list<string> $fields Bloecke anderer Plugins, ueber dem Titelfeld
  * @var string $loadError     Warum der aktuelle Stand fehlt
  * @var bool $canManage       Hat der Kanal die Twitch-Freigabe?
  * @var bool $canEditTitle
@@ -64,12 +66,28 @@ $spielAendern = $canEditGame && $canManage;
 
         <h2><?= $e(translate('streaminfo.title_heading')) ?></h2>
 
+        <?php /*
+            Was andere Plugins beitragen - gespeicherte Titel zur
+            Auswahl, Tags. Ungeputzt ausgegeben: der Inhalt kommt aus
+            Plugin-Code und nicht aus einem Eingabefeld. Siehe
+            Streaminfo::fields().
+        */ ?>
+        <?php foreach ($fields ?? [] as $block): ?>
+            <?= $block ?>
+        <?php endforeach ?>
+
         <div class="row">
             <label class="field grow">
                 <span class="hint"><?= $e(translate('streaminfo.field.title')) ?></span>
+                <?php /*
+                    Hier steht der BLANKE Titel, nicht der ganze. Was
+                    Plugins vorangestellt haben, setzen sie beim
+                    Speichern wieder davor - stand es auch im Feld,
+                    waere es beim naechsten Mal zweimal da.
+                */ ?>
                 <input class="input" type="text" name="title" id="streaminfo-title"
                        maxlength="<?= $e((string) $maxTitle) ?>"
-                       value="<?= $e($current['title']) ?>"
+                       value="<?= $e($bare ?? $current['title']) ?>"
                        <?= $titelAendern ? '' : 'readonly' ?>>
             </label>
         </div>

@@ -1,0 +1,20 @@
+{
+    "si_presets.add_row": "Vorlage hinzufügen",
+    "si_presets.count": "%{count} Vorlage(n)",
+    "si_presets.empty": "Noch keine Vorlage. Solange die Liste leer ist, erscheint auf der Streaminfo-Seite keine Auswahl.",
+    "si_presets.example": "z. B. „FFXIV – FATEs“",
+    "si_presets.field": "Vorlage",
+    "si_presets.full": "Mehr als %{count} Vorlagen findet man in der Auswahl nicht mehr wieder.",
+    "si_presets.lead": "Gespeicherte Stream-Titel. Auf der Streaminfo-Seite stehen sie über dem Titelfeld zur Auswahl.",
+    "si_presets.name": "Streaminfo – Vorlagen",
+    "si_presets.own_text": "— eigener Text —",
+    "si_presets.perm.edit": "darf die gespeicherten Stream-Titel pflegen.",
+    "si_presets.remove_row": "Entfernen",
+    "si_presets.rule_double": "Zwei gleiche Zeilen werden zu einer. In der Auswahl wären sie nicht zu unterscheiden.",
+    "si_presets.rule_empty": "Leere Zeilen werden verworfen – so entfernt man eine Vorlage auch, ohne den Knopf zu benutzen.",
+    "si_presets.rule_length": "Länger als %{count} Zeichen wird gekürzt; das ist die Grenze von Twitch.",
+    "si_presets.rule_order": "Die Reihenfolge bleibt, wie du sie hier setzt – was du oft brauchst, stellst du nach oben.",
+    "si_presets.rules": "Was beim Speichern passiert",
+    "si_presets.saved": "Vorlagen gespeichert.",
+    "si_presets.to_page": "Zur Streaminfo"
+}

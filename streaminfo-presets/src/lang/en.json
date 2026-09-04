@@ -1,0 +1,20 @@
+{
+    "si_presets.add_row": "Add preset",
+    "si_presets.count": "%{count} preset(s)",
+    "si_presets.empty": "No presets yet. While the list is empty, no picker appears on the stream info page.",
+    "si_presets.example": "e.g. “FFXIV – FATEs”",
+    "si_presets.field": "Preset",
+    "si_presets.full": "More than %{count} presets are no longer findable in the picker.",
+    "si_presets.lead": "Saved stream titles. They appear above the title field on the stream info page.",
+    "si_presets.name": "Stream info – presets",
+    "si_presets.own_text": "— own text —",
+    "si_presets.perm.edit": "may maintain the saved stream titles.",
+    "si_presets.remove_row": "Remove",
+    "si_presets.rule_double": "Two identical rows become one. In the picker they would be indistinguishable.",
+    "si_presets.rule_empty": "Empty rows are dropped – that is also how you remove a preset without using the button.",
+    "si_presets.rule_length": "Longer than %{count} characters is truncated; that is Twitch's limit.",
+    "si_presets.rule_order": "The order stays as you set it here – put what you use often at the top.",
+    "si_presets.rules": "What happens when you save",
+    "si_presets.saved": "Presets saved.",
+    "si_presets.to_page": "Go to stream info"
+}

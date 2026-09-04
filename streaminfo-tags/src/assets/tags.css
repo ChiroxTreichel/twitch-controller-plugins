@@ -1,0 +1,55 @@
+/* -------------------------------------------------------------------
+ *  Streaminfo - Tags: die Haken und die Vorschau
+ * ------------------------------------------------------------------- */
+.si-tags {
+    margin: 0 0 14px;
+}
+
+.si-tags-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px 10px;
+    margin: 6px 0 0;
+}
+
+/* Jeder Tag ist eine eigene anklickbare Flaeche - das Kaestchen allein
+   ist im Stream ein zu kleines Ziel. */
+.si-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+
+    padding: 5px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.si-tag:has(input:checked) {
+    border-color: var(--accent, #7c3aed);
+    background: var(--panel-2, rgba(124, 58, 237, .12));
+}
+
+/* Ohne :has() im Browser bleibt der Rahmen grau - das Kaestchen selbst
+   zeigt den Zustand trotzdem. Deshalb hier keine Notloesung mit
+   JavaScript: sie waere eine zweite Wahrheit neben dem Kaestchen. */
+.si-tag input {
+    margin: 0;
+}
+
+.si-tag:has(input:disabled) {
+    opacity: .55;
+    cursor: default;
+}
+
+.si-tags-preview {
+    margin: 8px 0 0;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    word-break: break-word;
+}
+
+.si-tags-preview.is-over {
+    color: var(--warn, #f59e0b);
+}
