@@ -81,8 +81,28 @@
     white-space: nowrap;
 }
 
-.ln-state {
-    text-align: center;
+/*
+ *  Live: ein gruener Schein am Bild.
+ *
+ *  Nicht als Schildchen daneben - das Bild ist das Grosse in der
+ *  Kachel, und den Schein sieht man im ganzen Gitter auf einen Blick.
+ *  Ein Schildchen verschiebt ausserdem die Kachelhoehe, je nachdem, wer
+ *  gerade streamt.
+ *
+ *  Zwei Schatten: ein harter Ring direkt am Rand, damit die Kante auch
+ *  auf hellem Bild sichtbar bleibt, und ein weicher darum als das
+ *  eigentliche Leuchten.
+ */
+.ln-avatar.is-live {
+    box-shadow:
+        0 0 0 2px var(--ok),
+        0 0 12px 2px rgba(62, 207, 142, .55);
+}
+
+/* Der erste Buchstabe leuchtet mit - und faerbt sich, damit die Kachel
+   ohne Bild nicht blasser wirkt als die mit. */
+.ln-avatar-empty.is-live {
+    color: var(--ok);
 }
 
 /* -------------------------------------------------------------------

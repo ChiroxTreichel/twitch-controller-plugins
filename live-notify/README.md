@@ -38,6 +38,13 @@ Kanäle. Die Rechnung geht auf, weil die Liste kurz ist. Antwortet Twitch
 nicht, zeigen die Kacheln den ersten Buchstaben — eine Seite ohne Bilder
 ist besser als eine mit einer Fehlermeldung.
 
+**Live wird am Bild gezeigt**, als grüner Schein — nicht als Schildchen
+daneben. Das Bild ist das Große in der Kachel; den Schein sieht man im
+ganzen Gitter auf einen Blick, ein Schildchen müsste man lesen und es
+verschiebt die Kachelhöhe je nachdem, wer gerade streamt. Weil Farbe
+allein die Aussage nicht tragen darf, steht „live" zusätzlich im
+`title` des Links.
+
 Die Haken *sehen aus* wie Kästchen und sind Absende-Knöpfe: ein echtes
 `<input type="checkbox">` müsste beim Anklicken abschicken, und das
 kann nur JavaScript. So ist die ganze Zeile anklickbar statt nur der

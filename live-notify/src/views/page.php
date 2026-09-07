@@ -147,10 +147,26 @@ $zielZiel = $url('/networking/live/target');
                     */ ?>
                     <?php $bild = $images[$kanal['login']] ?? ''; ?>
 
+                    <?php /*
+                        Live wird am BILD gezeigt, nicht als Schildchen
+                        daneben: das Bild ist das Grosse in der Kachel,
+                        und ein gruener Schein daran sieht man im ganzen
+                        Gitter auf einen Blick. Ein Schildchen muesste
+                        man lesen, und es verschiebt die Kachelhoehe je
+                        nachdem, wer gerade streamt.
+
+                        Farbe allein darf die Aussage aber nicht tragen -
+                        darum steht sie zusaetzlich im title des Links.
+                    */ ?>
+                    <?php $leuchten = $kanal['live'] ? ' is-live' : ''; ?>
+
                     <a class="ln-head" target="_blank" rel="noopener"
-                       href="https://twitch.tv/<?= $e(rawurlencode($kanal['login'])) ?>">
+                       href="https://twitch.tv/<?= $e(rawurlencode($kanal['login'])) ?>"
+                       title="<?= $e($kanal['live']
+                           ? $kanal['display_name'] . ' – ' . translate('live_notify.is_live')
+                           : $kanal['display_name']) ?>">
                         <?php if ($bild !== ''): ?>
-                            <img class="ln-avatar" src="<?= $e($bild) ?>" alt="">
+                            <img class="ln-avatar<?= $leuchten ?>" src="<?= $e($bild) ?>" alt="">
                         <?php else: ?>
                             <?php /*
                                 Kein Bild: der erste Buchstabe. Das
@@ -158,17 +174,13 @@ $zielZiel = $url('/networking/live/target');
                                 antwortet - eine Seite ohne Bilder ist
                                 besser als eine mit einer Fehlermeldung.
                             */ ?>
-                            <div class="ln-avatar ln-avatar-empty">
+                            <div class="ln-avatar ln-avatar-empty<?= $leuchten ?>">
                                 <?= $e(strtoupper(substr($kanal['display_name'], 0, 1))) ?>
                             </div>
                         <?php endif ?>
 
                         <div class="ln-name"><?= $e($kanal['display_name']) ?></div>
                     </a>
-
-                    <?php if ($kanal['live']): ?>
-                        <div class="ln-state"><span class="badge badge-ok"><?= $e(translate('live_notify.is_live')) ?></span></div>
-                    <?php endif ?>
 
                     <div class="ln-targets">
                         <?php foreach ($targets as $schluessel => $ziel): ?>
