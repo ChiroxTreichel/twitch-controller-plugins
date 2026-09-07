@@ -1,0 +1,21 @@
+{
+    "raids_raid.cancel": "Raid abbrechen",
+    "raids_raid.cancelled": "Raid abgebrochen.",
+    "raids_raid.error.already_running": "Es läuft schon ein Raid. Erst abbrechen, dann neu starten.",
+    "raids_raid.error.forbidden": "Twitch verweigert den Raid. Vermutlich fehlt die Freigabe „Raids starten“.",
+    "raids_raid.error.nothing_to_cancel": "Es läuft kein Raid, der abgebrochen werden könnte.",
+    "raids_raid.error.no_channel": "Es ist kein Twitch-Kanal verbunden.",
+    "raids_raid.error.rate_limit": "Zu viele Anfragen an Twitch. Bitte einen Augenblick warten.",
+    "raids_raid.error.rejected": "Twitch hat den Raid abgelehnt – der Zielkanal ist womöglich gesperrt oder gerade nicht raidbar.",
+    "raids_raid.error.self": "Du kannst deinen eigenen Kanal nicht raiden.",
+    "raids_raid.error.unauthorized": "Twitch hat die Anmeldung abgelehnt. Der Kanal muss neu verbunden werden.",
+    "raids_raid.error.unknown_channel": "Zu diesem Kanal ist keine Twitch-ID zu finden.",
+    "raids_raid.name": "Raids – Raiden",
+    "raids_raid.perm.start": "darf den Raid starten und ihn wieder abbrechen.",
+    "raids_raid.scope": "Raids starten",
+    "raids_raid.scope.why": "damit der Raid-Knopf den Raid wirklich auslösen kann.",
+    "raids_raid.scope_missing": "Twitch-Freigabe „Raids starten“ fehlt. Der Kanal muss dafür einmal neu verbunden werden.",
+    "raids_raid.start": "Raiden",
+    "raids_raid.start_hint": "%{name} raiden – Twitch gibt 90 Sekunden Vorlauf.",
+    "raids_raid.started": "Raid auf %{name} gestartet. Twitch gibt 90 Sekunden Vorlauf."
+}

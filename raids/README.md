@@ -107,9 +107,60 @@ im Live-Reiter steckt eine Twitch-Abfrage.
 
 Meldungen (`?notice=` / `?error=`) zeigt der Rahmen.
 
+### In den Live-Reiter, nicht daneben
+
+Ein eigener Reiter ist falsch für alles, was **an der Live-Liste
+arbeitet**. Das Roulette und der Raid-Knopf brauchen genau die Kacheln,
+die dort schon stehen; ein zweiter Reiter mit derselben Liste wäre
+dieselbe Seite zweimal — einmal zum Ansehen und einmal zum
+Draufdrücken. Dafür gibt es zwei Stellen:
+
+```php
+// Über dem Gitter - hier hängt das Roulette.
+$hooks->on('raids.live_actions', static function (array $knoepfe): array {
+    $knoepfe[] = ['order' => 10, 'render' => static fn (): string => '…'];
+
+    return $knoepfe;
+});
+
+// In jeder Kachel - hier hängt der Raid-Knopf. render bekommt die
+// Kachel, weil es den Login braucht.
+$hooks->on('raids.tile_actions', static function (array $knoepfe): array {
+    $knoepfe[] = [
+        'order'  => 10,
+        'render' => static fn (array $kachel): string => '…' . $kachel['login'] . '…',
+    ];
+
+    return $knoepfe;
+});
+```
+
+Deshalb ist die Live-Kachel ein `<div>` mit einem `<a>` darin und nicht
+selbst ein Link: ein Formular in einem Link ist kein gültiges HTML, und
+der Browser zieht den Knopf sonst aus der Kachel heraus. Jede Kachel
+trägt ihren Login als `data-raid-login`, damit ein Skript sie findet.
+
+### Wer sonst noch live sein soll
+
+Der Live-Reiter zeigt die Favoriten. Wer sich per Raid-Anfrage gemeldet
+hat, ist kein Favorit und soll trotzdem auftauchen:
+
+```php
+$hooks->on('raids.live_logins', static function (array $logins): array {
+    $logins[] = 'einkanal';
+
+    return $logins;
+});
+```
+
+Ein dazugelegter Login hat kein Bild in `raid_channels` — `live()` holt
+es dann frisch bei Twitch nach, in einem Aufruf für alle und nur für
+die, die gerade streamen.
+
 Wer die Kanalliste braucht, nimmt `Channels`: `active()` für die
 aktiven, `favorites()` für die Logins der Favoriten, `live()` für die
-gerade streamenden.
+gerade streamenden, `userId()` für die Twitch-ID zu einem Login (aus
+der Tabelle, sonst frisch bei Twitch).
 
 ## Was das Plugin speichert
 

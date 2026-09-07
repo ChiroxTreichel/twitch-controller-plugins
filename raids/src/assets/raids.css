@@ -136,3 +136,26 @@ a.raid-tile:hover,
 span.raid-star {
     cursor: default;
 }
+
+/* -------------------------------------------------------------------
+ *  Platz fuer die Erweiterungen
+ *
+ *  Ueber dem Gitter haengt das Roulette, in der Kachel der
+ *  Raid-Knopf. Beide bringen ihr eigenes Aussehen mit; hier steht nur,
+ *  wo sie stehen.
+ * ------------------------------------------------------------------- */
+.raid-actions {
+    margin: 12px 0 0;
+}
+
+/* Ein Knopf in der Kachel sitzt unter dem Namen und ueber die ganze
+   Breite: eine Kachel ist 130 Pixel schmal, und ein zentrierter Knopf
+   mit Rand daneben waere schmaler als sein eigener Text. */
+.raid-tile > form {
+    width: 100%;
+    margin-top: 2px;
+}
+
+.raid-tile > form .btn {
+    width: 100%;
+}

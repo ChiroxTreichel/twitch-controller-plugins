@@ -18,8 +18,10 @@ declare(strict_types=1);
  * die Frage "wen kann ich raiden". Siehe Channels.
  *
  * Was NICHT hier ist: das Raiden selbst, das Roulette und die
- * Raid-Anfragen. Jedes davon wird ein eigenes Plugin und haengt sich
- * ueber raids.tabs ein.
+ * Raid-Anfragen. Jedes davon ist ein eigenes Plugin. Die Anfragen
+ * bringen einen eigenen Reiter mit (raids.tabs); das Roulette und der
+ * Raid-Knopf haengen sich IN den Live-Reiter, ueber raids.live_actions
+ * und raids.tile_actions - sie arbeiten an genau dessen Liste.
  *
  * @var \TwitchController\Core\App $app
  * @var \TwitchController\Core\Hook\Hooks $hooks
@@ -127,9 +129,14 @@ $hooks->on('raids.tabs', static function (array $tabs) use ($app, $plugin): arra
             $kanaele = new Channels($app);
 
             return $vorlagen->render('tab_live', [
-                'live'      => $kanaele->live(),
-                'favorites' => count($kanaele->favorites()),
-                'loadError' => $kanaele->error(),
+                'live'        => $kanaele->live(),
+                'favorites'   => count($kanaele->favorites()),
+                'loadError'   => $kanaele->error(),
+                // Das Roulette und der Raid-Knopf haengen hier, nicht
+                // in einem eigenen Reiter: sie arbeiten an genau
+                // dieser Liste.
+                'actions'     => Raids::liveActions($app),
+                'tileActions' => Raids::tileActions($app),
             ], null);
         },
     ];

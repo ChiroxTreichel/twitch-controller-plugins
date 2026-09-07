@@ -1,0 +1,26 @@
+/* -------------------------------------------------------------------
+ *  Raids - Raiden
+ *
+ *  Der Knopf sitzt unter dem Namen in der Kachel; wo genau, sagt das
+ *  Basis-Plugin (.raid-tile > form). Hier steht nur, wie er aussieht.
+ * ------------------------------------------------------------------- */
+.raid-start {
+    /* Auffaellig, weil es der Knopf ist, fuer den man die Seite offen
+       hat - und weil ein Fehlgriff neunzig Sekunden kostet, soll man
+       ihn nicht mit dem Kachel-Link verwechseln. */
+    background: var(--accent, #7c3aed);
+    border-color: var(--accent, #7c3aed);
+    color: var(--accent-ink, #fff);
+}
+
+.raid-start:hover:not([disabled]) {
+    filter: brightness(1.1);
+}
+
+/* Ohne Twitch-Freigabe: sichtbar, aber sichtbar nicht bedienbar. */
+.raid-start[disabled] {
+    background: none;
+    border-color: var(--line);
+    color: var(--muted);
+    cursor: not-allowed;
+}

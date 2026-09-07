@@ -1,0 +1,45 @@
+/* -------------------------------------------------------------------
+ *  Raids - Anfragen: der Reiter in der Verwaltung
+ *
+ *  Die Kacheln kommen von Raids. Hier stehen nur die zwei Knoepfe
+ *  darunter - Haken und Kreuz.
+ * ------------------------------------------------------------------- */
+.raid-decide {
+    /* Nebeneinander und beide gleich breit: es sind zwei
+       Entscheidungen, und keine von beiden ist die vorgeschlagene. */
+    display: flex;
+    gap: 6px;
+    width: 100%;
+    margin-top: 4px;
+}
+
+.raid-decide form {
+    flex: 1 1 0;
+}
+
+.raid-decide .btn {
+    width: 100%;
+    padding: 4px 0;
+
+    font-size: 0.95rem;
+    line-height: 1.2;
+}
+
+.raid-accept {
+    border-color: var(--ok, #3ecf8e);
+    color: var(--ok, #3ecf8e);
+}
+
+.raid-accept:hover {
+    background: rgba(62, 207, 142, .14);
+}
+
+.raid-decline {
+    border-color: var(--line);
+    color: var(--muted);
+}
+
+.raid-decline:hover {
+    border-color: var(--danger, #ef4444);
+    color: var(--danger, #ef4444);
+}

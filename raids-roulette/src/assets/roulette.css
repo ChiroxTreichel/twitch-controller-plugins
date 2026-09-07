@@ -1,0 +1,70 @@
+/* -------------------------------------------------------------------
+ *  Raids - Roulette
+ *
+ *  Zwei Zustaende einer Kachel: sie ist gerade dran, oder sie hat
+ *  gewonnen. Beides ueber einen Rahmen und einen Schein - nicht ueber
+ *  die Groesse allein: ein Gitter, in dem eine Kachel waechst,
+ *  verschiebt alle anderen, und dann springt die ganze Seite.
+ *
+ *  transform: scale() waechst nur optisch und kostet kein Neuzeichnen
+ *  des Gitters. Deshalb steht es hier und nicht width/height.
+ * ------------------------------------------------------------------- */
+.raid-tile {
+    transition: transform .12s ease, box-shadow .12s ease, border-color .12s ease;
+}
+
+/* Gerade dran. */
+.raid-tile.is-spinning {
+    border-color: var(--accent, #7c3aed);
+    box-shadow: 0 0 16px rgba(124, 58, 237, .55);
+    transform: scale(1.06);
+
+    /* Ueber die Nachbarn, sonst schneidet der Schein an deren Rand ab. */
+    z-index: 1;
+}
+
+/* Gewonnen. Gold und nicht die Akzentfarbe: das Ergebnis soll nicht
+   aussehen wie ein Zwischenstand. */
+.raid-tile.is-winner {
+    border-color: #f5b942;
+    transform: scale(1.08);
+    z-index: 1;
+
+    animation: raid-roulette-pulse 1.1s ease-in-out infinite;
+}
+
+@keyframes raid-roulette-pulse {
+    0%, 100% { box-shadow: 0 0 18px rgba(245, 185, 66, .55); }
+    50%      { box-shadow: 0 0 30px rgba(245, 185, 66, .9); }
+}
+
+/*
+ * Wer Animationen abbestellt hat, bekommt das Ergebnis ohne sie: der
+ * Rahmen bleibt, das Pulsieren und das Wachsen gehen.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .raid-tile {
+        transition: none;
+    }
+
+    .raid-tile.is-spinning,
+    .raid-tile.is-winner {
+        transform: none;
+        animation: none;
+    }
+}
+
+/* -------------------------------------------------------------------
+ *  Der Wuerfel
+ * ------------------------------------------------------------------- */
+.raid-roulette {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Waehrend es dreht ist der Knopf gesperrt und nicht kaputt - darum
+   der wartende Zeiger und kein blasser Knopf. */
+.raid-roulette[disabled] {
+    cursor: progress;
+}

@@ -187,17 +187,27 @@ final class Channels
      */
     public function live(): array
     {
-        $logins = $this->favorites();
+        // Die Favoriten, und was ein Plugin dazulegt: wer sich per
+        // Raid-Anfrage gemeldet hat, ist kein Favorit und soll hier
+        // trotzdem auftauchen. Siehe Raids::extraLogins().
+        $logins = array_values(array_unique(array_merge(
+            $this->favorites(),
+            Raids::extraLogins($this->app)
+        )));
+
         if ($logins === []) {
             return [];
         }
 
-        // Die Bilder stehen schon in der Tabelle - der Live-Aufruf
-        // liefert sie nicht mit, und ein zweiter Aufruf nur fuer
-        // Avatare waere Verschwendung.
+        // Die Bilder der Favoriten stehen schon in der Tabelle - der
+        // Live-Aufruf liefert sie nicht mit, und ein zweiter Aufruf nur
+        // fuer Avatare waere Verschwendung.
         $bilder = [];
-        foreach ($this->app->db->all('SELECT login, profile_image_url FROM raid_channels WHERE favorite') as $row) {
-            $bilder[(string) $row['login']] = (string) $row['profile_image_url'];
+        foreach ($this->app->db->all('SELECT login, profile_image_url FROM raid_channels') as $row) {
+            $bild = (string) $row['profile_image_url'];
+            if ($bild !== '') {
+                $bilder[(string) $row['login']] = $bild;
+            }
         }
 
         $live = [];
@@ -221,12 +231,75 @@ final class Channels
             }
         }
 
+        // Wer nicht in der Tabelle steht - ein dazugelegter Login -
+        // hat noch kein Bild. Das wird jetzt geholt, in EINEM Aufruf
+        // fuer alle und nur fuer die, die gerade live sind: das sind
+        // hoechstens eine Handvoll, und gespeichert wuerde es
+        // veralten.
+        $fehlen = [];
+        foreach ($live as $eintrag) {
+            if ($eintrag['profile_image_url'] === '') {
+                $fehlen[] = $eintrag['login'];
+            }
+        }
+
+        if ($fehlen !== []) {
+            $nachgeholt = [];
+            foreach ($this->get('users', ['login' => array_slice($fehlen, 0, self::LIVE_CHUNK)]) as $zeile) {
+                if (!is_array($zeile)) {
+                    continue;
+                }
+
+                $login = self::normalizeLogin((string) ($zeile['login'] ?? ''));
+                if ($login !== '') {
+                    $nachgeholt[$login] = (string) ($zeile['profile_image_url'] ?? '');
+                }
+            }
+
+            foreach ($live as $i => $eintrag) {
+                if ($eintrag['profile_image_url'] === '') {
+                    $live[$i]['profile_image_url'] = $nachgeholt[$eintrag['login']] ?? '';
+                }
+            }
+        }
+
         usort(
             $live,
             static fn (array $a, array $b): int => strnatcasecmp($a['display_name'], $b['display_name'])
         );
 
         return $live;
+    }
+
+    /**
+     * Die Twitch-ID zu einem Login.
+     *
+     * Zuerst aus der Tabelle - die kennt jeden gefolgten Kanal. Wer
+     * nicht drinsteht (ein dazugelegter Login aus einer Raid-Anfrage),
+     * wird bei Twitch nachgefragt. Gebraucht wird sie vom Raiden: der
+     * Helix-Aufruf will IDs, nicht Namen.
+     */
+    public function userId(string $login): string
+    {
+        $login = self::normalizeLogin($login);
+        if ($login === '') {
+            return '';
+        }
+
+        $gespeichert = (string) $this->app->db->value(
+            'SELECT user_id FROM raid_channels WHERE login = :login',
+            ['login' => $login]
+        );
+
+        if ($gespeichert !== '') {
+            return $gespeichert;
+        }
+
+        $nutzer = $this->get('users', ['login' => $login]);
+
+        return isset($nutzer[0]) && is_array($nutzer[0])
+            ? (string) ($nutzer[0]['id'] ?? '')
+            : '';
     }
 
     // -----------------------------------------------------------------

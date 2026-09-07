@@ -1,0 +1,21 @@
+{
+    "raids_raid.cancel": "Cancel raid",
+    "raids_raid.cancelled": "Raid cancelled.",
+    "raids_raid.error.already_running": "A raid is already running. Cancel it first, then start a new one.",
+    "raids_raid.error.forbidden": "Twitch refuses the raid. The “start raids” permission is probably missing.",
+    "raids_raid.error.nothing_to_cancel": "No raid is running that could be cancelled.",
+    "raids_raid.error.no_channel": "No Twitch channel is connected.",
+    "raids_raid.error.rate_limit": "Too many requests to Twitch. Please wait a moment.",
+    "raids_raid.error.rejected": "Twitch rejected the raid – the target channel may be banned or currently not raidable.",
+    "raids_raid.error.self": "You cannot raid your own channel.",
+    "raids_raid.error.unauthorized": "Twitch rejected the login. The channel has to be reconnected.",
+    "raids_raid.error.unknown_channel": "No Twitch ID could be found for this channel.",
+    "raids_raid.name": "Raids – Raiding",
+    "raids_raid.perm.start": "may start a raid and cancel it again.",
+    "raids_raid.scope": "Start raids",
+    "raids_raid.scope.why": "so the raid button can actually trigger the raid.",
+    "raids_raid.scope_missing": "The Twitch permission “start raids” is missing. The channel has to be reconnected once.",
+    "raids_raid.start": "Raid",
+    "raids_raid.start_hint": "Raid %{name} – Twitch gives 90 seconds of lead time.",
+    "raids_raid.started": "Raid on %{name} started. Twitch gives 90 seconds of lead time."
+}
