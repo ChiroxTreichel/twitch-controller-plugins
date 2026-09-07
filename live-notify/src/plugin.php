@@ -348,11 +348,21 @@ $router->get('/networking/live/settings', static function (Request $request) use
 }, ['auth' => true, 'permission' => 'LiveNotify.Global.View']);
 
 $router->get('/networking/live', static function (Request $request) use ($app, $plugin): Response {
+    $kanaele = LiveNotify::channels($app);
+
     return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
         'title'     => translate('live_notify.nav.item'),
         'active'    => 'networking/live',
         'enabled'   => LiveNotify::enabled($app),
-        'channels'  => LiveNotify::channels($app),
+        'channels'  => $kanaele,
+        // Frisch von Twitch und nicht aus der Tabelle: ein
+        // gespeichertes Bild veraltet, sobald jemand sein Bild
+        // wechselt. Ein Aufruf fuer alle Kanaele - siehe
+        // LiveNotify::profiles().
+        'images'    => LiveNotify::profiles(
+            $app,
+            array_map(static fn (array $k): string => $k['login'], $kanaele)
+        ),
         'targets'   => LiveNotify::targets($app),
         'canEdit'   => permission('LiveNotify.Global.Edit'),
         'canAdd'    => permission('LiveNotify.Channels.Add'),

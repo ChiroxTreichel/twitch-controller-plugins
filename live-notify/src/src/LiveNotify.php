@@ -471,6 +471,68 @@ final class LiveNotify
         return $gemeldet;
     }
 
+    /**
+     * Die Profilbilder zu einer Liste von Logins.
+     *
+     * Frisch bei Twitch gefragt und NICHT gespeichert. Ein Bild in der
+     * Tabelle veraltet: wer es bei Twitch wechselt, behielte hier das
+     * alte, bis irgendetwas es nachzieht - und dieses "irgendetwas"
+     * waere Code, den man pflegen muss.
+     *
+     * Die Rechnung geht auf, weil die Liste kurz ist: ein Aufruf fuer
+     * alle beobachteten Kanaele - users nimmt bis zu hundert Logins -,
+     * und die Seite oeffnet man selten.
+     *
+     * Scheitert der Aufruf, kommt zurueck, was schon beisammen ist. Die
+     * Kacheln zeigen dann den ersten Buchstaben: eine Seite ohne Bilder
+     * ist besser als eine Seite mit einer Fehlermeldung.
+     *
+     * @param list<string> $logins
+     * @return array<string, string> Login => Bildadresse
+     */
+    public static function profiles(App $app, array $logins): array
+    {
+        $logins = array_values(array_filter($logins, static fn (string $l): bool => $l !== ''));
+        if ($logins === []) {
+            return [];
+        }
+
+        $bilder = [];
+
+        foreach (array_chunk($logins, self::CHUNK) as $haeufchen) {
+            try {
+                $antwort = $app->twitch->api()
+                    ->as(TokenStore::BROADCASTER)
+                    ->get('users', ['login' => $haeufchen]);
+            } catch (Throwable $e) {
+                $app->log('LiveNotify: Bilder nicht abrufbar: ' . $e->getMessage());
+
+                return $bilder;
+            }
+
+            if (!$antwort->ok()) {
+                $app->log('LiveNotify: Bilder nicht abrufbar: ' . $antwort->error());
+
+                return $bilder;
+            }
+
+            foreach (($antwort->json['data'] ?? []) as $zeile) {
+                if (!is_array($zeile)) {
+                    continue;
+                }
+
+                $login = self::normalizeLogin((string) ($zeile['login'] ?? ''));
+                if ($login === '') {
+                    continue;
+                }
+
+                $bilder[$login] = (string) ($zeile['profile_image_url'] ?? '');
+            }
+        }
+
+        return $bilder;
+    }
+
     // -----------------------------------------------------------------
     //  Kleinigkeiten
     // -----------------------------------------------------------------

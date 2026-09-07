@@ -31,3 +31,15 @@ $db->run("
         added_at     TIMESTAMPTZ NOT NULL DEFAULT now()
     )
 ");
+
+// Das PROFILBILD steht absichtlich nicht hier.
+//
+// Die Kacheln brauchen es, aber gespeichert veraltet es: wer sein Bild
+// bei Twitch wechselt, behielte hier das alte, bis irgendetwas es
+// nachzieht - und dieses "irgendetwas" waere Code, den man pflegen
+// muss.
+//
+// Geholt wird es beim Anzeigen der Seite, in einem Aufruf fuer alle
+// beobachteten Kanaele - siehe LiveNotify::profiles(). Die Rechnung
+// geht auf, weil die Liste kurz ist: eine Handvoll Kanaele, und die
+// Seite oeffnet man selten.

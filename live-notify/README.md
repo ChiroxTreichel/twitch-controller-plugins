@@ -24,6 +24,30 @@ das Senden. Das ist Absicht: würde weiter mitgeschrieben, gälte ein
 Kanal nach dem Wiedereinschalten als „war schon live", und seine Meldung
 fiele aus.
 
+## Kanäle als Kacheln
+
+Bild, Name, ein Haken je Ziel, ein Kreuz in der Ecke — wie im alten
+System. Wer sieben Kanäle beobachtet, findet den gesuchten am Bild und
+nicht am Text.
+
+Das **Profilbild wird nicht gespeichert.** Gespeichert veraltet es: wer
+es bei Twitch wechselt, behielte hier das alte, bis irgendetwas es
+nachzieht — und dieses "irgendetwas" wäre Code, den man pflegen muss.
+Geholt wird es beim Anzeigen der Seite, in **einem** Aufruf für alle
+Kanäle. Die Rechnung geht auf, weil die Liste kurz ist. Antwortet Twitch
+nicht, zeigen die Kacheln den ersten Buchstaben — eine Seite ohne Bilder
+ist besser als eine mit einer Fehlermeldung.
+
+Die Haken *sehen aus* wie Kästchen und sind Absende-Knöpfe: ein echtes
+`<input type="checkbox">` müsste beim Anklicken abschicken, und das
+kann nur JavaScript. So ist die ganze Zeile anklickbar statt nur der
+Kasten.
+
+Das Kreuz entfernt **ohne Rückfrage**. Bei einer Löschung ist eine
+Rückfrage sonst Pflicht; hier nicht: einen Kanal wieder aufzunehmen
+kostet einen Tastendruck, und verloren geht dabei nur der Haken. Eine
+Rückfrage je Kachel wäre teurer als der Fehlgriff, den sie verhindert.
+
 ## Kanäle
 
 Aufnehmen über Login **oder Adresse** — `twitch.tv/twitchdev` wird zum
@@ -117,7 +141,7 @@ dieses Plugin fragt Twitch ohnehin.
 
 Die Tabelle `live_notify_channels` — ein Kanal je Zeile mit
 Anzeigename, den angehakten Zielen (JSONB), dem Live-Zustand und den
-Zeitstempeln. Dazu im Bereich `plugin:live-notify` die Webhook-Adresse
+Zeitstempeln. **Kein Profilbild** — siehe oben. Dazu im Bereich `plugin:live-notify` die Webhook-Adresse
 (verschlüsselt), die Nachrichtenvorlage, der Hauptschalter und der
 Zeitpunkt der letzten Runde.
 

@@ -2,14 +2,13 @@
 /**
  * Die Seite: wer beobachtet wird, und mit welchen Zielen.
  *
- * Nur die Kanaele - das ist die Arbeit. Die Einstellungen (Webhook,
- * Nachrichtenvorlage) stehen unter Plugins > Einstellungen; dort sucht
- * man sie, und hier waeren sie im Weg.
+ * Kacheln wie im alten System - Bild, Name, ein Haken je Ziel, und ein
+ * Kreuz in der Ecke. Wer sieben Kanaele beobachtet, findet den
+ * gesuchten am Bild und nicht am Text.
  *
- * Eine Zeile je Kanal, ein Haken je Ziel. Jeder Haken ist ein
- * Absende-Knopf in seinem eigenen Formular - kein JavaScript. Das alte
- * System schickte dafuer eine AJAX-Anfrage; ein Formular tut dasselbe
- * und funktioniert auch dann, wenn ein Skript fehlt.
+ * Nur die Kanaele; die Einstellungen jedes Ziels stehen unter
+ * Plugins > Einstellungen. Dort sucht man sie, und hier waeren sie im
+ * Weg.
  *
  * Welche Ziele es gibt, weiss diese Vorlage nicht: sie laeuft ueber
  * $targets, und die kommen aus dem Hook. Ein neues Ziel-Plugin
@@ -18,11 +17,12 @@
  * @var callable $e
  * @var callable $url
  * @var list<array{login: string, display_name: string, targets: list<string>, live: bool, checked_at: ?string}> $channels
+ * @var array<string, string> $images  Login => Bildadresse, frisch von Twitch
  * @var array<string, array{label: string, order: int, ready: bool, hint: string}> $targets
+ * @var bool $enabled
  * @var bool $canEdit
  * @var bool $canAdd
  * @var bool $canDelete
- * @var bool $enabled
  * @var string $notice
  * @var string $error
  * @var string $csrf
@@ -92,7 +92,7 @@ $zielZiel = $url('/networking/live/target');
         waeren die Haken in seiner Spalte Schalter, die stillschweigend
         nichts tun.
     */ ?>
-    <?php foreach ($targets as $schluessel => $ziel): ?>
+    <?php foreach ($targets as $ziel): ?>
         <?php if (!$ziel['ready'] && $ziel['hint'] !== ''): ?>
             <div class="note note-warn">
                 <strong><?= $e($ziel['label']) ?>:</strong>
@@ -106,33 +106,69 @@ $zielZiel = $url('/networking/live/target');
     <?php elseif ($targets === []): ?>
         <?php /*
             Kanaele ohne ein einziges Ziel: dann wird beobachtet und
-            niemand erfaehrt es. Kann eigentlich nicht passieren -
-            dieses Plugin bringt Discord mit - aber wer es abschaltet,
-            soll den Grund lesen und nicht raten.
+            niemand erfaehrt es.
         */ ?>
         <p class="hint"><?= $e(translate('live_notify.no_targets')) ?></p>
     <?php else: ?>
-        <div class="ln-list">
+        <div class="ln-grid">
             <?php foreach ($channels as $kanal): ?>
-                <div class="ln-row">
-                    <div class="ln-channel">
-                        <a target="_blank" rel="noopener"
-                           href="https://twitch.tv/<?= $e(rawurlencode($kanal['login'])) ?>">
-                            <?= $e($kanal['display_name']) ?>
-                        </a>
+                <div class="ln-tile">
+                    <?php if ($canDelete): ?>
+                        <?php /*
+                            Das Kreuz in der Ecke, wie im alten System -
+                            ohne Rueckfrage.
 
-                        <?php if ($kanal['live']): ?>
-                            <span class="badge badge-ok"><?= $e(translate('live_notify.is_live')) ?></span>
-                        <?php endif ?>
+                            Bei einer Loeschung ist eine Rueckfrage sonst
+                            Pflicht; hier nicht: einen Kanal wieder
+                            aufzunehmen kostet einen Tastendruck, und
+                            verloren geht dabei nur der Haken. Eine
+                            Rueckfrage je Kachel waere teurer als der
+                            Fehlgriff, den sie verhindert.
+                        */ ?>
+                        <form class="ln-remove" method="post" action="<?= $e($kanalZiel) ?>">
+                            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                            <input type="hidden" name="action" value="remove">
+                            <input type="hidden" name="login" value="<?= $e($kanal['login']) ?>">
+                            <button type="submit"
+                                    title="<?= $e(translate('live_notify.remove_channel', [
+                                        'name' => $kanal['display_name'],
+                                    ])) ?>"
+                                    aria-label="<?= $e(translate('live_notify.remove_channel', [
+                                        'name' => $kanal['display_name'],
+                                    ])) ?>">&times;</button>
+                        </form>
+                    <?php endif ?>
 
-                        <?php if ($kanal['checked_at'] !== null): ?>
-                            <span class="hint"><?= $e(translate('live_notify.checked_at', [
-                                'when' => Dates::short($kanal['checked_at']),
-                            ])) ?></span>
+                    <?php /*
+                        Das Bild kommt frisch von Twitch und nicht aus
+                        der Tabelle: gespeichert veraltet es, sobald
+                        jemand sein Bild wechselt. Siehe
+                        LiveNotify::profiles().
+                    */ ?>
+                    <?php $bild = $images[$kanal['login']] ?? ''; ?>
+
+                    <a class="ln-head" target="_blank" rel="noopener"
+                       href="https://twitch.tv/<?= $e(rawurlencode($kanal['login'])) ?>">
+                        <?php if ($bild !== ''): ?>
+                            <img class="ln-avatar" src="<?= $e($bild) ?>" alt="">
                         <?php else: ?>
-                            <span class="hint"><?= $e(translate('live_notify.never_checked')) ?></span>
+                            <?php /*
+                                Kein Bild: der erste Buchstabe. Das
+                                kommt vor, wenn Twitch gerade nicht
+                                antwortet - eine Seite ohne Bilder ist
+                                besser als eine mit einer Fehlermeldung.
+                            */ ?>
+                            <div class="ln-avatar ln-avatar-empty">
+                                <?= $e(strtoupper(substr($kanal['display_name'], 0, 1))) ?>
+                            </div>
                         <?php endif ?>
-                    </div>
+
+                        <div class="ln-name"><?= $e($kanal['display_name']) ?></div>
+                    </a>
+
+                    <?php if ($kanal['live']): ?>
+                        <div class="ln-state"><span class="badge badge-ok"><?= $e(translate('live_notify.is_live')) ?></span></div>
+                    <?php endif ?>
 
                     <div class="ln-targets">
                         <?php foreach ($targets as $schluessel => $ziel): ?>
@@ -140,6 +176,16 @@ $zielZiel = $url('/networking/live/target');
 
                             <?php if ($canEdit): ?>
                                 <?php /*
+                                    Sieht aus wie ein Kaestchen, ist ein
+                                    Absende-Knopf.
+
+                                    Ein echtes <input type="checkbox">
+                                    muesste beim Anklicken abschicken,
+                                    und das kann nur JavaScript. Ein
+                                    Knopf tut es ohne, und die ganze
+                                    Zeile ist anklickbar statt nur der
+                                    Kasten.
+
                                     Der Wert ist das Gegenteil des
                                     jetzigen Zustands - der Knopf sagt,
                                     was er tun WILL. Sonst muesste der
@@ -152,35 +198,38 @@ $zielZiel = $url('/networking/live/target');
                                     <input type="hidden" name="login" value="<?= $e($kanal['login']) ?>">
                                     <input type="hidden" name="target" value="<?= $e($schluessel) ?>">
                                     <input type="hidden" name="value" value="<?= $an ? '0' : '1' ?>">
-                                    <button class="ln-target<?= $an ? ' is-on' : '' ?><?= $ziel['ready'] ? '' : ' is-stuck' ?>"
+                                    <button class="ln-check<?= $an ? ' is-on' : '' ?><?= $ziel['ready'] ? '' : ' is-stuck' ?>"
                                             type="submit"
                                             title="<?= $e($ziel['ready']
                                                 ? $ziel['label']
                                                 : $ziel['label'] . ' – ' . $ziel['hint']) ?>">
-                                        <?= $e($ziel['label']) ?>
+                                        <span class="ln-box" aria-hidden="true"></span>
+                                        <span><?= $e($ziel['label']) ?></span>
                                     </button>
                                 </form>
                             <?php else: ?>
-                                <span class="ln-target<?= $an ? ' is-on' : '' ?>"><?= $e($ziel['label']) ?></span>
+                                <span class="ln-check<?= $an ? ' is-on' : '' ?>">
+                                    <span class="ln-box" aria-hidden="true"></span>
+                                    <span><?= $e($ziel['label']) ?></span>
+                                </span>
                             <?php endif ?>
                         <?php endforeach ?>
                     </div>
 
-                    <?php if ($canDelete): ?>
-                        <?= $view->render('_confirm', [
-                            'label'    => translate('live_notify.remove'),
-                            'question' => translate('live_notify.confirm_remove', [
-                                'name' => $kanal['display_name'],
-                            ]),
-                            'confirm'  => translate('live_notify.confirm_remove_yes'),
-                            'action'   => $kanalZiel,
-                            'fields'   => [
-                                'csrf'   => $csrf,
-                                'action' => 'remove',
-                                'login'  => $kanal['login'],
-                            ],
-                        ], null) ?>
-                    <?php endif ?>
+                    <?php /*
+                        Wann zuletzt nachgesehen wurde. Unten und klein:
+                        man braucht es nur, wenn man sich fragt, ob
+                        ueberhaupt etwas laeuft.
+                    */ ?>
+                    <div class="ln-foot hint">
+                        <?php if ($kanal['checked_at'] !== null): ?>
+                            <?= $e(translate('live_notify.checked_at', [
+                                'when' => Dates::short($kanal['checked_at']),
+                            ])) ?>
+                        <?php else: ?>
+                            <?= $e(translate('live_notify.never_checked')) ?>
+                        <?php endif ?>
+                    </div>
                 </div>
             <?php endforeach ?>
         </div>
