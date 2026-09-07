@@ -10,7 +10,7 @@
     "raids.live_count": "%{count} live",
     "raids.live_failed": "The live lookup failed:",
     "raids.name": "Raids",
-    "raids.nav.stream": "Stream",
+    "raids.nav.networking": "Networking",
     "raids.no_favorites": "No favourites yet. Mark the channels you want to see here in the “Following” tab.",
     "raids.nobody_live": "None of your favourites is streaming right now.",
     "raids.none_active": "None of the %{total} followed channels streamed within the last %{days} days.",

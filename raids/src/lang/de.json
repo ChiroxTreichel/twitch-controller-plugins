@@ -10,7 +10,7 @@
     "raids.live_count": "%{count} live",
     "raids.live_failed": "Die Live-Abfrage ist gescheitert:",
     "raids.name": "Raids",
-    "raids.nav.stream": "Stream",
+    "raids.nav.networking": "Networking",
     "raids.no_favorites": "Noch keine Favoriten. Markiere im Reiter „Ich folge“ die Kanäle, die hier auftauchen sollen.",
     "raids.nobody_live": "Von deinen Favoriten streamt gerade niemand.",
     "raids.none_active": "Keiner der %{total} gefolgten Kanäle hat in den letzten %{days} Tagen gestreamt.",

@@ -32,7 +32,7 @@ use TwitchController\Core\Support\Dates;
         <h2><?= $e(translate('raids.tab.follows')) ?></h2>
 
         <?php if ($canSync): ?>
-            <form method="post" action="<?= $e($url('/stream/raids/sync')) ?>">
+            <form method="post" action="<?= $e($url('/networking/raids/sync')) ?>">
                 <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                 <button class="btn btn-ghost btn-small" type="submit"
                         <?= $canRead ? '' : 'disabled' ?>>
@@ -115,7 +115,7 @@ use TwitchController\Core\Support\Dates;
                             nachsehen, und zwei Klicks kurz
                             hintereinander koennten sich aufheben.
                         */ ?>
-                        <form method="post" action="<?= $e($url('/stream/raids/favorite')) ?>">
+                        <form method="post" action="<?= $e($url('/networking/raids/favorite')) ?>">
                             <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                             <input type="hidden" name="login" value="<?= $e($kachel['login']) ?>">
                             <input type="hidden" name="value" value="<?= $kachel['favorite'] ? '0' : '1' ?>">

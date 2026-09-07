@@ -76,14 +76,14 @@ $hooks->on('core.twitch.scope_labels', static function (array $labels): array {
 //  Menue und Dateien
 // -------------------------------------------------------------------
 $hooks->on('admin.nav', static function (array $nav): array {
-    // Anhaengen und nicht setzen: in der Gruppe "Stream" haengt auch
-    // die Streaminfo, und wer sie setzt, laesst je nach
+    // Anhaengen und nicht setzen: in die Gruppe "Networking" kommt
+    // auch die Live-Benachrichtigung, und wer sie setzt, laesst je nach
     // Ladereihenfolge den anderen Menuepunkt verschwinden.
-    $nav['stream']['label'] = translate('raids.nav.stream');
-    $nav['stream']['order'] = 15;
-    $nav['stream']['items'][] = [
+    $nav['networking']['label'] = translate('raids.nav.networking');
+    $nav['networking']['order'] = 25;
+    $nav['networking']['items'][] = [
         'label'      => translate('raids.name'),
-        'href'       => '/stream/raids',
+        'href'       => '/networking/raids',
         'permission' => 'Raids.Global.View',
     ];
 
@@ -174,8 +174,8 @@ $zurueck = static function (string $pfad, array $query = []) use ($app): Respons
 // heute keinen Zusammenstoss - die Reiter sind GET - aber die
 // Reihenfolge soll auch dann stimmen, wenn hier einmal ein GET
 // dazukommt.
-$router->post('/stream/raids/favorite', static function (Request $request) use ($app, $zurueck): Response {
-    $ziel = '/stream/raids/follows';
+$router->post('/networking/raids/favorite', static function (Request $request) use ($app, $zurueck): Response {
+    $ziel = '/networking/raids/follows';
 
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return $zurueck($ziel, ['error' => translate('common.error.form_expired')]);
@@ -197,8 +197,8 @@ $router->post('/stream/raids/favorite', static function (Request $request) use (
     return $zurueck($ziel);
 }, ['auth' => true]);
 
-$router->post('/stream/raids/sync', static function (Request $request) use ($app, $zurueck): Response {
-    $ziel = '/stream/raids/follows';
+$router->post('/networking/raids/sync', static function (Request $request) use ($app, $zurueck): Response {
+    $ziel = '/networking/raids/follows';
 
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return $zurueck($ziel, ['error' => translate('common.error.form_expired')]);
@@ -243,7 +243,7 @@ $seite = static function (Request $request, array $params = []) use ($app, $plug
 
     return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
         'title'   => translate('raids.name'),
-        'active'  => 'stream/raids',
+        'active'  => 'networking/raids',
         'tabs'    => $reiter,
         'open'    => $offen,
         'content' => $inhalt,
@@ -253,11 +253,11 @@ $seite = static function (Request $request, array $params = []) use ($app, $plug
 };
 
 // Ohne Reiter zuerst - sonst faengt {tab} den Aufruf.
-$router->get('/stream/raids', $seite, [
+$router->get('/networking/raids', $seite, [
     'auth'       => true,
     'permission' => 'Raids.Global.View',
 ]);
-$router->get('/stream/raids/{tab}', $seite, [
+$router->get('/networking/raids/{tab}', $seite, [
     'auth'       => true,
     'permission' => 'Raids.Global.View',
 ]);

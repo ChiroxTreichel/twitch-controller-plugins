@@ -100,7 +100,7 @@ $hooks->on('raids.tabs', static function (array $tabs) use ($app): array {
 });
 ```
 
-Der Schlüssel ist die Adresse: `/stream/raids/<schlüssel>`. Ein
+Der Schlüssel ist die Adresse: `/networking/raids/<schlüssel>`. Ein
 unbekannter Schlüssel führt auf den ersten Reiter, nicht auf eine
 Fehlerseite. `render` wird **nur** für den offenen Reiter aufgerufen —
 im Live-Reiter steckt eine Twitch-Abfrage.

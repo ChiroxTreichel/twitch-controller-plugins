@@ -76,7 +76,7 @@
         <?php if ($favorites === 0): ?>
             <p class="hint"><?= $e(translate('raids.no_favorites')) ?></p>
             <div class="row">
-                <a class="btn btn-ghost btn-small" href="<?= $e($url('/stream/raids/follows')) ?>">
+                <a class="btn btn-ghost btn-small" href="<?= $e($url('/networking/raids/follows')) ?>">
                     <?= $e(translate('raids.to_follows')) ?>
                 </a>
             </div>

@@ -39,7 +39,7 @@
     <div class="tabs">
         <?php foreach ($tabs as $key => $tab): ?>
             <a class="tab<?= $open === $key ? ' is-active' : '' ?>"
-               href="<?= $e($url('/stream/raids/' . rawurlencode((string) $key))) ?>"><?= $e($tab['label']) ?></a>
+               href="<?= $e($url('/networking/raids/' . rawurlencode((string) $key))) ?>"><?= $e($tab['label']) ?></a>
         <?php endforeach ?>
     </div>
 <?php endif ?>
