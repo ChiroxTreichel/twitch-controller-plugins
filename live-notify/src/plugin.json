@@ -1,0 +1,16 @@
+{
+  "slug": "live-notify",
+  "name": "Live-Benachrichtigung – Discord",
+  "version": "1.0.0",
+  "description": "Beobachtet fremde Twitch-Kanäle und meldet über einen Discord-Webhook, wenn einer davon live geht. Weitere Ziele – Chat, Shoutout – kommen als eigene Plugins dazu.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.1.2"
+  },
+  "optional": {},
+  "tags": [
+    "networking",
+    "discord",
+    "twitch"
+  ]
+}

@@ -1,0 +1,13 @@
+{
+    "ln_chat.lead": "Was im eigenen Chat steht, wenn ein beobachteter Kanal live geht.",
+    "ln_chat.message": "Nachricht",
+    "ln_chat.name": "Live-Benachrichtigung – Chat",
+    "ln_chat.no_sender": "Kein Absender für den Chat.",
+    "ln_chat.no_sender_hint": "Es ist weder ein Bot-Konto noch der Kanal selbst zum Schreiben verbunden – ohne Absender geht keine Chatnachricht hinaus.",
+    "ln_chat.only_when_live": "Geschrieben wird nur, während der eigene Stream läuft. Ein Post in einen leeren Chat geht nicht verloren – er steht dort, wenn der nächste Stream anfängt, und wirkt dann wie eine Meldung von gerade.",
+    "ln_chat.perm.edit": "darf die Nachrichtenvorlage für den Chat ändern.",
+    "ln_chat.placeholders": "Platzhalter:",
+    "ln_chat.saved": "Gespeichert.",
+    "ln_chat.target": "Chat",
+    "ln_chat.to_channels": "Zu den Kanälen"
+}

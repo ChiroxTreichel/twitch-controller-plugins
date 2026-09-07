@@ -1,0 +1,102 @@
+/* -------------------------------------------------------------------
+ *  Live-Benachrichtigung: die Kanalliste
+ *
+ *  Eine Zeile je Kanal: links wer, in der Mitte die Ziele, rechts der
+ *  Entfernen-Knopf. Untereinander mit Trennlinien statt einzelner
+ *  Kaesten - zehn Kaesten mit Abstand dazwischen sind wieder eine
+ *  lange Seite mit wenig Inhalt.
+ * ------------------------------------------------------------------- */
+.ln-list {
+    display: flex;
+    flex-direction: column;
+    margin: 12px 0 0;
+}
+
+.ln-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    flex-wrap: wrap;
+
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+}
+
+.ln-row:first-child {
+    border-top: 0;
+}
+
+.ln-channel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+
+    /* Nimmt den Platz, die Ziele und der Knopf behalten ihren. */
+    flex: 1 1 200px;
+    min-width: 0;
+}
+
+.ln-channel a {
+    font-weight: 600;
+    color: inherit;
+}
+
+/* Die Ziele als Reihe von Schaltern. Sie stehen rechts vom Namen und
+   sollen nicht umbrechen, solange Platz ist. */
+.ln-targets {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+
+/* -------------------------------------------------------------------
+ *  Ein Ziel je Kanal
+ *
+ *  Als Pille und nicht als Kaestchen: der Name des Ziels steht darin,
+ *  und die ganze Flaeche ist anklickbar. Ein 12 Pixel grosses
+ *  Kaestchen mit Beschriftung daneben trifft man schlechter.
+ * ------------------------------------------------------------------- */
+.ln-target {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 5px 12px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+
+    background: none;
+    color: var(--muted);
+    cursor: pointer;
+
+    font-size: 0.82rem;
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.ln-target:hover {
+    border-color: var(--muted);
+}
+
+.ln-target.is-on {
+    border-color: var(--accent, #7c3aed);
+    background: var(--panel-2, rgba(124, 58, 237, .14));
+    color: var(--text, #fff);
+}
+
+/*
+ * Ein Ziel, das gerade nicht kann - fehlende Adresse, fehlende
+ * Freigabe. Der Haken bleibt bedienbar: man darf ihn setzen, bevor man
+ * die Adresse eintraegt. Er sieht nur nicht danach aus, als wuerde er
+ * schon wirken, und der Grund steht oben auf der Seite.
+ */
+.ln-target.is-stuck {
+    border-style: dashed;
+}
+
+/* Ein Ziel ohne Knopf - wer nicht aendern darf, sieht nur den
+   Zustand. */
+span.ln-target {
+    cursor: default;
+}
