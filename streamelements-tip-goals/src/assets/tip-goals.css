@@ -1,0 +1,84 @@
+/* -------------------------------------------------------------------
+ *  Spendenziele: die Liste in der Verwaltung
+ *
+ *  Eine Karte je Ziel, das laufende hervorgehoben. Die Reihenfolge ist
+ *  hier keine Zierde, sondern die Aussage: oben landet das Geld.
+ * ------------------------------------------------------------------- */
+.tip-goals {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 12px 0;
+}
+
+.tip-goal {
+    padding: 12px 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+/* Das laufende Ziel. Ein farbiger Rand links statt eines anderen
+   Hintergrunds: der Rand traegt die Aussage auch dann, wenn jemand
+   Farben schlecht unterscheidet - er ist an der Kante zu sehen. */
+.tip-goal.is-current {
+    border-left: 3px solid var(--accent, #7c3aed);
+}
+
+.tip-goal-head {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.tip-goal-order {
+    font-weight: 700;
+    color: var(--muted);
+}
+
+.tip-goal-percent {
+    margin-left: auto;
+}
+
+/* -------------------------------------------------------------------
+ *  Der kleine Balken unter jedem Ziel
+ *
+ *  Nur zur Ansicht - der echte steht im Overlay. Er beantwortet die
+ *  Frage "wie weit ist das", ohne dass man rechnen muss.
+ * ------------------------------------------------------------------- */
+.tip-goal-bar {
+    height: 6px;
+    margin-top: 8px;
+    overflow: hidden;
+
+    background: var(--panel-2, rgba(255, 255, 255, .06));
+    border-radius: 3px;
+}
+
+.tip-goal-bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #ffd34d, #ff9f1c);
+}
+
+/* -------------------------------------------------------------------
+ *  Verschieben und Loeschen
+ *
+ *  In eigenen Formularen und darum in einem eigenen Block: ein Klick
+ *  auf den Pfeil darf keine ungespeicherten Eingaben mitnehmen.
+ * ------------------------------------------------------------------- */
+.tip-goal-actions {
+    margin-top: 14px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+}
+
+.tip-goal-actions .row {
+    align-items: center;
+    gap: 6px;
+}
+
+.tip-goal-actions .row + .row {
+    margin-top: 4px;
+}
