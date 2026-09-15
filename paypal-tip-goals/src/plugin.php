@@ -359,8 +359,15 @@ $router->post('/display/goals/tips/appearance', static function (Request $reques
 $oeffentlich = static function (string $vorlage, array $daten = [], int $status = 200) use ($app, $plugin): Response {
     $wer = Donations::identity($app);
 
+    // Die Wurzel ist /views und NICHT /views/public - obwohl alle
+    // Seiten hier darunter liegen.
+    //
+    // Denn die Seiten holen sich ihren Rahmen selbst, mit
+    // $view->render('public/_head'). Waere die Wurzel schon
+    // /views/public, suchte der das unter views/public/public/_head -
+    // und genau das ist beim ersten Anlauf passiert.
     return Response::html(
-        $app->view->from($plugin->directory . '/views/public')->render($vorlage, $daten + [
+        $app->view->from($plugin->directory . '/views')->render('public/' . $vorlage, $daten + [
             'brand'    => TipGoals::brand($app),
             'identity' => $wer,
             'legal'    => Legal::available($app),
