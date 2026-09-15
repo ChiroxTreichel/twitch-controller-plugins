@@ -61,12 +61,17 @@ final class TipGoals
      * Wann sich Geruest oder Aussehen zuletzt geaendert haben.
      *
      * Der Wert steckt in der Adresse des Overlay-Stylesheets. Ohne
-     * Aenderung behaelt OBS das alte - also MUSS diese Zahl mitwachsen,
-     * wenn html() oder css() angefasst werden. Genau das war beim
-     * ersten Anlauf der Grund, warum eine Korrektur am Balken im
-     * Overlay nicht ankam.
+     * Aenderung behaelt OBS das alte - also MUSS er mitwachsen, wenn
+     * html() oder css() angefasst werden. Genau das war beim ersten
+     * Anlauf der Grund, warum eine Korrektur am Balken im Overlay nicht
+     * ankam.
+     *
+     * Mit Uhrzeit, weil an einem Tag mehr als eine Aenderung passieren
+     * kann - und lesbar als Datum, weil strtotime() daraus die Zahl
+     * macht. Ein "2026-09-15 2" waere KEIN Datum mehr und ergaebe
+     * stillschweigend 0; die Pruefsammlung nagelt das fest.
      */
-    public const STAMP = '2026-09-15';
+    public const STAMP = '2026-09-15 14:00';
 
     public static function scope(): string
     {
@@ -389,9 +394,27 @@ HTML;
 }
 
 .goal-tip .goal-row p {
-    margin: 0 0 -4px;
+    margin: 0;
     padding: 0;
     font-size: 24px;
+
+    /* Das ist der Punkt, an dem der Text im Balken sitzt oder nicht.
+     *
+     * Ohne Angabe rechnet der Browser die Zeilenhoehe aus der Schrift:
+     * bei 24 Pixeln sind das rund 33 - MEHR als die 30 des Balkens.
+     * Der Text ragt dann oben und unten heraus, und .goal-bar schneidet
+     * ihn mit seinem overflow: hidden ab.
+     *
+     * Das alte System half sich mit margin-top: -4px, also einem
+     * Schubs. Ein Schubs verschiebt aber nur, was zu gross ist; hier
+     * wird es passend gemacht, und dann zentriert das flex von
+     * .goal-row von selbst.
+     *
+     * (Mein erster Versuch schrieb den Schubs als "margin: 0 0 -4px" -
+     * das ist margin-BOTTOM und damit die Gegenrichtung. Der Text
+     * rutschte nach unten aus dem Balken.)
+     */
+    line-height: 1;
 }
 
 .goal-tip .goal-label   { position: absolute; left: 5px; }
