@@ -1,4 +1,4 @@
-# Streamlabs-Tip-Goals
+# Tip-Goals – Streamlabs
 
 Spendenziele als Balken im Overlay, gespeist aus **Streamlabs**.
 

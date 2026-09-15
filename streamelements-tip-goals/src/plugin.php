@@ -112,7 +112,7 @@ $hooks->on('goals.state', static function (array $zustand) use ($app): array {
 
 // Aendert sich das Geruest, muss OBS nachladen.
 $hooks->on('goals.stamp', static function (mixed $stempel): int {
-    return max((int) $stempel, (int) strtotime('2026-09-14'));
+    return max((int) $stempel, (int) strtotime(TipGoals::STAMP));
 });
 
 // -------------------------------------------------------------------

@@ -57,6 +57,17 @@ final class TipGoals
     /** Laenger als das passt in keinen Balken. */
     public const MAX_TITLE = 80;
 
+    /**
+     * Wann sich Geruest oder Aussehen zuletzt geaendert haben.
+     *
+     * Der Wert steckt in der Adresse des Overlay-Stylesheets. Ohne
+     * Aenderung behaelt OBS das alte - also MUSS diese Zahl mitwachsen,
+     * wenn html() oder css() angefasst werden. Genau das war beim
+     * ersten Anlauf der Grund, warum eine Korrektur am Balken im
+     * Overlay nicht ankam.
+     */
+    public const STAMP = '2026-09-15';
+
     public static function scope(): string
     {
         return Settings::pluginScope(self::SLUG);
@@ -303,10 +314,89 @@ final class TipGoals
 HTML;
     }
 
+    /**
+     * Das Aussehen - VOLLSTAENDIG und auf .goal-tip beschraenkt.
+     *
+     * Beides ist noetig, und beides war beim ersten Versuch falsch:
+     *
+     * Vollstaendig, weil dieses Plugin nur Goals voraussetzt und nicht
+     * Twitch-Goals. Die Klassen .goal, .goal-bar, .goal-row und so
+     * weiter kommen aus DESSEN Stylesheet; ohne es haette der Balken
+     * gar kein Aussehen. Der erste Versuch setzte nur die Farbe der
+     * Fuellung und verliess sich auf den Rest - und selbst MIT
+     * Twitch-Goals blieb der Balken unsichtbar, weil .goal dort keine
+     * Hoehe hat: die holen sich die kleinen Balken aus .goal-small, und
+     * .goal-tip gab es nicht.
+     *
+     * Beschraenkt auf .goal-tip, weil sonst zwei Plugins dieselben
+     * Klassen beschreiben und das letzte gewinnt - je nach
+     * Ladereihenfolge saehen die Twitch-Ziele dann anders aus.
+     *
+     * Die Werte sind die des alten Systems, Farbe fuer Farbe.
+     */
     public static function css(): string
     {
         return <<<'CSS'
-.goal-tip .goal-fill { background: linear-gradient(90deg, #ffd34d, #ff9f1c); }
+/* Beide Klassen im Selektor: das Geruest traegt "goal goal-tip", und
+   so ist jede benutzte Klasse auch wirklich beschrieben - ohne eine
+   unbeschraenkte Regel, die den Twitch-Zielen dazwischenfunkt. */
+.goal.goal-tip {
+    position: relative;
+    width: 100%;
+
+    /* Die Hoehe des grossen Balkens - im alten System 30 Pixel. Ohne
+       sie faellt der ganze Balken auf null zusammen: .goal-bar ist
+       height: 100%, und 100% von nichts ist nichts. */
+    height: 30px;
+}
+
+.goal-tip .goal-bar {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+/* Untergrund und Fuellung als eigene Klassen, wie im alten System -
+   so passt ein von dort kopiertes Geruest ohne Aenderung. */
+.goal-tip .bg-primary { background: #7384e5; }
+.goal-tip .fg-tip     { background: #b21edb; }
+
+.goal-tip .goal-fill {
+    position: absolute;
+    left: 0;
+    top: 0;
+    height: 100%;
+    width: 0%;
+
+    transition: width .2s linear;
+}
+
+.goal-tip .goal-row {
+    position: relative;
+    z-index: 1;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 8px;
+
+    color: #fff;
+    font-family: Nunito, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    text-shadow: 3px 3px 3px rgba(0, 0, 0, .9);
+}
+
+.goal-tip .goal-row p {
+    margin: 0 0 -4px;
+    padding: 0;
+    font-size: 24px;
+}
+
+.goal-tip .goal-label   { position: absolute; left: 5px; }
+.goal-tip .goal-current { opacity: .95; width: 100%; text-align: center; }
+.goal-tip .goal-amount  { opacity: .95; text-align: right; position: absolute; right: 5px; }
 CSS;
     }
 
