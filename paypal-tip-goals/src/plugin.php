@@ -391,13 +391,17 @@ $router->get('/tips', static function (Request $request) use ($app, $oeffentlich
     // sich nicht ohne eine pruefen - und genau daran ist der
     // Renderdurchlauf haengengeblieben.
     return $oeffentlich('landing', [
-        'goals'    => TipGoals::all($app),
-        'canPay'   => PayPal::hasCredentials($app),
-        'minimum'  => TipGoals::minAmount($app),
-        'vorgabe'  => TipGoals::defaultAmount($app),
-        'csrf'     => Donations::csrfToken($app),
-        'notice'   => (string) $request->get('notice'),
-        'error'    => (string) $request->get('error'),
+        'goals'      => TipGoals::all($app),
+        'canPay'     => PayPal::hasCredentials($app),
+        'minimum'    => TipGoals::minAmount($app),
+        'vorgabe'    => TipGoals::defaultAmount($app),
+        'presets'    => TipGoals::presets($app),
+        'feePercent' => TipGoals::feePercent($app),
+        'feeFixed'   => TipGoals::feeFixed($app),
+        'terms'      => Legal::termsRequired($app),
+        'csrf'       => Donations::csrfToken($app),
+        'notice'     => (string) $request->get('notice'),
+        'error'      => (string) $request->get('error'),
     ]);
 });
 
@@ -453,6 +457,14 @@ $router->post('/tips', static function (Request $request) use ($app, $zurueckTip
 
     if (!PayPal::hasCredentials($app)) {
         return $zurueckTips(['error' => translate('pp_tip.error.no_credentials')]);
+    }
+
+    // Das Haekchen unter AGB und Datenschutz gibt es nur, wenn beide
+    // Texte auch geschrieben sind - und dann muss es auch gesetzt sein.
+    // Geprueft wird es hier und nicht nur im Browser: required im
+    // Formular ist eine Bequemlichkeit, keine Bedingung.
+    if (Legal::termsRequired($app) && $request->input('accept_terms') !== '1') {
+        return $zurueckTips(['error' => translate('pp_tip.error.terms')]);
     }
 
     // Das Ziel: leer oder "none" heisst "einfach so". Sonst muss es das

@@ -17,7 +17,8 @@ $heading = translate('pp_tip.public.closed');
 echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null);
 ?>
 
-<h1><?= $e(translate('pp_tip.public.closed')) ?></h1>
-<p class="tp-lead"><?= $e(translate('pp_tip.public.closed_hint')) ?></p>
+<div class="hero">
+    <p class="lead"><?= $e(translate('pp_tip.public.closed_hint')) ?></p>
+</div>
 
-<?= $view->render('public/_foot', compact('legal'), null) ?>
+<?= $view->render('public/_foot', compact('brand', 'legal'), null) ?>

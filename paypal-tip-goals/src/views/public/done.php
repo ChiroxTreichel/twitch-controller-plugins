@@ -4,7 +4,10 @@
  *
  * Dieselbe Seite fuer geglueckt und gescheitert, nur mit anderem Text:
  * wer hier landet, hat eine Frage - "ist mein Geld angekommen?" - und
- * die wird oben beantwortet.
+ * die wird in der Ueberschrift beantwortet.
+ *
+ * Die Karte darunter ist die des alten Systems, dort hiess sie
+ * "Spende vorbereitet".
  *
  * @var callable $e
  * @var callable $url
@@ -20,12 +23,19 @@
 echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null);
 ?>
 
-<div class="tp-note <?= $ok ? 'tp-ok' : 'tp-error' ?>">
-    <strong><?= $e($heading) ?></strong>
+<div class="placeholder-box">
+    <?php /*
+        Der Rahmen traegt die Farbe mit - Farbe allein unterscheidet
+        "angekommen" und "nicht durchgegangen" sonst fuer niemanden,
+        der sie nicht unterscheiden kann.
+    */ ?>
+    <div class="flash <?= $ok ? 'flash-ok' : 'flash-error' ?>"><?= $e($body) ?></div>
+
+    <p>
+        <a class="primary-button" href="<?= $e($url('/tips')) ?>">
+            <?= $e(translate('pp_tip.done.back')) ?>
+        </a>
+    </p>
 </div>
 
-<p class="tp-lead"><?= $e($body) ?></p>
-
-<a class="tp-button" href="<?= $e($url('/tips')) ?>"><?= $e(translate('pp_tip.done.back')) ?></a>
-
-<?= $view->render('public/_foot', compact('legal'), null) ?>
+<?= $view->render('public/_foot', compact('brand', 'legal'), null) ?>

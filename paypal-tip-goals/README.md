@@ -7,6 +7,24 @@ und als Balken im Overlay.
 Braucht **Goals**. Mit **Alerts** kommt zusätzlich ein Alert im Stream —
 ohne läuft alles andere genauso.
 
+## Das Aussehen ist das alte
+
+Farben, Rundungen, Knöpfe, Schalter und das Karussell für die Ziele
+kommen aus der alten Spendenseite und sind von dort übernommen — wer
+sie kannte, muss die neue nicht erst wiedererkennen.
+
+Zwei Dinge sind trotzdem anders, und beide aus einem Grund:
+
+- **Eine Seite statt zweier.** Früher kam erst eine Startseite und nach
+  einem Klick das Formular. Hier steht es gleich da, sobald man
+  angemeldet ist. Die Startkarte gibt es weiter — für den, der es noch
+  nicht ist.
+- **Die Auswahl steckt im Karussell selbst.** Früher schrieb
+  JavaScript sie in ein verstecktes Feld; ohne JavaScript ging gar
+  nichts. Jetzt trägt jede Karte einen echten Auswahlknopf, und ohne
+  JavaScript liegen die Karten untereinander. Das sieht anders aus —
+  spenden kann man trotzdem.
+
 ## Der Unterschied zu den anderen beiden
 
 Bei StreamElements und Streamlabs kommt eine Spende aus einer
@@ -81,6 +99,11 @@ Spendenseite mit fremden Daten.
 Geschrieben werden sie in den Einstellungen, je Text ein Reiter.
 Markdown ist erlaubt. Verlinkt wird im Fuß nur, was wirklich da ist —
 ein Link auf eine leere Seite ist schlechter als kein Link.
+
+Das Häkchen „AGB und Datenschutz gelesen" erscheint aus demselben Grund
+erst, wenn **beide** Texte geschrieben sind. Steht es da, prüft es auch
+der Server: `required` im Formular ist eine Bequemlichkeit, keine
+Bedingung.
 
 ## Der Spender bekommt kein Konto
 

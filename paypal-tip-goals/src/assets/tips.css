@@ -1,302 +1,718 @@
 /* -------------------------------------------------------------------
  *  /tips - die oeffentliche Spendenseite
  *
+ *  Das Aussehen kommt aus dem alten spenden.talutah.de und ist von
+ *  dort uebernommen: dieselben Farben, dieselben Radien, dieselben
+ *  Klassennamen. Wer die alte Seite kannte, soll die neue nicht erst
+ *  wiedererkennen muessen.
+ *
  *  Eine eigene Datei, weil das eine eigene Seite ist: admin.css bringt
  *  Navigation, Tabellen und Karten mit, und davon braucht sie nichts.
  *  Wer hier landet, hat ein einziges Anliegen.
  *
- *  Farben von Hand: die Variablen der Verwaltung liegen in admin.css,
- *  und die wird hier nicht geladen.
+ *  Deshalb stehen hier auch nackte Auswahlen - h1, p, textarea. Auf
+ *  dieser Seite gibt es kein zweites Stylesheet, mit dem sie sich
+ *  streiten koennten.
  * ------------------------------------------------------------------- */
 :root {
     color-scheme: dark;
 
-    --tp-bg: #0d0f1a;
-    --tp-panel: #161a2b;
-    --tp-panel-2: #1e2338;
-    --tp-line: rgba(255, 255, 255, .08);
-    --tp-text: #f4f7fb;
-    --tp-muted: #95a0b8;
-    --tp-accent: #9146ff;
-    --tp-accent-2: #7c46cc;
-    --tp-ok: #6ad88f;
-    --tp-warn: #ffb74d;
-    --tp-error: #ff6b6b;
+    --bg: #0d0f1a;
+    --panel: #161a2b;
+    --panel-2: #1e2338;
+    --border: rgba(255, 255, 255, 0.08);
+    --text: #f4f7fb;
+    --muted: #95a0b8;
+    --accent: #b06cff;
+    --accent-2: #7c46cc;
+    --good: #6ad88f;
+    --warn: #ffb74d;
+    --error: #ff6b6b;
 }
 
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
+html, body {
     margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
     min-height: 100vh;
+}
 
-    background: var(--tp-bg);
-    color: var(--tp-text);
-    font: 15px/1.55 system-ui, "Segoe UI", sans-serif;
+body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code {
+    font-family: "JetBrains Mono", Consolas, monospace;
+    font-size: 0.9em;
+    background: rgba(255, 255, 255, 0.06);
+    padding: 0.1em 0.4em;
+    border-radius: 4px;
 }
 
 /* -------------------------------------------------------------------
  *  Kopf und Fuss
  * ------------------------------------------------------------------- */
-.tp-head {
+.page-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 18px 20px;
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.2);
 }
 
-.tp-brand {
-    color: var(--tp-text);
-    font-size: 1.1rem;
+.brand {
+    font-size: 24px;
     font-weight: 700;
-    text-decoration: none;
+    color: var(--text);
+    letter-spacing: 0.02em;
 }
 
-.tp-user {
+.brand span {
+    color: var(--accent);
+}
+
+.user-nav {
     display: flex;
     align-items: center;
-    gap: 10px;
-    font-size: 0.85rem;
-    color: var(--tp-muted);
+    gap: 14px;
+    font-size: 14px;
+    color: var(--muted);
 }
 
-.tp-main {
-    max-width: 680px;
+.user-name {
+    color: var(--text);
+}
+
+.logout-form { margin: 0; }
+
+.link-button {
+    appearance: none;
+    background: transparent;
+    border: 0;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+    padding: 4px 6px;
+}
+
+.link-button:hover { color: var(--accent); }
+
+.page-main {
+    flex: 1;
+    width: 100%;
+    max-width: 720px;
     margin: 0 auto;
-    padding: 0 20px 40px;
-}
-
-.tp-foot {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    flex-wrap: wrap;
-
-    max-width: 680px;
-    margin: 0 auto;
-    padding: 24px 20px 40px;
-
-    border-top: 1px solid var(--tp-line);
-    font-size: 0.82rem;
-}
-
-.tp-foot a,
-.tp-user a {
-    color: var(--tp-muted);
+    padding: 40px 24px 60px;
 }
 
 h1 {
-    margin: 0 0 8px;
-    font-size: 1.5rem;
+    margin: 0 0 24px;
+    font-size: 32px;
+    letter-spacing: -0.01em;
 }
 
-.tp-lead {
-    margin: 0 0 22px;
-    color: var(--tp-muted);
+h2 {
+    margin: 0 0 12px;
+    font-size: 20px;
 }
 
-.tp-quiet {
-    color: var(--tp-muted);
+p { line-height: 1.55; }
+
+.lead {
+    font-size: 17px;
+    color: #dde3ef;
 }
 
-.tp-small {
-    font-size: 0.82rem;
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+.page-footer {
+    padding: 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--muted);
+    border-top: 1px solid var(--border);
+    background: rgba(0, 0, 0, 0.18);
 }
+
+.footer-links {
+    margin-top: 10px;
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.footer-links a { color: var(--muted); }
+.footer-links a:hover { color: var(--accent); }
+
+/* -------------------------------------------------------------------
+ *  Knoepfe
+ * ------------------------------------------------------------------- */
+.primary-button,
+button.primary-button {
+    appearance: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 14px 28px;
+    font-size: 16px;
+    font-weight: 600;
+    border: 0;
+    border-radius: 999px;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: #fff;
+    cursor: pointer;
+    text-decoration: none;
+    transition: transform 0.1s ease, box-shadow 0.2s ease;
+    box-shadow: 0 8px 24px rgba(124, 70, 204, 0.35);
+}
+
+.primary-button:hover {
+    transform: translateY(-1px);
+    text-decoration: none;
+    box-shadow: 0 12px 28px rgba(124, 70, 204, 0.45);
+}
+
+.primary-button:active { transform: translateY(0); }
 
 /* -------------------------------------------------------------------
  *  Meldungen
  *
- *  Der Rahmen traegt die Farbe mit - Farbe allein unterscheidet sie
- *  sonst fuer niemanden, der sie nicht unterscheiden kann.
+ *  Im alten System gab es genau eine Sorte - eine Warnung. Hier kommen
+ *  auch "hat geklappt" und "ist schiefgegangen" vor, und die tragen
+ *  ihre Farbe im Rahmen mit: Farbe allein unterscheidet sie sonst
+ *  fuer niemanden, der sie nicht unterscheiden kann.
  * ------------------------------------------------------------------- */
-.tp-note {
-    margin: 0 0 20px;
-    padding: 14px 16px;
-
-    background: var(--tp-panel-2);
-    border: 1px solid var(--tp-line);
+.flash {
+    padding: 12px 16px;
+    background: rgba(255, 183, 77, 0.18);
+    border: 1px solid rgba(255, 183, 77, 0.5);
+    color: #ffe7c2;
     border-radius: 10px;
-    font-size: 0.94rem;
+    margin-bottom: 20px;
 }
 
-.tp-ok    { border-color: rgba(106, 216, 143, .4); color: var(--tp-ok); }
-.tp-warn  { border-color: rgba(255, 183, 77, .4);  color: var(--tp-warn); }
-.tp-error { border-color: rgba(255, 107, 107, .4); color: var(--tp-error); }
+.flash-ok {
+    background: rgba(106, 216, 143, 0.14);
+    border-color: rgba(106, 216, 143, 0.5);
+    color: #d4f3df;
+}
+
+.flash-error {
+    background: rgba(255, 107, 107, 0.14);
+    border-color: rgba(255, 107, 107, 0.5);
+    color: #ffd9d9;
+}
+
+/* -------------------------------------------------------------------
+ *  Die Startkarte und der Zielbalken
+ * ------------------------------------------------------------------- */
+.hero {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    display: grid;
+    gap: 22px;
+}
+
+.tip-goal {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+}
+
+.tip-goal-compact {
+    margin-bottom: 24px;
+}
+
+.goal-bar {
+    display: block;
+    position: relative;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.06);
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.goal-fill {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), #4ad67b);
+    transition: width 0.3s ease;
+}
+
+.goal-figures {
+    display: flex;
+    justify-content: space-between;
+    margin: 10px 0 0;
+    font-size: 14px;
+}
+
+.goal-figures strong {
+    font-size: 18px;
+    color: var(--text);
+}
+
+.goal-figures span { color: var(--muted); }
 
 /* -------------------------------------------------------------------
  *  Das Formular
  * ------------------------------------------------------------------- */
-.tp-form {
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
+.donate-form {
+    display: grid;
+    gap: 24px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
 }
 
-.tp-field {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.tp-field > span {
-    font-size: 0.85rem;
-    color: var(--tp-muted);
-}
-
-.tp-input {
-    width: 100%;
-    padding: 11px 13px;
-
-    background: var(--tp-panel);
-    border: 1px solid var(--tp-line);
-    border-radius: 10px;
-
-    color: var(--tp-text);
-    font: inherit;
-}
-
-.tp-input:focus {
-    outline: 2px solid var(--tp-accent);
-    outline-offset: 1px;
-}
-
-.tp-check {
-    display: flex;
-    align-items: flex-start;
-    gap: 10px;
-    font-size: 0.92rem;
-}
-
-.tp-check input {
-    margin-top: 3px;
-    flex: 0 0 auto;
-}
-
-.tp-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-
-    padding: 13px 20px;
-    border: 0;
-    border-radius: 10px;
-    background: linear-gradient(135deg, var(--tp-accent), var(--tp-accent-2));
-
-    color: #fff;
-    font: inherit;
-    font-weight: 600;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.tp-button:hover {
-    filter: brightness(1.08);
-}
-
-/* -------------------------------------------------------------------
- *  Die Zielauswahl
- *
- *  Radioknoepfe und kein Karussell: ein Karussell versteckt die Wahl
- *  hinter einer Bewegung und braucht JavaScript. Hier liegt alles
- *  offen, und ohne JavaScript geht es genauso.
- * ------------------------------------------------------------------- */
-.tp-goals {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-
+.donate-form fieldset {
     margin: 0;
     padding: 0;
     border: 0;
-}
-
-.tp-goals legend {
-    padding: 0 0 8px;
-    font-size: 0.85rem;
-    color: var(--tp-muted);
-}
-
-.tp-goal {
-    display: flex;
-    align-items: flex-start;
+    display: grid;
     gap: 12px;
 
-    padding: 13px 15px;
-    background: var(--tp-panel);
-    border: 1px solid var(--tp-line);
-    border-radius: 10px;
-    cursor: pointer;
+    /* Ein fieldset bringt vom Browser min-inline-size: min-content mit
+       und schrumpft sonst nie unter seinen breitesten Inhalt. Mit dem
+       Karussell darin war die Seite auf einem Handy 680 Pixel breit. */
+    min-width: 0;
 }
 
-/* Das gewaehlte Ziel. Rand UND Hintergrund, damit man es auch ohne
-   Farbunterscheidung sieht. */
-.tp-goal:has(input:checked) {
-    border-color: var(--tp-accent);
-    background: var(--tp-panel-2);
+.donate-form legend {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
 }
 
-.tp-goal input {
-    margin-top: 4px;
-    flex: 0 0 auto;
-}
-
-.tp-goal-body {
+.amount-presets {
     display: flex;
-    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.preset-button {
+    appearance: none;
+    padding: 10px 18px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    color: var(--text);
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.preset-button:hover {
+    background: rgba(176, 108, 255, 0.18);
+    border-color: var(--accent);
+}
+
+.amount-label, .message-label {
+    display: grid;
+    gap: 6px;
+}
+
+.amount-label > span {
+    font-size: 14px;
+    color: var(--muted);
+}
+
+input[type="number"],
+textarea {
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font: inherit;
+    padding: 12px 14px;
+    width: 100%;
+}
+
+input[type="number"]:focus,
+textarea:focus {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+}
+
+textarea { resize: vertical; }
+
+.checkbox-label {
+    display: inline-flex;
+    align-items: flex-start;
+    gap: 10px;
+    cursor: pointer;
+    line-height: 1.4;
+}
+
+.checkbox-label input {
+    margin-top: 4px;
+    width: 18px;
+    height: 18px;
+    accent-color: var(--accent);
+}
+
+.amount-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.amount-row .amount-label {
+    flex: 1 1 220px;
+    min-width: 0;
+}
+
+.amount-row .cover-fees-row {
+    flex: 0 0 auto;
+    padding-bottom: 10px;
+}
+
+.cover-fees-row {
+    margin-top: 6px;
+}
+
+@media (max-width: 480px) {
+    .amount-row .cover-fees-row {
+        padding-bottom: 0;
+    }
+}
+
+/* -------------------------------------------------------------------
+ *  Was wirklich ankommt
+ * ------------------------------------------------------------------- */
+.net-info {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    flex-wrap: wrap;
+    padding: 10px 14px;
+    background: rgba(106, 216, 143, 0.08);
+    border: 1px solid rgba(106, 216, 143, 0.25);
+    border-radius: 10px;
+    margin: 4px 0 0;
+    font-size: 14px;
+    color: #dde3ef;
+}
+
+.net-info strong {
+    font-size: 18px;
+    color: var(--good);
+    letter-spacing: 0.01em;
+}
+
+.net-formula {
+    color: var(--muted);
+    font-size: 13px;
+}
+
+.net-warn {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 10px 14px;
+    background: rgba(255, 183, 77, 0.12);
+    border: 1px solid rgba(255, 183, 77, 0.45);
+    border-radius: 10px;
+    margin: 4px 0 0;
+    font-size: 13px;
+    color: #ffe7c2;
+    line-height: 1.4;
+}
+
+.net-warn::before {
+    /* Das Zeichen steht hier ausgeschrieben und nicht als \26A0:
+       die Escape-Schreibweise verschluckte im Browser das Zeichen und
+       liess "A0" stehen. */
+    content: '⚠';
+    flex-shrink: 0;
+    font-size: 15px;
+    color: var(--warn);
+}
+
+/* -------------------------------------------------------------------
+ *  Die Schalter
+ * ------------------------------------------------------------------- */
+.toggle-wrap {
+    display: inline-flex;
+    align-items: center;
+    gap: 14px;
+    color: var(--text);
+    font-size: 15px;
+}
+
+.toggle-switch {
+    position: relative;
+    width: 52px;
+    height: 30px;
+    display: inline-block;
+    flex-shrink: 0;
+    cursor: pointer;
+    touch-action: manipulation;
+}
+
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 999px;
+    cursor: pointer;
+    pointer-events: none;
+    transition: background 0.15s ease;
+}
+
+.toggle-slider::before {
+    content: '';
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: 4px;
+    top: 4px;
+    border-radius: 50%;
+    background: #fff;
+    transition: transform 0.15s ease;
+}
+
+.toggle-switch input:checked + .toggle-slider {
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+}
+
+.toggle-switch input:checked + .toggle-slider::before {
+    transform: translateX(22px);
+}
+
+/* Die Tastatur darf den Schalter nicht verlieren: das Kaestchen ist
+   durchsichtig, also traegt der Rahmen den Fokus. */
+.toggle-switch input:focus-visible + .toggle-slider {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+.is-hidden { display: none !important; }
+
+/* -------------------------------------------------------------------
+ *  Der Spendenziel-Picker (Karussell)
+ * ------------------------------------------------------------------- */
+.goal-picker { margin: 0 0 20px; }
+
+.goal-picker legend { font-weight: 600; padding: 0 4px; }
+
+.goal-carousel {
+    display: flex;
+    align-items: stretch;
+    gap: 8px;
+    margin-top: 8px;
+
+    /* Dasselbe eine Ebene hoeher: auch als Kind des Rasters schrumpft
+       es von sich aus nicht unter seinen Inhalt. */
+    min-width: 0;
+}
+
+.goal-carousel-viewport {
+    flex: 1 1 auto;
+
+    /* Ohne das ist die Seite auf einem Handy 680 Pixel breit und
+       schiebt sich seitlich weg: ein Flex-Kind schrumpft von sich aus
+       nicht unter seinen Inhalt (min-width: auto), und der Inhalt sind
+       hier ALLE Karten nebeneinander. Im alten System stand die Zeile
+       nicht - dort scrollte die Seite quer. */
+    min-width: 0;
+
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.goal-carousel-track {
+    display: flex;
+    width: 100%;
+    transition: transform 220ms ease;
+    will-change: transform;
+}
+
+.goal-slide {
+    flex: 0 0 100%;
+    min-width: 0;
+    padding: 16px 18px;
+    box-sizing: border-box;
+}
+
+.goal-slide-head {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 8px;
+}
+
+.goal-slide-title { font-weight: 600; font-size: 16px; }
+
+.goal-slide-active-tag {
+    font-size: 12px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: rgba(176, 115, 255, 0.18);
+    color: var(--accent);
+}
+
+.goal-slide-body {
+    display: grid;
     gap: 6px;
     flex: 1 1 auto;
     min-width: 0;
 }
 
-.tp-goal-title {
-    font-weight: 600;
+.goal-slide .goal-bar { margin: 6px 0 0; }
+.goal-slide .goal-figures { margin: 6px 0 0; font-size: 14px; }
+.goal-slide.is-none .muted { margin: 4px 0 0; }
+
+.goal-carousel-nav {
+    flex: 0 0 auto;
+    width: 40px;
+    border: none;
+    border-radius: 10px;
+    background: transparent;
+    color: inherit;
+    font-size: 18px;
+    cursor: pointer;
+    transition: color 120ms ease;
 }
 
-.tp-goal-bar {
-    display: block;
-    height: 6px;
-    overflow: hidden;
-
-    background: var(--tp-panel-2);
-    border-radius: 3px;
+.goal-carousel-nav:hover {
+    color: var(--accent);
 }
 
-.tp-goal-bar span {
-    display: block;
-    height: 100%;
-    background: linear-gradient(90deg, #ffd34d, #ff9f1c);
+.goal-carousel-dots {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    margin-top: 10px;
 }
 
-.tp-goal-figures {
-    font-size: 0.86rem;
+.goal-carousel-dot {
+    width: 8px;
+    height: 8px;
+    padding: 0;
+    border-radius: 50%;
+    border: none;
+    background: var(--border);
+    cursor: pointer;
+    transition: background 120ms ease, transform 120ms ease;
+}
+
+.goal-carousel-dot:hover { background: var(--accent); }
+
+.goal-carousel-dot.is-current {
+    background: var(--accent);
+    transform: scale(1.25);
+}
+
+/* Die Wahl steckt in einem echten Radioknopf je Karte - im alten
+   System war es ein verstecktes Feld, das nur JavaScript beschrieb.
+   Sichtbar ist er nicht, denn sichtbar ist immer genau eine Karte:
+   die Karte IST die Auswahl.
+
+   Ohne JavaScript ist sie es nicht mehr, und dafuer gibt es weiter
+   unten den noscript-Block. */
+.goal-slide > input[type="radio"] {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.goal-slide:has(> input:focus-visible) {
+    outline: 2px solid var(--accent);
+    outline-offset: -2px;
+    border-radius: 12px;
+}
+
+/* -------------------------------------------------------------------
+ *  Die Zusammenfassung nach der Rueckkehr
+ * ------------------------------------------------------------------- */
+.placeholder-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 28px;
+    display: grid;
+    gap: 18px;
+}
+
+.intent-summary {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: 8px 24px;
+    margin: 0;
+}
+
+.intent-summary dt {
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--muted);
+}
+
+.intent-summary dd {
+    margin: 0;
+    font-size: 15px;
 }
 
 /* -------------------------------------------------------------------
  *  Die Rechtstexte
  * ------------------------------------------------------------------- */
-.tp-text {
-    line-height: 1.7;
+.legal { line-height: 1.6; }
+
+.legal h2 {
+    margin-top: 28px;
+    font-size: 18px;
 }
 
-.tp-text h2,
-.tp-text h3 {
-    margin: 26px 0 8px;
-    font-size: 1.05rem;
+.legal h2:first-of-type { margin-top: 0; }
+.legal p { margin: 0 0 12px; }
+
+.legal ul {
+    margin: 0 0 12px;
+    padding-left: 22px;
 }
 
-.tp-text p,
-.tp-text ul {
-    margin: 0 0 14px;
-}
+.legal ul li { margin-bottom: 4px; }
+.legal-address { line-height: 1.6; }
 
-.tp-text a {
-    color: var(--tp-accent);
+/* -------------------------------------------------------------------
+ *  Schmale Fenster
+ * ------------------------------------------------------------------- */
+@media (max-width: 600px) {
+    .page-main { padding: 24px 16px 40px; }
+    h1 { font-size: 26px; }
+    .hero, .donate-form, .placeholder-box { padding: 20px; }
+    .intent-summary { grid-template-columns: 1fr; gap: 4px; }
+    .intent-summary dt { margin-top: 8px; }
 }

@@ -6,6 +6,8 @@
  * Markdown-Wandler gegangen wie die Plugin-Beschreibungen - darum ohne
  * $e(): er ist bereits HTML, und zwar gesaeubertes.
  *
+ * Die Ueberschrift steht im Rahmen und nicht hier.
+ *
  * @var callable $e
  * @var callable $view
  * @var string $brand
@@ -18,8 +20,6 @@
 echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null);
 ?>
 
-<h1><?= $e($heading) ?></h1>
+<div class="legal"><?= $body ?></div>
 
-<div class="tp-text"><?= $body ?></div>
-
-<?= $view->render('public/_foot', compact('legal'), null) ?>
+<?= $view->render('public/_foot', compact('brand', 'legal'), null) ?>
