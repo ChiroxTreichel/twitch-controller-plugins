@@ -113,6 +113,22 @@ final class TipGoals
      */
     public const STAMP_FINGERPRINT = '90f53d2ec019468b';
 
+    /**
+     * Die Vorgabe fuer die PayPal-Gebuehr.
+     *
+     * Als Konstante und nicht dreimal als Zeichenkette: der Wert stand
+     * im Getter UND im Einstellungsformular, und solange beide
+     * dasselbe sagen, faellt niemandem auf, dass es zwei sind. Aendert
+     * man nur einen, zeigt das leere Formular etwas anderes an, als
+     * ohne Eintrag gerechnet wird.
+     *
+     * Der Betrag ist der Satz fuer Spenden innerhalb Deutschlands.
+     * Geraten wird trotzdem nichts: was wirklich abgezogen wurde, sagt
+     * die Abrechnung, und wer einen anderen Satz hat, traegt ihn ein.
+     */
+    public const FEE_PERCENT = '2.99';
+    public const FEE_FIXED = '0.39';
+
     public static function scope(): string
     {
         return Settings::pluginScope(self::SLUG);
@@ -186,12 +202,12 @@ final class TipGoals
      */
     public static function feePercent(App $app): float
     {
-        return max(0.0, (float) self::money($app->settings->string('fee_percent', '2.49', self::scope())));
+        return max(0.0, (float) self::money($app->settings->string('fee_percent', self::FEE_PERCENT, self::scope())));
     }
 
     public static function feeFixed(App $app): float
     {
-        return max(0.0, (float) self::money($app->settings->string('fee_fixed', '0.35', self::scope())));
+        return max(0.0, (float) self::money($app->settings->string('fee_fixed', self::FEE_FIXED, self::scope())));
     }
 
     /**

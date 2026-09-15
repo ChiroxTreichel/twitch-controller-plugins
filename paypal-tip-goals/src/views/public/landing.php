@@ -31,14 +31,11 @@
  * @var list<float> $presets
  * @var float $feePercent
  * @var float $feeFixed
- * @var bool $terms
  * @var string $csrf
  * @var list<string> $legal
  * @var string $notice
  * @var string $error
  */
-
-use TwitchController\Plugin\PaypalTipGoals\Legal;
 
 /** Ein Betrag, wie ihn die Seite zeigt: 12,50 €. */
 $euro = static fn (float $wert): string => number_format($wert, 2, ',', '.') . ' €';
@@ -292,25 +289,34 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
             <p class="muted small"><?= $e(translate('pp_tip.public.anonymous')) ?></p>
         </fieldset>
 
-        <?php /*
-            Das Haekchen gibt es nur, wenn AGB und Datenschutz auch
-            wirklich geschrieben sind. Sonst stuende hier ein Link auf
-            eine Seite, die es nicht gibt - und eine Zustimmung zu
-            nichts ist keine.
-        */ ?>
-        <?php if ($terms): ?>
-            <fieldset>
-                <label class="checkbox-label">
-                    <input type="checkbox" name="accept_terms" value="1" required>
-                    <span><?= translate('pp_tip.public.terms', [
-                        'terms' => '<a href="' . $e($url('/tips/agb')) . '" target="_blank" rel="noopener">'
-                            . $e(Legal::title('agb')) . '</a>',
-                        'privacy' => '<a href="' . $e($url('/tips/datenschutz')) . '" target="_blank" rel="noopener">'
-                            . $e(Legal::title('datenschutz')) . '</a>',
-                    ]) ?></span>
-                </label>
-            </fieldset>
-        <?php endif ?>
+        <?php
+            /*
+                Das Haekchen steht IMMER da - unabhaengig davon, ob die
+                Texte schon geschrieben sind. Es traegt auch die
+                Altersbestaetigung, und die gilt so oder so.
+
+                Der Fuss der Seite haelt es anders: dort wird nur
+                verlinkt, was es gibt. Hier nicht - wer eine
+                Spendenseite betreibt, schreibt AGB und Datenschutz,
+                und bis dahin fuehrt der Link auf den Hinweis, dass es
+                die Seite noch nicht gibt.
+            */
+            // Im Satz steht der ausgeschriebene Titel und nicht der aus
+            // dem Fuss: "Ich habe die Datenschutz gelesen" ist kein
+            // Deutsch. Im Fuss ist die Kurzform dagegen richtig.
+            $verweis = static fn (string $schluessel, string $titel): string =>
+                '<a href="' . $e($url('/tips/' . $schluessel)) . '" target="_blank" rel="noopener">'
+                . $e($titel) . '</a>';
+        ?>
+        <fieldset>
+            <label class="checkbox-label">
+                <input type="checkbox" name="accept_terms" value="1" required>
+                <span><?= translate('pp_tip.public.terms', [
+                    'terms'   => $verweis('agb', translate('pp_tip.legal.terms')),
+                    'privacy' => $verweis('datenschutz', translate('pp_tip.legal.privacy_long')),
+                ]) ?></span>
+            </label>
+        </fieldset>
 
         <button class="primary-button" type="submit"><?= $e(translate('pp_tip.public.submit')) ?></button>
 

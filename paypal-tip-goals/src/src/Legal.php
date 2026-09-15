@@ -124,19 +124,6 @@ final class Legal
     }
 
     /**
-     * Muss der Spender AGB und Datenschutz zustimmen?
-     *
-     * Nur wenn es beide Texte wirklich gibt. Ein Haekchen mit einem
-     * Link auf eine leere Seite verlangte eine Zustimmung zu nichts -
-     * und ein Pflichtfeld, an dem der Spender haengenbliebe, ohne dass
-     * er etwas dagegen tun koennte.
-     */
-    public static function termsRequired(App $app): bool
-    {
-        return self::text($app, 'agb') !== '' && self::text($app, 'datenschutz') !== '';
-    }
-
-    /**
      * Ein Text als HTML.
      *
      * Durch denselben Markdown-Wandler wie die Plugin-Beschreibungen:

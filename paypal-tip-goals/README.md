@@ -67,10 +67,11 @@ ankommt. Der Balken soll nicht mehr zeigen, als da ist.
 
 Wer „Gebühren übernehmen" anhakt, meint den Betrag, der ankommen soll;
 der Aufschlag wird daraus gerechnet und auf Cent aufgerundet. Die Sätze
-dafür stehen in den Einstellungen und werden **nicht geraten**: PayPal
-berechnet je nach Land und Konto anderes. Gerechnet wird damit nur der
-*Vorschlag* im Formular — was wirklich abgezogen wurde, sagt die
-Abrechnung.
+dafür stehen in den Einstellungen; vorgegeben sind **2,99 % + 0,39 €**,
+der Satz für Spenden innerhalb Deutschlands. Geraten wird damit
+trotzdem nichts: PayPal berechnet je nach Land und Konto anderes, und
+gerechnet wird nur der *Vorschlag* im Formular — was wirklich abgezogen
+wurde, sagt die Abrechnung.
 
 „Einfach so – kein Ziel" bucht auf keinen Balken. Das steht dem Spender
 auch so auf der Seite.
@@ -100,10 +101,10 @@ Geschrieben werden sie in den Einstellungen, je Text ein Reiter.
 Markdown ist erlaubt. Verlinkt wird im Fuß nur, was wirklich da ist —
 ein Link auf eine leere Seite ist schlechter als kein Link.
 
-Das Häkchen „AGB und Datenschutz gelesen" erscheint aus demselben Grund
-erst, wenn **beide** Texte geschrieben sind. Steht es da, prüft es auch
-der Server: `required` im Formular ist eine Bequemlichkeit, keine
-Bedingung.
+Das Häkchen „AGB und Datenschutzerklärung gelesen" steht davon
+unabhängig **immer** da — es trägt auch die Altersbestätigung, und die
+gilt so oder so. Geprüft wird es auch vom Server: `required` im
+Formular ist eine Bequemlichkeit, keine Bedingung.
 
 ## Der Spender bekommt kein Konto
 

@@ -57,6 +57,7 @@
   "pp_tip.last_failed": "Bei PayPal ging zuletzt etwas schief:",
   "pp_tip.legal.imprint": "Impressum",
   "pp_tip.legal.privacy": "Datenschutz",
+  "pp_tip.legal.privacy_long": "Datenschutzerklärung",
   "pp_tip.legal.terms": "AGB",
   "pp_tip.legal_field": "Text (höchstens %{max} Zeichen)",
   "pp_tip.legal_hint": "Diesen Text bringt das Plugin nicht mit – er gehört dir. In einem Impressum steht dein Name und deine Anschrift; ein Plugin, das eines mitbrächte, würde deine Angaben bei jedem verbreiten, der es installiert.",

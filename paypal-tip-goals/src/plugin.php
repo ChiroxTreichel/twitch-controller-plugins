@@ -223,8 +223,8 @@ $einstellungen = static function (Request $request, array $params = []) use ($ap
         'presets'        => $app->settings->string('presets', '1, 2, 5, 10', TipGoals::scope()),
         'minAmount'      => $app->settings->string('min_amount', '1', TipGoals::scope()),
         'defaultAmount'  => $app->settings->string('default_amount', '5', TipGoals::scope()),
-        'feePercent'     => $app->settings->string('fee_percent', '2.49', TipGoals::scope()),
-        'feeFixed'       => $app->settings->string('fee_fixed', '0.35', TipGoals::scope()),
+        'feePercent'     => $app->settings->string('fee_percent', TipGoals::FEE_PERCENT, TipGoals::scope()),
+        'feeFixed'       => $app->settings->string('fee_fixed', TipGoals::FEE_FIXED, TipGoals::scope()),
 
         'pageReady' => Legal::pageReady($app),
         'publicUrl' => $app->url('/tips'),
@@ -398,7 +398,6 @@ $router->get('/tips', static function (Request $request) use ($app, $oeffentlich
         'presets'    => TipGoals::presets($app),
         'feePercent' => TipGoals::feePercent($app),
         'feeFixed'   => TipGoals::feeFixed($app),
-        'terms'      => Legal::termsRequired($app),
         'csrf'       => Donations::csrfToken($app),
         'notice'     => (string) $request->get('notice'),
         'error'      => (string) $request->get('error'),
@@ -459,11 +458,11 @@ $router->post('/tips', static function (Request $request) use ($app, $zurueckTip
         return $zurueckTips(['error' => translate('pp_tip.error.no_credentials')]);
     }
 
-    // Das Haekchen unter AGB und Datenschutz gibt es nur, wenn beide
-    // Texte auch geschrieben sind - und dann muss es auch gesetzt sein.
-    // Geprueft wird es hier und nicht nur im Browser: required im
-    // Formular ist eine Bequemlichkeit, keine Bedingung.
-    if (Legal::termsRequired($app) && $request->input('accept_terms') !== '1') {
+    // Das Haekchen steht immer da - es traegt auch die
+    // Altersbestaetigung. Geprueft wird es hier und nicht nur im
+    // Browser: required im Formular ist eine Bequemlichkeit, keine
+    // Bedingung.
+    if ($request->input('accept_terms') !== '1') {
         return $zurueckTips(['error' => translate('pp_tip.error.terms')]);
     }
 

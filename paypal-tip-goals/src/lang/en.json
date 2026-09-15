@@ -57,6 +57,7 @@
   "pp_tip.last_failed": "Something went wrong with PayPal last time:",
   "pp_tip.legal.imprint": "Imprint",
   "pp_tip.legal.privacy": "Privacy",
+  "pp_tip.legal.privacy_long": "privacy policy",
   "pp_tip.legal.terms": "Terms",
   "pp_tip.legal_field": "Text (at most %{max} characters)",
   "pp_tip.legal_hint": "The plugin does not ship this text – it is yours. An imprint carries your name and address; a plugin bringing one along would spread your details to everyone who installs it.",
