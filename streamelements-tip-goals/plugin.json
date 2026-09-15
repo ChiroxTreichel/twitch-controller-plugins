@@ -1,7 +1,7 @@
 {
   "slug": "streamelements-tip-goals",
   "name": "Tip-Goals – StreamElements",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Spendenziele als Balken im Overlay, gespeist aus StreamElements. Jede Spende geht auf das oberste Ziel der Liste.",
   "author": "Twitch-Controller",
   "requires": {

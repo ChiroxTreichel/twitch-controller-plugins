@@ -99,6 +99,20 @@ final class TipGoals
      */
     public const STAMP = '2026-09-15 14:00';
 
+    /**
+     * Der Abdruck von Geruest und Aussehen, zum Zeitpunkt des Stempels.
+     *
+     * Nur die Pruefsammlung liest das. Sie vergleicht ihn mit dem, was
+     * defaultHtml() und defaultCss() JETZT ergeben - stimmt er nicht
+     * mehr, wurde am Aussehen gearbeitet, ohne den Stempel
+     * mitzuziehen. Dann behaelt OBS das alte Stylesheet, und die
+     * Korrektur kommt bei niemandem an.
+     *
+     * Genau das ist hier passiert, und man merkt es nicht: der Code ist
+     * richtig, das Paket ist richtig, und im Browser steht das Alte.
+     */
+    public const STAMP_FINGERPRINT = '90f53d2ec019468b';
+
     public static function scope(): string
     {
         return Settings::pluginScope(self::SLUG);
