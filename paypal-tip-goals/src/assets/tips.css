@@ -1,0 +1,302 @@
+/* -------------------------------------------------------------------
+ *  /tips - die oeffentliche Spendenseite
+ *
+ *  Eine eigene Datei, weil das eine eigene Seite ist: admin.css bringt
+ *  Navigation, Tabellen und Karten mit, und davon braucht sie nichts.
+ *  Wer hier landet, hat ein einziges Anliegen.
+ *
+ *  Farben von Hand: die Variablen der Verwaltung liegen in admin.css,
+ *  und die wird hier nicht geladen.
+ * ------------------------------------------------------------------- */
+:root {
+    color-scheme: dark;
+
+    --tp-bg: #0d0f1a;
+    --tp-panel: #161a2b;
+    --tp-panel-2: #1e2338;
+    --tp-line: rgba(255, 255, 255, .08);
+    --tp-text: #f4f7fb;
+    --tp-muted: #95a0b8;
+    --tp-accent: #9146ff;
+    --tp-accent-2: #7c46cc;
+    --tp-ok: #6ad88f;
+    --tp-warn: #ffb74d;
+    --tp-error: #ff6b6b;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    min-height: 100vh;
+
+    background: var(--tp-bg);
+    color: var(--tp-text);
+    font: 15px/1.55 system-ui, "Segoe UI", sans-serif;
+}
+
+/* -------------------------------------------------------------------
+ *  Kopf und Fuss
+ * ------------------------------------------------------------------- */
+.tp-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 18px 20px;
+}
+
+.tp-brand {
+    color: var(--tp-text);
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.tp-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 0.85rem;
+    color: var(--tp-muted);
+}
+
+.tp-main {
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 0 20px 40px;
+}
+
+.tp-foot {
+    display: flex;
+    justify-content: center;
+    gap: 18px;
+    flex-wrap: wrap;
+
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 24px 20px 40px;
+
+    border-top: 1px solid var(--tp-line);
+    font-size: 0.82rem;
+}
+
+.tp-foot a,
+.tp-user a {
+    color: var(--tp-muted);
+}
+
+h1 {
+    margin: 0 0 8px;
+    font-size: 1.5rem;
+}
+
+.tp-lead {
+    margin: 0 0 22px;
+    color: var(--tp-muted);
+}
+
+.tp-quiet {
+    color: var(--tp-muted);
+}
+
+.tp-small {
+    font-size: 0.82rem;
+}
+
+/* -------------------------------------------------------------------
+ *  Meldungen
+ *
+ *  Der Rahmen traegt die Farbe mit - Farbe allein unterscheidet sie
+ *  sonst fuer niemanden, der sie nicht unterscheiden kann.
+ * ------------------------------------------------------------------- */
+.tp-note {
+    margin: 0 0 20px;
+    padding: 14px 16px;
+
+    background: var(--tp-panel-2);
+    border: 1px solid var(--tp-line);
+    border-radius: 10px;
+    font-size: 0.94rem;
+}
+
+.tp-ok    { border-color: rgba(106, 216, 143, .4); color: var(--tp-ok); }
+.tp-warn  { border-color: rgba(255, 183, 77, .4);  color: var(--tp-warn); }
+.tp-error { border-color: rgba(255, 107, 107, .4); color: var(--tp-error); }
+
+/* -------------------------------------------------------------------
+ *  Das Formular
+ * ------------------------------------------------------------------- */
+.tp-form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.tp-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.tp-field > span {
+    font-size: 0.85rem;
+    color: var(--tp-muted);
+}
+
+.tp-input {
+    width: 100%;
+    padding: 11px 13px;
+
+    background: var(--tp-panel);
+    border: 1px solid var(--tp-line);
+    border-radius: 10px;
+
+    color: var(--tp-text);
+    font: inherit;
+}
+
+.tp-input:focus {
+    outline: 2px solid var(--tp-accent);
+    outline-offset: 1px;
+}
+
+.tp-check {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 0.92rem;
+}
+
+.tp-check input {
+    margin-top: 3px;
+    flex: 0 0 auto;
+}
+
+.tp-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+
+    padding: 13px 20px;
+    border: 0;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--tp-accent), var(--tp-accent-2));
+
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.tp-button:hover {
+    filter: brightness(1.08);
+}
+
+/* -------------------------------------------------------------------
+ *  Die Zielauswahl
+ *
+ *  Radioknoepfe und kein Karussell: ein Karussell versteckt die Wahl
+ *  hinter einer Bewegung und braucht JavaScript. Hier liegt alles
+ *  offen, und ohne JavaScript geht es genauso.
+ * ------------------------------------------------------------------- */
+.tp-goals {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.tp-goals legend {
+    padding: 0 0 8px;
+    font-size: 0.85rem;
+    color: var(--tp-muted);
+}
+
+.tp-goal {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+
+    padding: 13px 15px;
+    background: var(--tp-panel);
+    border: 1px solid var(--tp-line);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+/* Das gewaehlte Ziel. Rand UND Hintergrund, damit man es auch ohne
+   Farbunterscheidung sieht. */
+.tp-goal:has(input:checked) {
+    border-color: var(--tp-accent);
+    background: var(--tp-panel-2);
+}
+
+.tp-goal input {
+    margin-top: 4px;
+    flex: 0 0 auto;
+}
+
+.tp-goal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.tp-goal-title {
+    font-weight: 600;
+}
+
+.tp-goal-bar {
+    display: block;
+    height: 6px;
+    overflow: hidden;
+
+    background: var(--tp-panel-2);
+    border-radius: 3px;
+}
+
+.tp-goal-bar span {
+    display: block;
+    height: 100%;
+    background: linear-gradient(90deg, #ffd34d, #ff9f1c);
+}
+
+.tp-goal-figures {
+    font-size: 0.86rem;
+}
+
+/* -------------------------------------------------------------------
+ *  Die Rechtstexte
+ * ------------------------------------------------------------------- */
+.tp-text {
+    line-height: 1.7;
+}
+
+.tp-text h2,
+.tp-text h3 {
+    margin: 26px 0 8px;
+    font-size: 1.05rem;
+}
+
+.tp-text p,
+.tp-text ul {
+    margin: 0 0 14px;
+}
+
+.tp-text a {
+    color: var(--tp-accent);
+}
