@@ -96,6 +96,28 @@ heißt darum „nicht ändern" und nicht „löschen": sonst würfe ein
 Speichern der Kanal-ID nebenbei den Zugang weg. Zum Löschen gibt es
 einen eigenen Knopf.
 
+## Das Aussehen lässt sich ändern
+
+Unter *Plugins → Einstellungen → Aussehen* stehen Gerüst und Stylesheet
+des Balkens — wie bei den Twitch-Zielen. Wer nichts speichert, bekommt
+die mitgelieferte Fassung; sobald etwas gespeichert ist, gilt die eigene
+und Korrekturen an der Vorgabe erreichen einen nicht mehr. Ein Knopf
+setzt zurück.
+
+**Pflichtelemente** müssen vorkommen: `data-bind="tip_title"`,
+`data-bind="tip_current"`, `data-bind="tip_goal"` und `data-fill="tip"`.
+Fehlt eines, wird trotzdem gespeichert — ein halb fertiges Gerüst soll
+man weiterschreiben können — und oben steht, was fehlt. Ohne diese
+Meldung sähe man es erst mitten im Stream, denn ein fehlendes Element
+zeigt im Overlay einfach nichts.
+
+Halte deine Regeln **innerhalb von `.goal-tip`**. Eine unbeschränkte
+Regel beschreibt dieselben Klassen wie die Twitch-Ziele, und dann sehen
+je nach Ladereihenfolge deren Balken anders aus.
+
+Jede Änderung setzt den Stempel in der Adresse des Stylesheets und lässt
+eine laufende Browserquelle neu laden — sonst behielte OBS das alte.
+
 ## Rechte
 
 | Recht | darf |

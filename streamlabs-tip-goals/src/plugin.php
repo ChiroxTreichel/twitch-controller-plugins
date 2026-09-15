@@ -25,6 +25,7 @@ declare(strict_types=1);
 
 use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
+use TwitchController\Plugin\Goals\Goals;
 use TwitchController\Plugin\StreamlabsTipGoals\Source;
 use TwitchController\Plugin\StreamlabsTipGoals\TipGoals;
 
@@ -56,6 +57,14 @@ $hooks->on('plugin.settings', static function (array $links): array {
     $links[TipGoals::SLUG] = [
         'label' => translate('sl_tip.settings'),
         'href'  => '/display/goals/tips/settings',
+    ];
+
+    // Das Aussehen als zweiter Eintrag - wie bei den Twitch-Zielen.
+    // Zugang und Aussehen sind zwei verschiedene Fragen, und wer den
+    // Balken umbaut, sucht nicht bei den Zugangsdaten.
+    $links[TipGoals::SLUG . ':appearance'] = [
+        'label' => translate('sl_tip.appearance'),
+        'href'  => '/display/goals/tips/appearance',
     ];
 
     return $links;
@@ -92,11 +101,11 @@ $hooks->on('goals.tabs', static function (array $tabs) use ($app, $plugin): arra
 // -------------------------------------------------------------------
 //  Der Balken im Overlay
 // -------------------------------------------------------------------
-$hooks->on('goals.markup', static function (array $teile): array {
+$hooks->on('goals.markup', static function (array $teile) use ($app): array {
     $teile['streamlabs-tip-goals'] = [
         'order' => 20,
-        'html'  => TipGoals::html(),
-        'css'   => TipGoals::css(),
+        'html'  => TipGoals::html($app),
+        'css'   => TipGoals::css($app),
     ];
 
     return $teile;
@@ -111,8 +120,8 @@ $hooks->on('goals.state', static function (array $zustand) use ($app): array {
 });
 
 // Aendert sich das Geruest, muss OBS nachladen.
-$hooks->on('goals.stamp', static function (mixed $stempel): int {
-    return max((int) $stempel, (int) strtotime(TipGoals::STAMP));
+$hooks->on('goals.stamp', static function (mixed $stempel) use ($app): int {
+    return max((int) $stempel, TipGoals::stamp($app));
 });
 
 // -------------------------------------------------------------------
@@ -198,6 +207,66 @@ $router->post('/display/goals/tips', static function (Request $request) use ($ap
     TipGoals::push($app);
 
     return $zurueck(['notice' => translate('sl_tip.saved')]);
+}, ['auth' => true]);
+
+// -------------------------------------------------------------------
+//  Das Aussehen
+// -------------------------------------------------------------------
+$zurueckAussehen = static function (array $query = []) use ($app): Response {
+    return Response::redirect(
+        $app->url('/display/goals/tips/appearance') . ($query === [] ? '' : '?' . http_build_query($query))
+    );
+};
+
+$router->get('/display/goals/tips/appearance', static function (Request $request) use ($app, $plugin): Response {
+    $html = TipGoals::html($app);
+
+    return Response::html($app->view->from($plugin->directory . '/views')->render('appearance', [
+        'title'    => translate('sl_tip.appearance'),
+        'active'   => 'display/goals',
+        'html'     => $html,
+        'css'      => TipGoals::css($app),
+        'custom'   => TipGoals::isCustom($app),
+        // Beim OEFFNEN schon melden, was fehlt - nicht erst beim
+        // Speichern. Wer eine kaputte Fassung stehen hat, soll sie
+        // sehen, ohne sie vorher noch einmal abschicken zu muessen.
+        'missing'  => Goals::missing($html, TipGoals::REQUIRED_BINDINGS, TipGoals::REQUIRED_FILLS),
+        'required' => [
+            'tip_title'   => translate('sl_tip.bind.title'),
+            'tip_current' => translate('sl_tip.bind.current'),
+            'tip_goal'    => translate('sl_tip.bind.goal'),
+        ],
+        'fills'    => ['tip' => translate('sl_tip.bind.fill')],
+        'canEdit'  => permission('SlTipGoals.Global.Edit'),
+        'csrf'     => $app->auth->csrfToken(),
+        'notice'   => (string) $request->get('notice'),
+        'error'    => (string) $request->get('error'),
+    ]));
+}, ['auth' => true, 'permission' => 'SlTipGoals.Global.View']);
+
+$router->post('/display/goals/tips/appearance', static function (Request $request) use ($app, $zurueckAussehen): Response {
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $zurueckAussehen(['error' => translate('common.error.form_expired')]);
+    }
+
+    if (!permission('SlTipGoals.Global.Edit')) {
+        return $zurueckAussehen(['error' => translate('common.error.no_permission')]);
+    }
+
+    if ($request->input('action') === 'reset') {
+        TipGoals::resetAppearance($app);
+
+        return $zurueckAussehen(['notice' => translate('sl_tip.reset_done')]);
+    }
+
+    $fehlend = TipGoals::saveAppearance($app, $request->input('html'), $request->input('css'));
+
+    // Gespeichert ist es in jedem Fall - gemeldet wird trotzdem, was
+    // fehlt. Ein halb fertiges Geruest soll man weiterschreiben
+    // koennen.
+    return $zurueckAussehen($fehlend === []
+        ? ['notice' => translate('sl_tip.appearance_saved')]
+        : ['error' => translate('sl_tip.missing_hint') . ' ' . implode(', ', $fehlend)]);
 }, ['auth' => true]);
 
 // -------------------------------------------------------------------

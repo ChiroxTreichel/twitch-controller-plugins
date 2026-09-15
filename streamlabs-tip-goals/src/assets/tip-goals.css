@@ -82,3 +82,26 @@
 .tip-goal-actions .row + .row {
     margin-top: 4px;
 }
+
+/* -------------------------------------------------------------------
+ *  Das Aussehen-Formular
+ *
+ *  Zwei grosse Textfelder mit HTML und CSS. Feste Schrittweite und
+ *  kein Zeilenumbruch: eingerueckter Code ist sonst nicht zu lesen,
+ *  und eine umgebrochene Zeile sieht aus wie zwei.
+ *
+ *  Eine eigene Klasse und nicht die der Twitch-Ziele: deren .goals-code
+ *  steht in DEREN Stylesheet, und dieses Plugin setzt sie nicht voraus.
+ * ------------------------------------------------------------------- */
+.tip-code {
+    min-height: 220px;
+
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.82rem;
+    line-height: 1.5;
+    tab-size: 2;
+
+    white-space: pre;
+    overflow-wrap: normal;
+    overflow-x: auto;
+}

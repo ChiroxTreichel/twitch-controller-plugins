@@ -6,6 +6,7 @@ namespace TwitchController\Plugin\StreamlabsTipGoals;
 
 use TwitchController\Core\App;
 use TwitchController\Core\Config\Settings;
+use TwitchController\Core\Overlay\Bus;
 use TwitchController\Plugin\Goals\Goals;
 
 /**
@@ -56,6 +57,31 @@ final class TipGoals
 
     /** Laenger als das passt in keinen Balken. */
     public const MAX_TITLE = 80;
+
+    /** Grenzen fuer das selbst geschriebene Aussehen. */
+    public const MAX_HTML = 20000;
+    public const MAX_CSS = 20000;
+
+    /**
+     * Was im Geruest vorkommen MUSS.
+     *
+     * Ohne diese Elemente zeigt der Balken im Overlay nichts an - und
+     * das faellt erst mitten im Stream auf. Darum wird beim Speichern
+     * gemeldet, was fehlt.
+     *
+     * @var list<string>
+     */
+    public const REQUIRED_BINDINGS = ['tip_title', 'tip_current', 'tip_goal'];
+
+    /**
+     * Der Balken, der vorkommen muss.
+     *
+     * data-fill="tip" rechnet aus tip_current und tip_goal die Breite.
+     * Ohne ihn bleibt die Anzeige eine Zeile Text ohne Fortschritt.
+     *
+     * @var list<string>
+     */
+    public const REQUIRED_FILLS = ['tip'];
 
     /**
      * Wann sich Geruest oder Aussehen zuletzt geaendert haben.
@@ -298,12 +324,109 @@ final class TipGoals
     }
 
     /**
-     * Das Geruest im Overlay.
+     * Das Geruest im Overlay - eigenes, sonst die Vorgabe.
+     */
+    public static function html(App $app): string
+    {
+        $wert = trim($app->settings->string('html', '', self::scope()));
+
+        return $wert === '' ? self::defaultHtml() : self::cut($wert, self::MAX_HTML);
+    }
+
+    public static function css(App $app): string
+    {
+        $wert = trim($app->settings->string('css', '', self::scope()));
+
+        return $wert === '' ? self::defaultCss() : self::cut($wert, self::MAX_CSS);
+    }
+
+    /** Steht in den Einstellungen ein eigenes Aussehen? */
+    public static function isCustom(App $app): bool
+    {
+        return trim($app->settings->string('html', '', self::scope())) !== ''
+            || trim($app->settings->string('css', '', self::scope())) !== '';
+    }
+
+    /**
+     * Aussehen speichern - und melden, was am Geruest fehlt.
+     *
+     * Gespeichert wird TROTZDEM: ein halb fertiges Geruest soll man
+     * stehen lassen und weiterschreiben koennen. Gemeldet wird es
+     * sofort, denn ein fehlendes Element sieht man im Overlay nicht -
+     * dort ist dann nur nichts.
+     *
+     * @return list<string> die fehlenden Bindungen
+     */
+    public static function saveAppearance(App $app, string $html, string $css): array
+    {
+        $html = self::cut(trim($html), self::MAX_HTML);
+        $css = self::cut(trim($css), self::MAX_CSS);
+
+        $app->settings->setMany([
+            'html'       => $html,
+            'css'        => $css,
+            // Treibt die Adresse des Stylesheets - ohne den Stempel
+            // behaelt OBS das alte.
+            'updated_at' => time(),
+        ], self::scope());
+
+        // Und die laufende Browserquelle haelt ihre alte Adresse fest.
+        (new Bus($app))->invalidate();
+
+        return Goals::missing(
+            $html === '' ? self::defaultHtml() : $html,
+            self::REQUIRED_BINDINGS,
+            self::REQUIRED_FILLS
+        );
+    }
+
+    /** Zurueck auf die Vorgabe. */
+    public static function resetAppearance(App $app): void
+    {
+        $app->settings->setMany([
+            'html'       => '',
+            'css'        => '',
+            'updated_at' => time(),
+        ], self::scope());
+
+        (new Bus($app))->invalidate();
+    }
+
+    /**
+     * Der Stempel fuer die Adresse des Stylesheets.
+     *
+     * Das Groessere von beidem: der Zeitpunkt der letzten eigenen
+     * Aenderung und der Stand der mitgelieferten Vorgabe. Ohne den
+     * zweiten Teil kaeme eine Korrektur an der VORGABE bei niemandem
+     * an, der nie etwas gespeichert hat - und genau das ist hier schon
+     * einmal passiert.
+     */
+    public static function stamp(App $app): int
+    {
+        return max(
+            $app->settings->int('updated_at', 0, self::scope()),
+            (int) strtotime(self::STAMP)
+        );
+    }
+
+    /**
+     * Zeichenweise kuerzen, nicht byteweise.
+     *
+     * substr() schnitte mitten in ein mehrbyte-Zeichen und
+     * hinterliesse ein kaputtes; mb_substr() gibt es nicht ueberall.
+     */
+    private static function cut(string $text, int $laenge): string
+    {
+        return preg_match('/^.{0,' . $laenge . '}/us', $text, $treffer) === 1 ? $treffer[0] : '';
+    }
+
+    /**
+     * Das mitgelieferte Geruest.
      *
      * Wortgleich aus dem alten System uebernommen, damit der Balken
      * genauso aussieht: dieselben Klassen, dieselben Bindungen.
      */
-    public static function html(): string
+    public static function defaultHtml(): string
     {
         return <<<'HTML'
 <section class="goal goal-tip">
@@ -339,7 +462,7 @@ HTML;
      *
      * Die Werte sind die des alten Systems, Farbe fuer Farbe.
      */
-    public static function css(): string
+    public static function defaultCss(): string
     {
         return <<<'CSS'
 /* Beide Klassen im Selektor: das Geruest traegt "goal goal-tip", und
