@@ -47,7 +47,6 @@
   "throne.key_set": "stored – leaving it empty means: do not change",
   "throne.lead": "Gifts, contributions and completed crowdfunds from your Throne wishlist.",
   "throne.name": "Throne – Alerts",
-  "throne.nav.networking": "Networking",
   "throne.needs_key": "Without a public key every message is rejected – a genuine one too.",
   "throne.not_ready": "No key",
   "throne.perm.edit": "Store the key and configure alerts",

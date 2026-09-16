@@ -408,25 +408,3 @@ $router->post('/networking/throne', static function (Request $request) use ($app
 
     return $zurueck(translate('throne.saved'));
 }, ['auth' => true]);
-
-// -------------------------------------------------------------------
-//  Der Menuepunkt
-// -------------------------------------------------------------------
-$hooks->on('admin.nav', static function (array $nav): array {
-    // Anhaengen und nicht setzen: in die Gruppe "Networking" kommen
-    // auch die Raids und die Live-Benachrichtigung, und wer sie setzt,
-    // laesst je nach Ladereihenfolge den anderen Menuepunkt
-    // verschwinden.
-    //
-    // Kein Rechte-Filter hier - der steht am Eintrag selbst, und die
-    // Navigation wertet ihn aus.
-    $nav['networking']['label'] = translate('throne.nav.networking');
-    $nav['networking']['order'] = 25;
-    $nav['networking']['items'][] = [
-        'label'      => translate('throne.short'),
-        'href'       => '/networking/throne',
-        'permission' => 'Throne.Global.View',
-    ];
-
-    return $nav;
-});
