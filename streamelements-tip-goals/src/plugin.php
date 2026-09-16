@@ -25,8 +25,10 @@ declare(strict_types=1);
 
 use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
+use TwitchController\Plugin\Alerts\Alerts;
 use TwitchController\Plugin\Goals\Goals;
 use TwitchController\Plugin\StreamelementsTipGoals\Source;
+use TwitchController\Plugin\StreamelementsTipGoals\TipAlert;
 use TwitchController\Plugin\StreamelementsTipGoals\TipGoals;
 
 // -------------------------------------------------------------------
@@ -148,8 +150,19 @@ $hooks->on('cron.tick', static function () use ($app): void {
         return;
     }
 
-    if ($ergebnis['amount'] > 0) {
-        TipGoals::applyDonation($app, $ergebnis['amount']);
+    // Je Spende einzeln buchen und melden.
+    //
+    // Vorher wurde die SUMME gebucht und sonst nichts - fuer den
+    // Balken reicht das, fuer einen Alert nicht: aus "12,50" laesst
+    // sich nicht mehr herausfinden, wer wie viel geschickt hat.
+    foreach ($ergebnis['donations'] as $spende) {
+        TipGoals::applyDonation($app, (float) $spende['amount']);
+
+        // Ein eigener Hook davor, damit ein anderes Plugin dasselbe
+        // Ereignis abgreifen kann - etwa fuer eine Chatnachricht.
+        $app->hooks->dispatch('tips.donation', $spende);
+
+        TipAlert::fire($app, $spende);
     }
 });
 
@@ -322,4 +335,118 @@ $router->post('/display/goals/tips/settings', static function (Request $request)
     $app->settings->set('last_error', '', TipGoals::scope());
 
     return $zurueckEinst(['notice' => translate('se_tip.settings_saved')]);
+}, ['auth' => true]);
+
+// -------------------------------------------------------------------
+//  Der Reiter auf der Alerts-Seite
+// -------------------------------------------------------------------
+//
+//  Er fehlte, und damit fehlte jede Einstellmoeglichkeit: der Alert
+//  feuerte mit einem festen Vorgabetext, ohne Video, ohne Ton, ohne
+//  Dauer. Im alten System hiess dieser Reiter "Spende".
+$hooks->on('alerts.tabs', static function (array $tabs) use ($app, $plugin): array {
+    if (!permission('SeTipGoals.Global.View')) {
+        return $tabs;
+    }
+
+    $tabs['tips-streamelements'] = [
+        'label' => translate('se_tip.alert.tab'),
+        'order' => 60,
+        // Wird nur fuer den offenen Reiter aufgerufen.
+        'render' => static fn (): string => $app->view
+            ->from($plugin->directory . '/views')
+            ->render('alert_tab', [
+                'config'          => TipAlert::config($app),
+                'placeholders'    => TipAlert::PLACEHOLDERS,
+                'preview'         => TipAlert::values([
+                    'name'    => 'Bukanier',
+                    'amount'  => 5.0,
+                    'message' => translate('se_tip.alert.test_message'),
+                ]),
+                'target'          => $app->url('/display/alerts/tips-streamelements'),
+                'canEdit'         => permission('SeTipGoals.Global.Edit'),
+                'canToggle'       => permission('SeTipGoals.Global.Edit'),
+                'canTest'         => permission('SeTipGoals.Global.Edit'),
+                'defaultDuration' => Alerts::DEFAULT_DURATION,
+                'maxText'         => TipAlert::MAX_TEXT,
+                'csrf'            => $app->auth->csrfToken(),
+            ], null),
+    ];
+
+    return $tabs;
+});
+
+$router->post('/display/alerts/tips-streamelements', static function (Request $request) use ($app): Response {
+    $zurueck = static function (?string $notice, ?string $error = null) use ($app): Response {
+        $query = array_filter([
+            'notice' => $notice,
+            'error'  => $error,
+        ], static fn (?string $wert): bool => $wert !== null);
+
+        return Response::redirect(
+            $app->url('/display/alerts/tips-streamelements')
+            . ($query === [] ? '' : '?' . http_build_query($query))
+        );
+    };
+
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $zurueck(null, translate('common.error.form_expired'));
+    }
+
+    if (!permission('SeTipGoals.Global.Edit')) {
+        return $zurueck(null, translate('common.error.no_permission'));
+    }
+
+    switch ($request->input('action')) {
+        case 'toggle':
+            $an = !TipAlert::config($app)['enabled'];
+            TipAlert::setEnabled($app, $an);
+
+            return $zurueck($an
+                ? translate('se_tip.alert.turned_on')
+                : translate('se_tip.alert.turned_off'));
+
+        case 'test':
+            // Der Hauptschalter von Alerts steht darueber. Ohne diesen
+            // Hinweis sucht man den Fehler beim Text.
+            if (!Alerts::enabled($app)) {
+                return $zurueck(null, translate('se_tip.alert.test_while_all_off'));
+            }
+
+            if (!TipAlert::config($app)['enabled']) {
+                return $zurueck(null, translate('se_tip.alert.test_while_off'));
+            }
+
+            // Die Werte aus dem Formular gelten fuer diesen einen Test
+            // und werden nicht gespeichert.
+            $werte = $request->post['preview'] ?? [];
+            $werte = is_array($werte) ? array_map('strval', $werte) : [];
+
+            $config = TipAlert::config($app);
+
+            $ok = Alerts::send($app, [
+                'kind'     => 'tip',
+                'text'     => $config['text'],
+                'video'    => $config['video'],
+                'audio'    => $config['audio'],
+                'duration' => $config['duration'],
+                'values'   => $werte,
+            ]);
+
+            return $ok
+                ? $zurueck(translate('se_tip.alert.test_sent'))
+                : $zurueck(null, translate('se_tip.alert.test_failed'));
+
+        case 'save':
+            TipAlert::save($app, [
+                'text'     => $request->input('text'),
+                'video'    => $request->input('video'),
+                'audio'    => $request->input('audio'),
+                'duration' => $request->input('duration'),
+            ]);
+
+            return $zurueck(translate('se_tip.alert.saved'));
+    }
+
+    return $zurueck(null, translate('common.error.unknown_action'));
 }, ['auth' => true]);

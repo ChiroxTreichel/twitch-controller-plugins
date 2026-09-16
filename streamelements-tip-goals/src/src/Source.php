@@ -102,11 +102,11 @@ final class Source
      * das Einrichten des Plugins die Spendenhistorie eines ganzen
      * Jahres auf das erste Ziel.
      *
-     * @return array{amount: float, count: int, error: string}
+     * @return array{amount: float, count: int, donations: list<array{name: string, amount: float, message: string}>, error: string}
      */
     public static function collect(App $app): array
     {
-        $leer = ['amount' => 0.0, 'count' => 0, 'error' => ''];
+        $leer = ['amount' => 0.0, 'count' => 0, 'donations' => [], 'error' => ''];
 
         if (!self::ready($app)) {
             return $leer;
@@ -122,11 +122,11 @@ final class Source
                 ]
             );
         } catch (Throwable $e) {
-            return ['amount' => 0.0, 'count' => 0, 'error' => $e->getMessage()];
+            return ['amount' => 0.0, 'count' => 0, 'donations' => [], 'error' => $e->getMessage()];
         }
 
         if (!$antwort->ok()) {
-            return ['amount' => 0.0, 'count' => 0, 'error' => self::explain($antwort->status, $antwort->error())];
+            return ['amount' => 0.0, 'count' => 0, 'donations' => [], 'error' => self::explain($antwort->status, $antwort->error())];
         }
 
         $recent = $antwort->json['recent'] ?? [];
@@ -145,6 +145,7 @@ final class Source
 
         $summe = 0.0;
         $anzahl = 0;
+        $spenden = [];
         $neuester = $seit;
 
         // Von hinten nach vorn: die Liste kommt neueste zuerst, und
@@ -176,6 +177,18 @@ final class Source
             $anzahl++;
             $neuester = max($neuester, $wann);
 
+            // Die einzelne Spende, nicht nur ihr Betrag.
+            //
+            // Vorher wurde hier nur summiert - Name und Nachricht
+            // fielen weg. Fuer den Balken reicht das, fuer einen Alert
+            // nicht: "5,00 EUR" ohne den, der sie geschickt hat, ist
+            // keine Danksagung.
+            $spenden[] = [
+                'name'    => (string) ($zeile['donation']['user']['username'] ?? ''),
+                'amount'  => $betrag,
+                'message' => trim((string) ($zeile['donation']['message'] ?? '')),
+            ];
+
             $app->log(sprintf(
                 '%s: Spende von %s ueber %.2f',
                 TipGoals::SLUG,
@@ -191,7 +204,7 @@ final class Source
             $app->settings->set('last_donation_at', $neuester, TipGoals::scope());
         }
 
-        return ['amount' => $summe, 'count' => $anzahl, 'error' => ''];
+        return ['amount' => $summe, 'count' => $anzahl, 'donations' => $spenden, 'error' => ''];
     }
 
     /**

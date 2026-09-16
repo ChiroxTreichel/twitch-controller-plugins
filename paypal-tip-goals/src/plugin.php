@@ -37,6 +37,7 @@ use TwitchController\Plugin\Goals\Goals;
 use TwitchController\Plugin\PaypalTipGoals\Donations;
 use TwitchController\Plugin\PaypalTipGoals\Legal;
 use TwitchController\Plugin\PaypalTipGoals\PayPal;
+use TwitchController\Plugin\PaypalTipGoals\TipAlert;
 use TwitchController\Plugin\PaypalTipGoals\TipGoals;
 
 // -------------------------------------------------------------------
@@ -666,27 +667,119 @@ $hooks->on('core.oauth.callback', static function (
 //  Plugin dasselbe Ereignis abgreifen - etwa fuer eine Chatnachricht -
 //  ohne dass dieses hier davon wissen muss.
 $hooks->on('tips.donation', static function (array $spende) use ($app): void {
-    if (!$app->plugins->isEnabled('alerts')) {
-        return;
-    }
-
-    $text = $app->settings->string('alert_text', '', TipGoals::scope());
-
-    if (trim($text) === '') {
-        $text = translate('pp_tip.alert_default');
-    }
-
-    // Der Text und die Werte getrennt: Alerts setzt sie selbst ein und
-    // maskiert dabei, was der Spender geschrieben hat. Fertig
-    // zusammengebautes HTML hineinzureichen waere ein Weg, ueber eine
-    // Spendennachricht Markup ins Overlay zu bekommen.
-    Alerts::send($app, [
-        'kind'   => 'tip',
-        'text'   => $text,
-        'values' => [
-            'name'    => (string) ($spende['name'] ?? ''),
-            'amount'  => number_format((float) ($spende['amount'] ?? 0), 2, ',', '.') . ' €',
-            'message' => (string) ($spende['message'] ?? ''),
-        ],
-    ]);
+    TipAlert::fire($app, $spende);
 });
+
+// -------------------------------------------------------------------
+//  Der Reiter auf der Alerts-Seite
+// -------------------------------------------------------------------
+//
+//  Er fehlte, und damit fehlte jede Einstellmoeglichkeit: der Alert
+//  feuerte mit einem festen Vorgabetext, ohne Video, ohne Ton, ohne
+//  Dauer. Im alten System hiess dieser Reiter "Spende".
+$hooks->on('alerts.tabs', static function (array $tabs) use ($app, $plugin): array {
+    if (!permission('PaypalTipGoals.Global.View')) {
+        return $tabs;
+    }
+
+    $tabs['tips-paypal'] = [
+        'label' => translate('pp_tip.alert.tab'),
+        'order' => 60,
+        // Wird nur fuer den offenen Reiter aufgerufen.
+        'render' => static fn (): string => $app->view
+            ->from($plugin->directory . '/views')
+            ->render('alert_tab', [
+                'config'          => TipAlert::config($app),
+                'placeholders'    => TipAlert::PLACEHOLDERS,
+                'preview'         => TipAlert::values([
+                    'name'    => 'Bukanier',
+                    'amount'  => 5.0,
+                    'message' => translate('pp_tip.alert.test_message'),
+                ]),
+                'target'          => $app->url('/display/alerts/tips-paypal'),
+                'canEdit'         => permission('PaypalTipGoals.Global.Edit'),
+                'canToggle'       => permission('PaypalTipGoals.Global.Edit'),
+                'canTest'         => permission('PaypalTipGoals.Global.Edit'),
+                'defaultDuration' => Alerts::DEFAULT_DURATION,
+                'maxText'         => TipAlert::MAX_TEXT,
+                'csrf'            => $app->auth->csrfToken(),
+            ], null),
+    ];
+
+    return $tabs;
+});
+
+$router->post('/display/alerts/tips-paypal', static function (Request $request) use ($app): Response {
+    $zurueck = static function (?string $notice, ?string $error = null) use ($app): Response {
+        $query = array_filter([
+            'notice' => $notice,
+            'error'  => $error,
+        ], static fn (?string $wert): bool => $wert !== null);
+
+        return Response::redirect(
+            $app->url('/display/alerts/tips-paypal')
+            . ($query === [] ? '' : '?' . http_build_query($query))
+        );
+    };
+
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $zurueck(null, translate('common.error.form_expired'));
+    }
+
+    if (!permission('PaypalTipGoals.Global.Edit')) {
+        return $zurueck(null, translate('common.error.no_permission'));
+    }
+
+    switch ($request->input('action')) {
+        case 'toggle':
+            $an = !TipAlert::config($app)['enabled'];
+            TipAlert::setEnabled($app, $an);
+
+            return $zurueck($an
+                ? translate('pp_tip.alert.turned_on')
+                : translate('pp_tip.alert.turned_off'));
+
+        case 'test':
+            // Der Hauptschalter von Alerts steht darueber. Ohne diesen
+            // Hinweis sucht man den Fehler beim Text.
+            if (!Alerts::enabled($app)) {
+                return $zurueck(null, translate('pp_tip.alert.test_while_all_off'));
+            }
+
+            if (!TipAlert::config($app)['enabled']) {
+                return $zurueck(null, translate('pp_tip.alert.test_while_off'));
+            }
+
+            // Die Werte aus dem Formular gelten fuer diesen einen Test
+            // und werden nicht gespeichert.
+            $werte = $request->post['preview'] ?? [];
+            $werte = is_array($werte) ? array_map('strval', $werte) : [];
+
+            $config = TipAlert::config($app);
+
+            $ok = Alerts::send($app, [
+                'kind'     => 'tip',
+                'text'     => $config['text'],
+                'video'    => $config['video'],
+                'audio'    => $config['audio'],
+                'duration' => $config['duration'],
+                'values'   => $werte,
+            ]);
+
+            return $ok
+                ? $zurueck(translate('pp_tip.alert.test_sent'))
+                : $zurueck(null, translate('pp_tip.alert.test_failed'));
+
+        case 'save':
+            TipAlert::save($app, [
+                'text'     => $request->input('text'),
+                'video'    => $request->input('video'),
+                'audio'    => $request->input('audio'),
+                'duration' => $request->input('duration'),
+            ]);
+
+            return $zurueck(translate('pp_tip.alert.saved'));
+    }
+
+    return $zurueck(null, translate('common.error.unknown_action'));
+}, ['auth' => true]);
