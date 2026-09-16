@@ -46,7 +46,7 @@
   "throne.key_hint": "Throne signs every message. The key is in your Throne settings – 64 hexadecimal characters.",
   "throne.key_set": "stored – leaving it empty means: do not change",
   "throne.lead": "Gifts, contributions and completed crowdfunds from your Throne wishlist.",
-  "throne.name": "Throne",
+  "throne.name": "Throne – Alerts",
   "throne.nav.networking": "Networking",
   "throne.needs_key": "Without a public key every message is rejected – a genuine one too.",
   "throne.not_ready": "No key",
@@ -56,6 +56,7 @@
   "throne.ready": "Ready",
   "throne.saved": "Saved.",
   "throne.settings": "Setup",
+  "throne.short": "Throne",
   "throne.someone": "Someone",
   "throne.webhook": "The address for Throne",
   "throne.webhook_hint": "Enter this address in Throne as the webhook. Throne sends every event there."

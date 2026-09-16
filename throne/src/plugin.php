@@ -173,7 +173,7 @@ $hooks->on('core.events.labels', static function (array $labels): array {
 });
 
 $hooks->on('core.obs.filters', static function (array $nodes): array {
-    $nodes[] = ['key' => 'throne', 'label' => translate('throne.name'), 'order' => 70];
+    $nodes[] = ['key' => 'throne', 'label' => translate('throne.short'), 'order' => 70];
 
     foreach ([
         'throne.gift'         => translate('throne.filter.gift'),
@@ -240,7 +240,9 @@ $hooks->on('alerts.tabs', static function (array $tabs) use ($app, $plugin): arr
     }
 
     $tabs['throne'] = [
-        'label' => translate('throne.name'),
+        // Der KURZE Name: "Throne - Alerts" saegte auf der
+        // Alerts-Seite zweimal dasselbe.
+        'label' => translate('throne.short'),
         'order' => 70,
         'render' => static fn (): string => $app->view
             ->from($plugin->directory . '/views')
@@ -421,7 +423,7 @@ $hooks->on('admin.nav', static function (array $nav): array {
     $nav['networking']['label'] = translate('throne.nav.networking');
     $nav['networking']['order'] = 25;
     $nav['networking']['items'][] = [
-        'label'      => translate('throne.name'),
+        'label'      => translate('throne.short'),
         'href'       => '/networking/throne',
         'permission' => 'Throne.Global.View',
     ];

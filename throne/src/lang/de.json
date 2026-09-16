@@ -46,7 +46,7 @@
   "throne.key_hint": "Throne unterschreibt jede Meldung. Der Schlüssel dazu steht in deinen Throne-Einstellungen – 64 Zeichen, hexadezimal.",
   "throne.key_set": "hinterlegt – leer lassen heißt: nicht ändern",
   "throne.lead": "Geschenke, Spenden und erreichte Sammelziele von deiner Throne-Wunschliste.",
-  "throne.name": "Throne",
+  "throne.name": "Throne – Alerts",
   "throne.nav.networking": "Networking",
   "throne.needs_key": "Ohne öffentlichen Schlüssel wird jede Meldung abgewiesen – auch eine echte.",
   "throne.not_ready": "Kein Schlüssel",
@@ -56,6 +56,7 @@
   "throne.ready": "Bereit",
   "throne.saved": "Gespeichert.",
   "throne.settings": "Einrichtung",
+  "throne.short": "Throne",
   "throne.someone": "Jemand",
   "throne.webhook": "Die Adresse für Throne",
   "throne.webhook_hint": "Diese Adresse trägst du bei Throne als Webhook ein. Throne schickt jedes Ereignis dorthin."
