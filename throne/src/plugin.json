@@ -1,0 +1,18 @@
+{
+  "slug": "throne",
+  "name": "Throne",
+  "version": "1.0.0",
+  "description": "Meldet Geschenke, Spenden und erreichte Sammelziele von Throne – als Alert im Stream und als Zeile im Aktivitäten-Feed.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.3.0"
+  },
+  "optional": {
+    "alerts": ">=1.0.0"
+  },
+  "tags": [
+    "networking",
+    "donations",
+    "alerts"
+  ]
+}
