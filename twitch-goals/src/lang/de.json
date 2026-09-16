@@ -25,7 +25,7 @@
   "twitch_goals.goal.sub": "markiert den Abschnitt des Sub-Ziels – wird verborgen, wenn es aus ist",
   "twitch_goals.is_default": "Es ist nichts Eigenes gespeichert – angezeigt wird die Vorgabe. Sobald du speicherst, gilt dein Gerüst.",
   "twitch_goals.missing_hint": "Diese Pflichtelemente fehlen im Gerüst:",
-  "twitch_goals.name": "Goals - Twitch",
+  "twitch_goals.name": "Twitch-Goals",
   "twitch_goals.never_checked": "Noch nie abgerufen. Der Hintergrundprozess holt die Zahlen von selbst.",
   "twitch_goals.no_goal": "Auf Twitch ist für diese Art kein Ziel angelegt – angezeigt wird darum nur der Zähler, ohne Zielwert.",
   "twitch_goals.no_script_hint": "script, iframe und Attribute wie onclick werden entfernt: hier geht es um das Aussehen. Das CSS gehört ins Feld darunter, nicht in ein style-Element.",

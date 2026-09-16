@@ -11,7 +11,7 @@
   "delete_bot.lead": "If a chat message matches one of the patterns, it is deleted.",
   "delete_bot.list": "Patterns",
   "delete_bot.list_hint": "One pattern per row. Each is a regular expression without delimiters – case does not matter.",
-  "delete_bot.name": "Chat - Delete bot",
+  "delete_bot.name": "Delete bot",
   "delete_bot.nav.chat": "Chat",
   "delete_bot.no_words": "No patterns yet.",
   "delete_bot.off": "off",

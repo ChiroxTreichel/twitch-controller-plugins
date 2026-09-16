@@ -11,7 +11,7 @@
   "delete_bot.lead": "Passt eine Chatnachricht auf eines der Muster, wird sie gelöscht.",
   "delete_bot.list": "Muster",
   "delete_bot.list_hint": "Ein Muster je Zeile. Jedes ist ein regulärer Ausdruck ohne Begrenzer – Groß- und Kleinschreibung ist egal.",
-  "delete_bot.name": "Chat - Löschbot",
+  "delete_bot.name": "Löschbot",
   "delete_bot.nav.chat": "Chat",
   "delete_bot.no_words": "Noch keine Muster vorhanden.",
   "delete_bot.off": "aus",

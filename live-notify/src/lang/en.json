@@ -25,7 +25,7 @@
   "live_notify.lead": "Watches other channels and reports when one of them goes live.",
   "live_notify.message": "Message",
   "live_notify.message_hint": "Leave empty for the default. Discord understands Markdown – **bold** becomes bold.",
-  "live_notify.name": "Live notification - Discord",
+  "live_notify.name": "Live notification",
   "live_notify.nav.item": "Live notification",
   "live_notify.nav.networking": "Networking",
   "live_notify.never_checked": "not checked yet",

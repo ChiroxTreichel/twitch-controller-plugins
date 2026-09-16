@@ -49,7 +49,7 @@
   "throne.key_own": "Your own key is in use – it overrides the shipped one.",
   "throne.key_set": "own key stored – leaving it empty means: do not change",
   "throne.lead": "Gifts, contributions and completed crowdfunds from your Throne wishlist.",
-  "throne.name": "Alerts - Throne",
+  "throne.name": "Throne - Alerts",
   "throne.not_ready": "No key",
   "throne.perm.edit": "Store the key and configure alerts",
   "throne.perm.view": "See the Throne setup and its events",

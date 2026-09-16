@@ -1,7 +1,7 @@
 {
   "ln_chat.lead": "What goes into your own chat when a watched channel goes live.",
   "ln_chat.message": "Message",
-  "ln_chat.name": "Live notification - Chat",
+  "ln_chat.name": "Live notification - chat",
   "ln_chat.no_sender": "No sender for the chat.",
   "ln_chat.no_sender_hint": "Neither a bot account nor the channel itself is connected for writing – without a sender no chat message goes out.",
   "ln_chat.only_when_live": "Messages are only written while your own stream is running. A post into an empty chat is not lost – it sits there when the next stream starts and then reads like a message from just now.",

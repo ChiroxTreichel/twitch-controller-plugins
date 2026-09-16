@@ -25,7 +25,7 @@
   "twitch_goals.goal.sub": "marks the sub goal section – hidden when it is switched off",
   "twitch_goals.is_default": "Nothing custom is saved – the preset is shown. As soon as you save, your scaffold applies.",
   "twitch_goals.missing_hint": "These required elements are missing from the scaffold:",
-  "twitch_goals.name": "Goals - Twitch",
+  "twitch_goals.name": "Twitch goals",
   "twitch_goals.never_checked": "Never fetched. The background process gets the numbers by itself.",
   "twitch_goals.no_goal": "No goal of this kind exists on Twitch – only the counter is shown, without a target.",
   "twitch_goals.no_script_hint": "script, iframe and attributes like onclick are removed: this is about appearance. CSS belongs in the field below, not in a style element.",

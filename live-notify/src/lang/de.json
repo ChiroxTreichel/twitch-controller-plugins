@@ -25,7 +25,7 @@
   "live_notify.lead": "Beobachtet fremde Kanäle und meldet, wenn einer davon live geht.",
   "live_notify.message": "Nachricht",
   "live_notify.message_hint": "Leer lassen für die Vorgabe. Discord versteht Markdown – **fett** wird fett.",
-  "live_notify.name": "Live-Benachrichtigung - Discord",
+  "live_notify.name": "Live-Benachrichtigung",
   "live_notify.nav.item": "Live-Benachrichtigung",
   "live_notify.nav.networking": "Networking",
   "live_notify.never_checked": "noch nicht geprüft",

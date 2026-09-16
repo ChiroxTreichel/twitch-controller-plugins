@@ -27,7 +27,7 @@
   "chat_commands.field.name": "Command without !",
   "chat_commands.field.response": "Reply text",
   "chat_commands.list": "Hey %{user}. These commands exist: %{commands}",
-  "chat_commands.name": "Chat - Commands",
+  "chat_commands.name": "Chat commands",
   "chat_commands.name_example": "mycommand",
   "chat_commands.nav.chat": "Chat",
   "chat_commands.new": "New command",

@@ -27,7 +27,7 @@
   "chat_commands.field.name": "Befehl ohne !",
   "chat_commands.field.response": "Antworttext",
   "chat_commands.list": "Hey %{user}. Diese Befehle gibt es: %{commands}",
-  "chat_commands.name": "Chat - Befehle",
+  "chat_commands.name": "Chatbefehle",
   "chat_commands.name_example": "meinbefehl",
   "chat_commands.nav.chat": "Chat",
   "chat_commands.new": "Neuer Befehl",

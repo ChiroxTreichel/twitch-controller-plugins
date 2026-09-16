@@ -41,7 +41,7 @@
   "twitch_alerts.from_amount": "from %{amount} %{unit}",
   "twitch_alerts.last_tier": "The last tier cannot be deleted – without it no alert would fire.",
   "twitch_alerts.min_amount": "Minimum count",
-  "twitch_alerts.name": "Alerts - Twitch",
+  "twitch_alerts.name": "Twitch alerts",
   "twitch_alerts.no_such_tier": "No such tier.",
   "twitch_alerts.no_tiers": "Without a tier no alert would fire. At least one has to remain.",
   "twitch_alerts.or_url": "or https://…",

@@ -1,7 +1,7 @@
 {
   "slug": "live-notify-chat",
   "name": "Live-Benachrichtigung - Chat",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Meldet im eigenen Twitch-Chat, wenn ein beobachteter Kanal live geht – aber nur, während der eigene Stream läuft.",
   "author": "Twitch-Controller",
   "requires": {

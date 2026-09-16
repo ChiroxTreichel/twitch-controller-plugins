@@ -1,7 +1,7 @@
 {
   "slug": "live-notify-shoutout",
   "name": "Live-Benachrichtigung - Shoutout",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Löst einen Twitch-Shoutout aus, wenn ein beobachteter Kanal live geht – aber nur, während der eigene Stream läuft.",
   "author": "Twitch-Controller",
   "requires": {

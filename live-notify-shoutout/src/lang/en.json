@@ -5,7 +5,7 @@
   "ln_shoutout.error.no_target_id": "The Twitch id of the target channel is unknown.",
   "ln_shoutout.error.rejected": "Twitch rejected the shoutout: %{reason}",
   "ln_shoutout.error.unauthorized": "Twitch rejected the sign-in. The channel has to be reconnected.",
-  "ln_shoutout.name": "Live notification - Shoutout",
+  "ln_shoutout.name": "Live notification - shoutout",
   "ln_shoutout.no_scope_hint": "Without the “shoutouts” permission Twitch will not accept a shoutout. The channel has to be reconnected once.",
   "ln_shoutout.target": "Shoutout"
 }

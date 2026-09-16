@@ -41,7 +41,7 @@
   "twitch_alerts.from_amount": "ab %{amount} %{unit}",
   "twitch_alerts.last_tier": "Die letzte Stufe kann nicht gelöscht werden – ohne sie käme kein Alert mehr.",
   "twitch_alerts.min_amount": "Mindestanzahl",
-  "twitch_alerts.name": "Alerts - Twitch",
+  "twitch_alerts.name": "Twitch-Alerts",
   "twitch_alerts.no_such_tier": "Diese Stufe gibt es nicht.",
   "twitch_alerts.no_tiers": "Ohne Stufe käme kein Alert. Mindestens eine muss bleiben.",
   "twitch_alerts.or_url": "oder https://…",
