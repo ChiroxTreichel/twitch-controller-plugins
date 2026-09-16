@@ -62,7 +62,22 @@ $ziel = $url('/networking/live/settings');
         <?php endif ?>
     </div>
 
-    <form method="post" action="<?= $e($ziel) ?>">
+    <?php /*
+        Das Formular traegt eine id, und der Speichern-Knopf steht
+        DRAUSSEN und gehoert ueber form="..." dazu.
+
+        Grund: der Knopf "Adresse loeschen" ist eine Rueckfrage, und
+        die bringt ihr eigenes Formular mit. Beide standen in einer
+        Zeile, also stand ein Formular im anderen - ungueltiges HTML.
+        Der Browser wirft das innere Start-Tag weg und haengt dessen
+        Felder an das aeussere; damit gab es zwei "action"-Felder, und
+        PHP nimmt das letzte. Ein Klick auf "Speichern" loeschte also
+        die Adresse und speicherte die Nachricht nicht.
+
+        So bleibt die Zeile, wie sie aussieht, und die beiden
+        Formulare bleiben getrennt.
+    */ ?>
+    <form id="live-discord" method="post" action="<?= $e($ziel) ?>">
         <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
         <input type="hidden" name="action" value="save">
 
@@ -111,22 +126,25 @@ $ziel = $url('/networking/live/settings');
 
         <p class="hint"><?= $e(translate('live_notify.message_hint')) ?></p>
 
-        <?php if ($canEdit): ?>
-            <div class="row">
-                <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
-
-                <?php if ($hasWebhook): ?>
-                    <?= $view->render('_confirm', [
-                        'label'    => translate('live_notify.forget_webhook'),
-                        'question' => translate('live_notify.confirm_forget'),
-                        'confirm'  => translate('live_notify.confirm_forget_yes'),
-                        'action'   => $ziel,
-                        'fields'   => ['csrf' => $csrf, 'action' => 'forget'],
-                    ], null) ?>
-                <?php endif ?>
-            </div>
-        <?php endif ?>
     </form>
+
+    <?php if ($canEdit): ?>
+        <div class="row">
+            <button class="btn" type="submit" form="live-discord">
+                <?= $e(translate('common.save')) ?>
+            </button>
+
+            <?php if ($hasWebhook): ?>
+                <?= $view->render('_confirm', [
+                    'label'    => translate('live_notify.forget_webhook'),
+                    'question' => translate('live_notify.confirm_forget'),
+                    'confirm'  => translate('live_notify.confirm_forget_yes'),
+                    'action'   => $ziel,
+                    'fields'   => ['csrf' => $csrf, 'action' => 'forget'],
+                ], null) ?>
+            <?php endif ?>
+        </div>
+    <?php endif ?>
 </div>
 
 <div class="card">
