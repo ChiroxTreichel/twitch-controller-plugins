@@ -22,7 +22,7 @@
   "pp_tip.alert.turned_off": "Alert ausgeschaltet.",
   "pp_tip.alert.turned_on": "Alert eingeschaltet.",
   "pp_tip.alert.video": "Video",
-  "pp_tip.alert_default": "%{name} hat %{amount} gespendet!",
+  "pp_tip.alert_default": "{{ name }} hat {{ amount }} gespendet!",
   "pp_tip.amounts": "Beträge und Beschriftung",
   "pp_tip.anonymous": "Anonym",
   "pp_tip.appearance": "Aussehen",

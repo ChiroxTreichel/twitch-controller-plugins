@@ -22,7 +22,7 @@
   "se_tip.alert.turned_off": "Alert ausgeschaltet.",
   "se_tip.alert.turned_on": "Alert eingeschaltet.",
   "se_tip.alert.video": "Video",
-  "se_tip.alert_default": "%{name} hat %{amount} gespendet!",
+  "se_tip.alert_default": "{{ name }} hat {{ amount }} gespendet!",
   "se_tip.appearance": "Aussehen",
   "se_tip.appearance_lead": "Gerüst und Stylesheet des Spendenbalkens im Overlay.",
   "se_tip.appearance_saved": "Aussehen gespeichert.",

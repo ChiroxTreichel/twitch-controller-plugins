@@ -22,7 +22,7 @@
   "se_tip.alert.turned_off": "Alert switched off.",
   "se_tip.alert.turned_on": "Alert switched on.",
   "se_tip.alert.video": "Video",
-  "se_tip.alert_default": "%{name} donated %{amount}!",
+  "se_tip.alert_default": "{{ name }} donated {{ amount }}!",
   "se_tip.appearance": "Appearance",
   "se_tip.appearance_lead": "Markup and stylesheet of the donation bar in the overlay.",
   "se_tip.appearance_saved": "Appearance saved.",

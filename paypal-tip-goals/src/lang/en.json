@@ -22,7 +22,7 @@
   "pp_tip.alert.turned_off": "Alert switched off.",
   "pp_tip.alert.turned_on": "Alert switched on.",
   "pp_tip.alert.video": "Video",
-  "pp_tip.alert_default": "%{name} donated %{amount}!",
+  "pp_tip.alert_default": "{{ name }} donated {{ amount }}!",
   "pp_tip.amounts": "Amounts and labelling",
   "pp_tip.anonymous": "Anonymous",
   "pp_tip.appearance": "Appearance",

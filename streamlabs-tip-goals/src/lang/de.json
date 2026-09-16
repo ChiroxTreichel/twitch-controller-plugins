@@ -22,7 +22,7 @@
   "sl_tip.alert.turned_off": "Alert ausgeschaltet.",
   "sl_tip.alert.turned_on": "Alert eingeschaltet.",
   "sl_tip.alert.video": "Video",
-  "sl_tip.alert_default": "%{name} hat %{amount} gespendet!",
+  "sl_tip.alert_default": "{{ name }} hat {{ amount }} gespendet!",
   "sl_tip.appearance": "Aussehen",
   "sl_tip.appearance_lead": "Gerüst und Stylesheet des Spendenbalkens im Overlay.",
   "sl_tip.appearance_saved": "Aussehen gespeichert.",
