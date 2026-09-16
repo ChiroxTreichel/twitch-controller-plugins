@@ -42,6 +42,27 @@ final class Throne
      */
     public const MAX_AGE = 300;
 
+    /**
+     * Thrones oeffentlicher Schluessel.
+     *
+     * Der steht so in Thrones Dokumentation und ist fuer alle gleich -
+     * es ist kein Wert, den sich jeder selbst holt. Darum steht er
+     * hier und nicht als Pflichtfeld in den Einstellungen: ein Feld,
+     * in das alle dasselbe eintippen, ist eine Fehlerquelle und keine
+     * Einstellung.
+     *
+     * Dort steht er als PEM:
+     *
+     *   -----BEGIN PUBLIC KEY-----
+     *   MCowBQYDK2VwAyEAPXbUfxh7XL4SYUVcfhmYMIbxvtR9E9LDd8gPJ1PwSD8=
+     *   -----END PUBLIC KEY-----
+     *
+     * Das sind 44 Byte DER: zwoelf Byte Vorspann, der "Ed25519" sagt
+     * (302a300506032b6570032100), und dahinter die 32 Byte, die
+     * sodium haben will. Genau die stehen hier.
+     */
+    public const DEFAULT_PUBLIC_KEY = '3d76d47f187b5cbe1261455c7e19983086f1bed47d13d2c377c80f2753f0483f';
+
     /** Die drei Ereignisse, in der Reihenfolge des alten Systems. */
     public const CASES = ['gift', 'contribution', 'crowdfund'];
 
@@ -72,7 +93,18 @@ final class Throne
      */
     public static function publicKey(App $app): string
     {
-        return trim($app->settings->secret('public_key', '', self::scope()));
+        $eigener = trim($app->settings->secret('public_key', '', self::scope()));
+
+        // Der eigene gewinnt - aber nur, wenn einer da ist. Er ist die
+        // Notluke fuer den Tag, an dem Throne den Schluessel wechselt
+        // und dieses Plugin noch nicht nachgezogen hat.
+        return $eigener !== '' ? $eigener : self::DEFAULT_PUBLIC_KEY;
+    }
+
+    /** Wird ein eigener Schluessel benutzt statt des mitgelieferten? */
+    public static function hasOwnKey(App $app): bool
+    {
+        return trim($app->settings->secret('public_key', '', self::scope())) !== '';
     }
 
     public static function setPublicKey(App $app, string $hex): void
@@ -80,9 +112,17 @@ final class Throne
         $app->settings->setSecret('public_key', trim($hex), self::scope());
     }
 
+    /**
+     * Laesst sich ueberhaupt pruefen?
+     *
+     * Seit der Schluessel mitgeliefert wird, ist das immer ja - die
+     * Frage steht trotzdem hier, weil die Seiten sie stellen und ein
+     * fest verdrahtetes "true" an drei Stellen schlechter zu aendern
+     * waere als eine Methode an einer.
+     */
     public static function hasKey(App $app): bool
     {
-        return self::publicKey($app) !== '';
+        return self::looksLikeKey(self::publicKey($app));
     }
 
     /**
@@ -118,6 +158,22 @@ final class Throne
      */
     public static function verify(App $app, string $timestamp, string $signature, string $body): string
     {
+        return self::verifyWith(self::publicKey($app), $timestamp, $signature, $body);
+    }
+
+    /**
+     * Dasselbe, aber ohne App - nur mit dem Schluessel.
+     *
+     * Die Rechnung braucht die Anwendung nicht, nur einen Schluessel.
+     * Getrennt steht sie hier, weil sie sich so mit ECHTEN
+     * Schluesselpaaren pruefen laesst: ein nachgebautes $app-Objekt
+     * erfuellt die Typangabe nicht, und der Krypto-Teil - der einzige,
+     * auf den es wirklich ankommt - waere ungeprueft geblieben.
+     *
+     * @return string Leer, wenn alles stimmt - sonst der Grund
+     */
+    public static function verifyWith(string $schluessel, string $timestamp, string $signature, string $body): string
+    {
         if (!extension_loaded('sodium')) {
             return 'sodium_missing';
         }
@@ -129,8 +185,6 @@ final class Throne
         if (abs(time() - (int) $timestamp) > self::MAX_AGE) {
             return 'stale';
         }
-
-        $schluessel = self::publicKey($app);
 
         if (!self::looksLikeKey($schluessel)) {
             return 'no_key';

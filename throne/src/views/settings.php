@@ -6,7 +6,8 @@
  * @var \TwitchController\Core\Http\View $view
  * @var callable $e
  * @var callable $url
- * @var bool $hasKey
+ * @var bool $hasKey      laesst sich ueberhaupt pruefen?
+ * @var bool $hasOwnKey   ein eigener statt des mitgelieferten?
  * @var string $webhookUrl
  * @var bool $canEdit
  * @var string $csrf
@@ -24,8 +25,13 @@
     <div class="note note-error"><?= $e($error) ?></div>
 <?php endif ?>
 
+<?php /*
+    Die Warnung gilt nur noch dem Sonderfall: ein EIGENER Schluessel
+    ist hinterlegt und taugt nicht. Ohne eigenen gilt der
+    mitgelieferte, und der stimmt.
+*/ ?>
 <?php if (!$hasKey): ?>
-    <div class="note note-warn"><?= $e(translate('throne.needs_key')) ?></div>
+    <div class="note note-warn"><?= $e(translate('throne.bad_own_key')) ?></div>
 <?php endif ?>
 
 <div class="card">
@@ -57,6 +63,17 @@
     <p class="hint"><?= $e(translate('throne.key_hint')) ?></p>
 
     <?php /*
+        Welcher gerade gilt. Ohne das waere nicht zu sehen, ob hier
+        schon einmal jemand etwas eingetragen hat - das Feld steht ja
+        immer leer da.
+    */ ?>
+    <p class="hint">
+        <?= $e($hasOwnKey
+            ? translate('throne.key_own')
+            : translate('throne.key_builtin')) ?>
+    </p>
+
+    <?php /*
         Das Formular traegt eine id, und der Speichern-Knopf steht
         DRAUSSEN und gehoert ueber form="..." dazu.
 
@@ -82,7 +99,7 @@
             <span class="hint"><?= $e(translate('throne.key_field')) ?></span>
             <input class="input" type="text" name="public_key"
                    autocomplete="off" spellcheck="false"
-                   placeholder="<?= $e($hasKey
+                   placeholder="<?= $e($hasOwnKey
                        ? translate('throne.key_set')
                        : translate('throne.key_empty')) ?>"
                 <?= $canEdit ? '' : 'readonly' ?>>
@@ -95,7 +112,7 @@
                 <?= $e(translate('common.save')) ?>
             </button>
 
-            <?php if ($hasKey): ?>
+            <?php if ($hasOwnKey): ?>
                 <?= $view->render('_confirm', [
                     'label'    => translate('throne.forget_key'),
                     'question' => translate('throne.forget_key_question'),

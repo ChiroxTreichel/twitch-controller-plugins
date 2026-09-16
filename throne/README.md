@@ -38,16 +38,16 @@ annimmt, wäre schlimmer als eine, die schweigt.
 
 ## Einrichten
 
-1. *Networking → Throne* öffnen
+1. *Plugins → Einstellungen → Throne* öffnen
 2. Die dort angezeigte Adresse bei Throne als Webhook eintragen
-3. Den öffentlichen Schlüssel aus den Throne-Einstellungen hier
-   hinterlegen — 64 hexadezimale Zeichen
 
-Der Schlüssel wird **verschlüsselt** abgelegt und nie wieder angezeigt.
-Ein öffentlicher Schlüssel ist zwar kein Geheimnis, aber wer ihn
-austauschen kann, kann sich eigene Ereignisse unterschreiben. Ein
-leeres Feld heißt „nicht ändern"; zum Löschen gibt es einen eigenen
-Knopf.
+Das ist alles. **Der Schlüssel wird mitgeliefert**: er steht in Thrones
+Dokumentation und ist für alle gleich — ein Feld, in das alle dasselbe
+eintippen, wäre eine Fehlerquelle und keine Einstellung.
+
+Das Feld dafür gibt es trotzdem, als Notluke für den Tag, an dem Throne
+den Schlüssel wechselt und dieses Plugin noch nicht nachgezogen hat.
+Normalerweise bleibt es leer.
 
 ## Beträge
 
