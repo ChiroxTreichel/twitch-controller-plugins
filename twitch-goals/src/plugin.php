@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * ===================================================================
- *  Twitch-Goals
+ *  Goals - Twitch
  * ===================================================================
  *
  * Follower- und Sub-Ziel, die Zahlen direkt von Twitch. Der Rahmen

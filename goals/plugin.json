@@ -1,8 +1,8 @@
 {
   "slug": "goals",
   "name": "Goals",
-  "version": "1.2.0",
-  "description": "Der Rahmen für Ziele: eine Fläche im Overlay, Reiter für die Ziel-Plugins und der Weg, auf dem deren Gerüst und Werte ins Overlay kommen. Zeigt selbst kein Ziel an – den Inhalt bringt Twitch-Goals mit.",
+  "version": "1.2.1",
+  "description": "Der Rahmen für Ziele: eine Fläche im Overlay, Reiter für die Ziel-Plugins und der Weg, auf dem deren Gerüst und Werte ins Overlay kommen. Zeigt selbst kein Ziel an – den Inhalt bringt Goals - Twitch mit.",
   "author": "Twitch-Controller",
   "requires": {
     "core": ">=2.1.0"

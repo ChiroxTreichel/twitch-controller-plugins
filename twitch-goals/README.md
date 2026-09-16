@@ -1,4 +1,4 @@
-# Twitch-Goals
+# Goals - Twitch
 
 Follower- und Sub-Ziel, die Zahlen **direkt von Twitch** und dauerhaft
 aktuell. Braucht das Plugin **Goals** — das wird bei der Installation

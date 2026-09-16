@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Twitch-Goals legt keine Tabelle an.
+ * Goals - Twitch legt keine Tabelle an.
  *
  * Titel, Geruest und der letzte bekannte Stand liegen im Scope
  * "plugin:twitch-goals", den loescht der Kern beim Entfernen mit.

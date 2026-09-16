@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 /**
- * Twitch-Alerts legt keine Tabelle an.
+ * Alerts - Twitch legt keine Tabelle an.
  *
  * Die Einstellungen liegen im Scope "plugin:twitch-alerts", einen
  * Eintrag je Alert-Typ. Den Scope loescht der Kern beim Entfernen des

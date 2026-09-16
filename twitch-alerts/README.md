@@ -1,4 +1,4 @@
-# Twitch-Alerts
+# Alerts - Twitch
 
 Alerts für **Follows, Bits, Subs, geschenkte Subs, Prime-Subs und
 Raids**. Je Fall ein eigener Text, ein eigenes Video, ein eigener Ton

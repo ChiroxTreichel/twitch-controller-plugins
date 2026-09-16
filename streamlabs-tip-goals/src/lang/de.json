@@ -52,7 +52,7 @@
   "sl_tip.missing_hint": "Im Gerüst fehlen Pflichtelemente – gespeichert wurde trotzdem:",
   "sl_tip.move_down": "Nach unten",
   "sl_tip.move_up": "Nach oben",
-  "sl_tip.name": "Tip-Goals – Streamlabs",
+  "sl_tip.name": "Tip-Goals - Streamlabs",
   "sl_tip.no_credentials": "Es ist noch kein Zugang zu Streamlabs hinterlegt – die Ziele wachsen deshalb nicht von selbst.",
   "sl_tip.no_script_hint": "Aus dem Gerüst fliegen script, iframe, object, embed, style und Attribute wie onclick heraus – hier geht es um das Aussehen.",
   "sl_tip.not_ready": "unvollständig",

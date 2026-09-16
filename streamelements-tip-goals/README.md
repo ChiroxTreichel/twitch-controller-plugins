@@ -1,4 +1,4 @@
-# Tip-Goals – StreamElements
+# Tip-Goals - StreamElements
 
 Spendenziele als Balken im Overlay, gespeist aus **StreamElements**.
 

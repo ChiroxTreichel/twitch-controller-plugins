@@ -1,7 +1,7 @@
 # Goals
 
 Der **Rahmen** für Ziele. Zeigt selbst kein Ziel an — den Inhalt bringen
-Ziel-Plugins mit, etwa **Twitch-Goals**.
+Ziel-Plugins mit, etwa **Goals - Twitch**.
 
 Ohne ein solches Plugin steht auf der Seite ein Hinweis, wo man eines
 herbekommt.

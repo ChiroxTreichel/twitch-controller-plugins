@@ -1,7 +1,7 @@
 {
   "slug": "raids-requests",
-  "name": "Raids – Anfragen",
-  "version": "1.0.0",
+  "name": "Raids - Anfragen",
+  "version": "1.0.1",
   "description": "Eine öffentliche Seite unter /raidme: fremde Streamer melden sich mit Twitch an und bitten um einen Raid. Angenommene tauchen im Live-Reiter auf, sobald sie streamen.",
   "author": "Twitch-Controller",
   "requires": {

@@ -1,4 +1,4 @@
-# Live-Benachrichtigung – Shoutout
+# Live-Benachrichtigung - Shoutout
 
 Löst einen Twitch-Shoutout aus, wenn ein beobachteter Kanal live geht.
 Ein Ziel wie Discord und Chat, nur ohne Text: Twitch baut den Shoutout

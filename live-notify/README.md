@@ -1,4 +1,4 @@
-# Live-Benachrichtigung – Discord
+# Live-Benachrichtigung - Discord
 
 Beobachtet fremde Twitch-Kanäle und meldet über einen Discord-Webhook,
 wenn einer davon live geht. Aus dem alten System übernommen, dort unter

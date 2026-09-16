@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 /**
  * ===================================================================
- *  Twitch-Alerts
+ *  Alerts - Twitch
  * ===================================================================
  *
  * Sechs Alert-Typen: Follows, Bits, Subs, Gifted-Subs, Prime-Subs und

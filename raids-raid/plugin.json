@@ -1,7 +1,7 @@
 {
   "slug": "raids-raid",
-  "name": "Raids – Raiden",
-  "version": "1.0.0",
+  "name": "Raids - Raiden",
+  "version": "1.0.1",
   "description": "Ein Knopf auf jeder Live-Kachel, der den Raid wirklich startet – und einer, der ihn während der 90 Sekunden Vorlauf wieder abbricht.",
   "author": "Twitch-Controller",
   "requires": {

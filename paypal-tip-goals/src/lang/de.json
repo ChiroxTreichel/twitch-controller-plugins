@@ -96,7 +96,7 @@
   "pp_tip.mode.sandbox": "Testkonto",
   "pp_tip.move_down": "Nach unten",
   "pp_tip.move_up": "Nach oben",
-  "pp_tip.name": "Tip-Goals – PayPal",
+  "pp_tip.name": "Tip-Goals - PayPal",
   "pp_tip.needs_imprint": "Ohne Impressum bleibt die Spendenseite geschlossen. Eine Seite, die Geld annimmt, muss sagen, wer es bekommt.",
   "pp_tip.no_script_hint": "Aus dem Gerüst fliegen script, iframe, object, embed, style und Attribute wie onclick heraus – hier geht es um das Aussehen.",
   "pp_tip.order_description": "Spende von @%{name}",

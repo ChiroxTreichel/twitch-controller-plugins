@@ -1,6 +1,6 @@
 {
-    "raids_roulette.name": "Raids – Roulette",
-    "raids_roulette.perm.spin": "may spin the raid roulette.",
-    "raids_roulette.spin": "Roulette",
-    "raids_roulette.spin_hint": "Runs through the tiles and stops on one channel."
+  "raids_roulette.name": "Raids - Roulette",
+  "raids_roulette.perm.spin": "may spin the raid roulette.",
+  "raids_roulette.spin": "Roulette",
+  "raids_roulette.spin_hint": "Runs through the tiles and stops on one channel."
 }

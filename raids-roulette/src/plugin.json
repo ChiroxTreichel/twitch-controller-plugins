@@ -1,7 +1,7 @@
 {
   "slug": "raids-roulette",
-  "name": "Raids – Roulette",
-  "version": "1.0.0",
+  "name": "Raids - Roulette",
+  "version": "1.0.1",
   "description": "Ein Würfel über dem Live-Gitter: das Roulette läuft durch die Kacheln, wird langsamer und bleibt auf einem Kanal stehen. Ist „Raids – Raiden“ installiert, wird der Raid gleich gestartet.",
   "author": "Twitch-Controller",
   "requires": {

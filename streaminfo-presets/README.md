@@ -1,4 +1,4 @@
-# Streaminfo – Vorlagen
+# Streaminfo - Vorlagen
 
 Gespeicherte Stream-Titel zum Auswählen. Auf der Streaminfo-Seite steht
 dann eine Liste über dem Titelfeld: im Stream sucht niemand nach der

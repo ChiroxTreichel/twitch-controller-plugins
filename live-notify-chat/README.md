@@ -1,4 +1,4 @@
-# Live-Benachrichtigung – Chat
+# Live-Benachrichtigung - Chat
 
 Meldet im eigenen Twitch-Chat, wenn ein beobachteter Kanal live geht.
 Ein Ziel wie Discord, nur anderswohin.

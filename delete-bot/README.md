@@ -1,4 +1,4 @@
-# Löschbot
+# Chat - Löschbot
 
 Eine Liste von Mustern. Passt eine Chatnachricht auf eines davon, wird
 sie gelöscht.

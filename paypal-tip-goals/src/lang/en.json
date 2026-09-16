@@ -96,7 +96,7 @@
   "pp_tip.mode.sandbox": "Sandbox",
   "pp_tip.move_down": "Move down",
   "pp_tip.move_up": "Move up",
-  "pp_tip.name": "Tip-Goals – PayPal",
+  "pp_tip.name": "Tip-Goals - PayPal",
   "pp_tip.needs_imprint": "Without an imprint the donation page stays closed. A page that accepts money has to say who receives it.",
   "pp_tip.no_script_hint": "script, iframe, object, embed, style and attributes like onclick are stripped from the markup – this is about appearance.",
   "pp_tip.order_description": "Donation from @%{name}",

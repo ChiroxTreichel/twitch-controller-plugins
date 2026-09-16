@@ -1,4 +1,4 @@
-# Raids – Anfragen
+# Raids - Anfragen
 
 Eine öffentliche Seite unter **`/raidme`**: fremde Streamer melden sich
 mit Twitch an und bitten um einen Raid. Der Kanalinhaber nimmt an oder

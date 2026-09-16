@@ -1,11 +1,11 @@
 {
-    "ln_shoutout.error.cooldown": "Twitch hat den Shoutout abgelehnt: Sperrfrist. Zwischen zwei Shoutouts liegen zwei Minuten, für denselben Kanal sechzig.",
-    "ln_shoutout.error.forbidden": "Twitch verweigert den Shoutout. Vermutlich fehlt die Freigabe „Shoutouts“.",
-    "ln_shoutout.error.no_channel": "Es ist kein Twitch-Kanal verbunden.",
-    "ln_shoutout.error.no_target_id": "Die Twitch-Kennung des Zielkanals ist unbekannt.",
-    "ln_shoutout.error.rejected": "Twitch hat den Shoutout abgelehnt: %{reason}",
-    "ln_shoutout.error.unauthorized": "Twitch hat die Anmeldung abgelehnt. Der Kanal muss neu verbunden werden.",
-    "ln_shoutout.name": "Live-Benachrichtigung – Shoutout",
-    "ln_shoutout.no_scope_hint": "Ohne die Freigabe „Shoutouts“ nimmt Twitch keinen Shoutout an. Der Kanal muss dafür einmal neu verbunden werden.",
-    "ln_shoutout.target": "Shoutout"
+  "ln_shoutout.error.cooldown": "Twitch hat den Shoutout abgelehnt: Sperrfrist. Zwischen zwei Shoutouts liegen zwei Minuten, für denselben Kanal sechzig.",
+  "ln_shoutout.error.forbidden": "Twitch verweigert den Shoutout. Vermutlich fehlt die Freigabe „Shoutouts“.",
+  "ln_shoutout.error.no_channel": "Es ist kein Twitch-Kanal verbunden.",
+  "ln_shoutout.error.no_target_id": "Die Twitch-Kennung des Zielkanals ist unbekannt.",
+  "ln_shoutout.error.rejected": "Twitch hat den Shoutout abgelehnt: %{reason}",
+  "ln_shoutout.error.unauthorized": "Twitch hat die Anmeldung abgelehnt. Der Kanal muss neu verbunden werden.",
+  "ln_shoutout.name": "Live-Benachrichtigung - Shoutout",
+  "ln_shoutout.no_scope_hint": "Ohne die Freigabe „Shoutouts“ nimmt Twitch keinen Shoutout an. Der Kanal muss dafür einmal neu verbunden werden.",
+  "ln_shoutout.target": "Shoutout"
 }

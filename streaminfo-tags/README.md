@@ -1,4 +1,4 @@
-# Streaminfo – Tags
+# Streaminfo - Tags
 
 Eigene Tags festlegen und auf der Streaminfo-Seite einzeln anhaken. Die
 angehakten stehen in eckigen Klammern vor dem Titel:

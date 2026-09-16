@@ -3,9 +3,9 @@
 Der Rahmen für Alerts im Stream. Dieses Plugin zeigt **selbst keine
 Alerts** — es bringt die Fläche, die Warteschlange und die
 Grundeinstellungen mit. Was angezeigt wird, liefern Plugins wie
-**Twitch-Alerts**.
+**Alerts - Twitch**.
 
-Wer Twitch-Alerts installiert, bekommt dieses hier automatisch dazu.
+Wer Alerts - Twitch installiert, bekommt dieses hier automatisch dazu.
 Einzeln installieren muss man es nur, wenn man selbst ein Alert-Plugin
 schreibt.
 

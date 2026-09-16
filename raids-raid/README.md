@@ -1,4 +1,4 @@
-# Raids – Raiden
+# Raids - Raiden
 
 Ein Knopf auf jeder Live-Kachel, der den Raid wirklich startet. Und
 einer darüber, der ihn während des Vorlaufs wieder abbricht.

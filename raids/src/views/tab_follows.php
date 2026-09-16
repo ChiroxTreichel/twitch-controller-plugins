@@ -61,7 +61,7 @@ use TwitchController\Core\Support\Dates;
                 Der Zeitstempel ist eine Sekundenzahl, Dates erwartet
                 aber eine Datumszeichenkette aus der Datenbank - mit
                 Offset, damit die Zeitzone stimmt. Genau so macht es
-                Twitch-Goals mit seinem checked_at.
+                Goals - Twitch mit seinem checked_at.
             */ ?>
             <?= $e(translate('raids.synced_at', [
                 'when' => Dates::long((string) date('Y-m-d H:i:sP', $syncedAt)),

@@ -1,4 +1,4 @@
-# Timer
+# Chat - Timer
 
 Wiederkehrende Nachrichten im Chat — **aber nur, wenn der Stream
 läuft.** Das ist die wichtigste Bedingung: ein Timer, der in einen

@@ -54,7 +54,7 @@
   "se_tip.missing_hint": "Im Gerüst fehlen Pflichtelemente – gespeichert wurde trotzdem:",
   "se_tip.move_down": "Nach unten",
   "se_tip.move_up": "Nach oben",
-  "se_tip.name": "Tip-Goals – StreamElements",
+  "se_tip.name": "Tip-Goals - StreamElements",
   "se_tip.no_credentials": "Es ist noch kein Zugang zu StreamElements hinterlegt – die Ziele wachsen deshalb nicht von selbst.",
   "se_tip.no_script_hint": "Aus dem Gerüst fliegen script, iframe, object, embed, style und Attribute wie onclick heraus – hier geht es um das Aussehen.",
   "se_tip.not_ready": "unvollständig",

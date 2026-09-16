@@ -29,7 +29,7 @@ use TwitchController\Core\Overlay\Bus;
  *   die Werte       Goals::send() schickt sie ins Overlay
  *   den Pruefer     required() sagt, welche Pflichtelemente fehlen
  *
- * Der Inhalt kommt von Twitch-Goals und spaeter vom Spenden-Plugin.
+ * Der Inhalt kommt von Goals - Twitch und spaeter vom Spenden-Plugin.
  * Ohne ein solches Plugin steht hier eine leere Flaeche und ein
  * Hinweis, wo man eines herbekommt.
  *

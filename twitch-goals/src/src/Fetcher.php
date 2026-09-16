@@ -293,13 +293,13 @@ final class Fetcher
         try {
             $antwort = $this->app->twitch->api()->as(TokenStore::BROADCASTER)->get($endpunkt, $query);
         } catch (Throwable $e) {
-            $this->app->log('Twitch-Goals: ' . $endpunkt . ' nicht abrufbar: ' . $e->getMessage());
+            $this->app->log('Goals - Twitch: ' . $endpunkt . ' nicht abrufbar: ' . $e->getMessage());
 
             return null;
         }
 
         if (!$antwort->ok()) {
-            $this->app->log('Twitch-Goals: ' . $endpunkt . ' nicht abrufbar: ' . $antwort->error());
+            $this->app->log('Goals - Twitch: ' . $endpunkt . ' nicht abrufbar: ' . $antwort->error());
 
             return null;
         }
@@ -316,13 +316,13 @@ final class Fetcher
         try {
             $antwort = $this->app->twitch->api()->as(TokenStore::BROADCASTER)->get($endpunkt, $query);
         } catch (Throwable $e) {
-            $this->app->log('Twitch-Goals: ' . $endpunkt . ' nicht abrufbar: ' . $e->getMessage());
+            $this->app->log('Goals - Twitch: ' . $endpunkt . ' nicht abrufbar: ' . $e->getMessage());
 
             return [];
         }
 
         if (!$antwort->ok()) {
-            $this->app->log('Twitch-Goals: ' . $endpunkt . ' nicht abrufbar: ' . $antwort->error());
+            $this->app->log('Goals - Twitch: ' . $endpunkt . ' nicht abrufbar: ' . $antwort->error());
 
             return [];
         }

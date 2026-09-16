@@ -2,7 +2,7 @@
 /**
  * Der Reiter "Spende" auf der Alerts-Seite.
  *
- * Aufbau wie die Reiter von Twitch-Alerts daneben - derselbe Kasten,
+ * Aufbau wie die Reiter von Alerts - Twitch daneben - derselbe Kasten,
  * derselbe Schalter oben rechts, dieselben Felder. Ein Reiter, der
  * anders aussieht als seine Nachbarn, faellt auf, ohne etwas zu
  * sagen.

@@ -1,15 +1,15 @@
 {
-    "si_tags.add_row": "Tag hinzufügen",
-    "si_tags.count": "%{count} Tag(s)",
-    "si_tags.empty": "Noch kein Tag. Solange die Liste leer ist, erscheinen auf der Streaminfo-Seite keine Haken.",
-    "si_tags.example": "z. B. „VTuber“",
-    "si_tags.example_line": "[VTuber][German] Das ist mein Titel",
-    "si_tags.field": "Tags",
-    "si_tags.full": "Mehr als %{count} Tags werden in der Reihe unübersichtlich.",
-    "si_tags.lead": "Eigene Tags festlegen. Auf der Streaminfo-Seite lassen sie sich einzeln anhaken; die angehakten stehen in eckigen Klammern vor dem Titel.",
-    "si_tags.name": "Streaminfo – Tags",
-    "si_tags.perm.edit": "darf die eigenen Tags festlegen.",
-    "si_tags.remove_row": "Entfernen",
-    "si_tags.saved": "Tags gespeichert. Der laufende Titel bleibt unberührt – er ändert sich erst beim nächsten Speichern in der Streaminfo.",
-    "si_tags.tab": "Tags"
+  "si_tags.add_row": "Tag hinzufügen",
+  "si_tags.count": "%{count} Tag(s)",
+  "si_tags.empty": "Noch kein Tag. Solange die Liste leer ist, erscheinen auf der Streaminfo-Seite keine Haken.",
+  "si_tags.example": "z. B. „VTuber“",
+  "si_tags.example_line": "[VTuber][German] Das ist mein Titel",
+  "si_tags.field": "Tags",
+  "si_tags.full": "Mehr als %{count} Tags werden in der Reihe unübersichtlich.",
+  "si_tags.lead": "Eigene Tags festlegen. Auf der Streaminfo-Seite lassen sie sich einzeln anhaken; die angehakten stehen in eckigen Klammern vor dem Titel.",
+  "si_tags.name": "Streaminfo - Tags",
+  "si_tags.perm.edit": "darf die eigenen Tags festlegen.",
+  "si_tags.remove_row": "Entfernen",
+  "si_tags.saved": "Tags gespeichert. Der laufende Titel bleibt unberührt – er ändert sich erst beim nächsten Speichern in der Streaminfo.",
+  "si_tags.tab": "Tags"
 }

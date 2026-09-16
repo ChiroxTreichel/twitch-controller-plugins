@@ -462,11 +462,11 @@ HTML;
      * Beides ist noetig, und beides war beim ersten Versuch falsch:
      *
      * Vollstaendig, weil dieses Plugin nur Goals voraussetzt und nicht
-     * Twitch-Goals. Die Klassen .goal, .goal-bar, .goal-row und so
+     * Goals - Twitch. Die Klassen .goal, .goal-bar, .goal-row und so
      * weiter kommen aus DESSEN Stylesheet; ohne es haette der Balken
      * gar kein Aussehen. Der erste Versuch setzte nur die Farbe der
      * Fuellung und verliess sich auf den Rest - und selbst MIT
-     * Twitch-Goals blieb der Balken unsichtbar, weil .goal dort keine
+     * Goals - Twitch blieb der Balken unsichtbar, weil .goal dort keine
      * Hoehe hat: die holen sich die kleinen Balken aus .goal-small, und
      * .goal-tip gab es nicht.
      *

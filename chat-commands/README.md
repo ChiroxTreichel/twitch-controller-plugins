@@ -1,4 +1,4 @@
-# Chatbefehle
+# Chat - Befehle
 
 Befehle im Chat. Zwei Reiter: **Grundbefehle** sind fest eingebaut und
 haben eigene Einstellungen, **Eigene Befehle** legst du selbst an.

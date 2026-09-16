@@ -9,7 +9,7 @@ declare(strict_types=1);
  *
  * Zeigt selbst kein Ziel an. Es stellt die Flaeche im Overlay, die
  * Reiter fuer die Ziel-Plugins und den Weg, auf dem deren Geruest und
- * Werte ins Overlay kommen. Der Inhalt kommt von Twitch-Goals und
+ * Werte ins Overlay kommen. Der Inhalt kommt von Goals - Twitch und
  * spaeter vom Spenden-Plugin.
  *
  * Der Kern wird dafuer nicht angefasst: overlay.assets nimmt jede

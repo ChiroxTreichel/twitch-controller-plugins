@@ -1,15 +1,15 @@
 {
-    "si_tags.add_row": "Add tag",
-    "si_tags.count": "%{count} tag(s)",
-    "si_tags.empty": "No tags yet. While the list is empty, no tick boxes appear on the stream info page.",
-    "si_tags.example": "e.g. “VTuber”",
-    "si_tags.example_line": "[VTuber][German] This is my title",
-    "si_tags.field": "Tags",
-    "si_tags.full": "More than %{count} tags make the row hard to read.",
-    "si_tags.lead": "Define your own tags. On the stream info page they can be ticked individually; the ticked ones appear in square brackets before the title.",
-    "si_tags.name": "Stream info – tags",
-    "si_tags.perm.edit": "may define the own tags.",
-    "si_tags.remove_row": "Remove",
-    "si_tags.saved": "Tags saved. The running title is untouched – it only changes the next time you save on the stream info page.",
-    "si_tags.tab": "Tags"
+  "si_tags.add_row": "Add tag",
+  "si_tags.count": "%{count} tag(s)",
+  "si_tags.empty": "No tags yet. While the list is empty, no tick boxes appear on the stream info page.",
+  "si_tags.example": "e.g. “VTuber”",
+  "si_tags.example_line": "[VTuber][German] This is my title",
+  "si_tags.field": "Tags",
+  "si_tags.full": "More than %{count} tags make the row hard to read.",
+  "si_tags.lead": "Define your own tags. On the stream info page they can be ticked individually; the ticked ones appear in square brackets before the title.",
+  "si_tags.name": "Stream info - Tags",
+  "si_tags.perm.edit": "may define the own tags.",
+  "si_tags.remove_row": "Remove",
+  "si_tags.saved": "Tags saved. The running title is untouched – it only changes the next time you save on the stream info page.",
+  "si_tags.tab": "Tags"
 }

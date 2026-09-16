@@ -1,4 +1,4 @@
-# Tip-Goals – PayPal
+# Tip-Goals - PayPal
 
 Eine **Spendenseite unter `/tips`**: Twitch-Login, Betrag, Ziel
 aussuchen, per PayPal zahlen. Die Spende landet auf dem gewählten Ziel

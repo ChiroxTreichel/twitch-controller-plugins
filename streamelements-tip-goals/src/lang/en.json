@@ -54,7 +54,7 @@
   "se_tip.missing_hint": "Required elements are missing from the markup – it was saved anyway:",
   "se_tip.move_down": "Move down",
   "se_tip.move_up": "Move up",
-  "se_tip.name": "Tip-Goals – StreamElements",
+  "se_tip.name": "Tip-Goals - StreamElements",
   "se_tip.no_credentials": "No StreamElements access is stored yet – that is why the goals do not grow on their own.",
   "se_tip.no_script_hint": "script, iframe, object, embed, style and attributes like onclick are stripped from the markup – this is about appearance.",
   "se_tip.not_ready": "incomplete",

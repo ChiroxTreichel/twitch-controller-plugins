@@ -1,4 +1,4 @@
-# Beispiel-Plugin
+# Beispiel
 
 Ein Plugin ohne jeden Nutzen — dafür ist jede Zeile kommentiert. Es
 zeigt an einem lauffähigen Beispiel, was ein Plugin im Twitch-Controller

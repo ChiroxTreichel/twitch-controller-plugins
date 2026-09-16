@@ -1,11 +1,11 @@
 {
-    "ln_shoutout.error.cooldown": "Twitch rejected the shoutout: cooldown. Two minutes between shoutouts, sixty for the same channel.",
-    "ln_shoutout.error.forbidden": "Twitch denies the shoutout. The “shoutouts” permission is probably missing.",
-    "ln_shoutout.error.no_channel": "No Twitch channel is connected.",
-    "ln_shoutout.error.no_target_id": "The Twitch id of the target channel is unknown.",
-    "ln_shoutout.error.rejected": "Twitch rejected the shoutout: %{reason}",
-    "ln_shoutout.error.unauthorized": "Twitch rejected the sign-in. The channel has to be reconnected.",
-    "ln_shoutout.name": "Live notification – shoutout",
-    "ln_shoutout.no_scope_hint": "Without the “shoutouts” permission Twitch will not accept a shoutout. The channel has to be reconnected once.",
-    "ln_shoutout.target": "Shoutout"
+  "ln_shoutout.error.cooldown": "Twitch rejected the shoutout: cooldown. Two minutes between shoutouts, sixty for the same channel.",
+  "ln_shoutout.error.forbidden": "Twitch denies the shoutout. The “shoutouts” permission is probably missing.",
+  "ln_shoutout.error.no_channel": "No Twitch channel is connected.",
+  "ln_shoutout.error.no_target_id": "The Twitch id of the target channel is unknown.",
+  "ln_shoutout.error.rejected": "Twitch rejected the shoutout: %{reason}",
+  "ln_shoutout.error.unauthorized": "Twitch rejected the sign-in. The channel has to be reconnected.",
+  "ln_shoutout.name": "Live notification - Shoutout",
+  "ln_shoutout.no_scope_hint": "Without the “shoutouts” permission Twitch will not accept a shoutout. The channel has to be reconnected once.",
+  "ln_shoutout.target": "Shoutout"
 }

@@ -1,4 +1,4 @@
-# Throne – Alerts
+# Alerts - Throne
 
 Meldet, was auf deiner [Throne](https://throne.com)-Wunschliste
 passiert: **Geschenke**, **Spenden** und **erreichte Sammelziele** —

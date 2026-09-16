@@ -1,15 +1,15 @@
 {
-    "si_presets.add_row": "Add preset",
-    "si_presets.count": "%{count} preset(s)",
-    "si_presets.empty": "No presets yet. While the list is empty, no picker appears on the stream info page.",
-    "si_presets.example": "e.g. “FFXIV – FATEs”",
-    "si_presets.field": "Preset",
-    "si_presets.full": "More than %{count} presets are no longer findable in the picker.",
-    "si_presets.lead": "Saved stream titles. They appear above the title field on the stream info page.",
-    "si_presets.name": "Stream info – presets",
-    "si_presets.own_text": "— own text —",
-    "si_presets.perm.edit": "may maintain the saved stream titles.",
-    "si_presets.remove_row": "Remove",
-    "si_presets.saved": "Presets saved.",
-    "si_presets.tab": "Presets"
+  "si_presets.add_row": "Add preset",
+  "si_presets.count": "%{count} preset(s)",
+  "si_presets.empty": "No presets yet. While the list is empty, no picker appears on the stream info page.",
+  "si_presets.example": "e.g. “FFXIV – FATEs”",
+  "si_presets.field": "Preset",
+  "si_presets.full": "More than %{count} presets are no longer findable in the picker.",
+  "si_presets.lead": "Saved stream titles. They appear above the title field on the stream info page.",
+  "si_presets.name": "Stream info - Presets",
+  "si_presets.own_text": "— own text —",
+  "si_presets.perm.edit": "may maintain the saved stream titles.",
+  "si_presets.remove_row": "Remove",
+  "si_presets.saved": "Presets saved.",
+  "si_presets.tab": "Presets"
 }

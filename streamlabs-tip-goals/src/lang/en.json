@@ -52,7 +52,7 @@
   "sl_tip.missing_hint": "Required elements are missing from the markup – it was saved anyway:",
   "sl_tip.move_down": "Move down",
   "sl_tip.move_up": "Move up",
-  "sl_tip.name": "Tip-Goals – Streamlabs",
+  "sl_tip.name": "Tip-Goals - Streamlabs",
   "sl_tip.no_credentials": "No Streamlabs access is stored yet – that is why the goals do not grow on their own.",
   "sl_tip.no_script_hint": "script, iframe, object, embed, style and attributes like onclick are stripped from the markup – this is about appearance.",
   "sl_tip.not_ready": "incomplete",
