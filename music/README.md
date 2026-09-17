@@ -48,6 +48,19 @@ hängt es am Rechtesystem: der Besucher auf `/music` ist kein
 angemeldeter Benutzer, aber wenn es zu seiner Twitch-Kennung einen
 Benutzer hier drin gibt, gelten dessen Rechte.
 
+## Suche und Markt
+
+Spotify verlangt bei der Suche einen **Markt** — ohne ihn antwortet es
+mit `400 Invalid limit`, einer Meldung, die woandershin zeigt als der
+Fehler liegt. Das alte System hatte dafür ein festes `market=DE` im
+Code; hier kommt das Land aus dem **verbundenen Konto** (`/me` →
+`country`) und wird beim Verbinden mitgespeichert. Wer aus Österreich
+streamt, bekommt sonst Titel angeboten, die er nicht abspielen kann.
+
+Steht dort nichts — etwa weil die Verbindung älter ist als diese
+Einstellung —, gilt `DE`. Beim nächsten *Neu anmelden* steht das
+richtige Land drin.
+
 ## Die Bannliste
 
 Vier Arten, in der Prüfreihenfolge des alten Systems:

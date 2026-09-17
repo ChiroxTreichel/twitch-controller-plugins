@@ -397,11 +397,46 @@ final class Music
         return $app->settings->string('account_name', '', self::scope());
     }
 
+    /**
+     * Das Land, in dem gesucht wird.
+     *
+     * Spotify braucht es: ohne Markt weist es die Suche ab. Das alte
+     * System hatte dafuer ein festes "DE" im Code - hier kommt es aus
+     * dem verbundenen Konto, denn wer aus Oesterreich streamt, bekommt
+     * sonst Titel angeboten, die er nicht abspielen kann.
+     *
+     * DE ist der Rueckfall, nicht die Regel: eine Verbindung, die vor
+     * dieser Aenderung entstanden ist, hat das Land noch nicht
+     * gespeichert.
+     */
+    public const DEFAULT_MARKET = 'DE';
+
+    public static function market(App $app): string
+    {
+        return self::normalizeMarket($app->settings->string('account_country', '', self::scope()));
+    }
+
+    /**
+     * Ein Laenderkennzeichen nach ISO 3166-1 alpha-2 - oder der
+     * Rueckfall.
+     *
+     * Zwei Buchstaben, sonst nichts: was Spotify nicht kennt, macht
+     * aus einer Suche eine Fehlermeldung, und dann lieber DE als gar
+     * keine Treffer.
+     */
+    public static function normalizeMarket(string $wert): string
+    {
+        $wert = strtoupper(trim($wert));
+
+        return preg_match('/^[A-Z]{2}$/', $wert) === 1 ? $wert : self::DEFAULT_MARKET;
+    }
+
     public static function disconnect(App $app): void
     {
         $app->settings->set('refresh_token', null, self::scope());
         $app->settings->set('access_token', null, self::scope());
         $app->settings->set('token_expires', 0, self::scope());
         $app->settings->set('account_name', '', self::scope());
+        $app->settings->set('account_country', '', self::scope());
     }
 }

@@ -101,14 +101,28 @@ final class Spotify
             return $antwort;
         }
 
-        // Wessen Konto ist das? Nur fuer die Anzeige - damit auf der
-        // Einstellungsseite steht, WOMIT man verbunden ist.
+        // Wessen Konto ist das? Der Name ist fuer die Anzeige - damit
+        // auf der Einstellungsseite steht, WOMIT man verbunden ist.
         $ich = $this->get('/me');
 
         if (is_array($ich) && isset($ich['display_name'])) {
             $this->app->settings->set(
                 'account_name',
                 (string) $ich['display_name'],
+                Music::scope()
+            );
+        }
+
+        /*
+         * Das Land wird gebraucht und nicht nur angezeigt: Spotify
+         * verlangt bei der Suche einen Markt. Es steht im Konto, also
+         * wird es hier mitgenommen - eine Frage weniger an Spotify bei
+         * jeder Suche.
+         */
+        if (is_array($ich) && isset($ich['country'])) {
+            $this->app->settings->set(
+                'account_country',
+                Music::normalizeMarket((string) $ich['country']),
                 Music::scope()
             );
         }
@@ -361,10 +375,15 @@ final class Spotify
             return [];
         }
 
+        /*
+         * Aufbau wie im alten System (type, market, limit, q). Der
+         * Markt muss mit: ohne ihn antwortet Spotify mit 400.
+         */
         $daten = $this->get('/search?' . http_build_query([
-            'q'     => $begriff,
-            'type'  => 'track',
-            'limit' => max(1, min(50, $limit)),
+            'type'   => 'track',
+            'market' => Music::market($this->app),
+            'limit'  => max(1, min(50, $limit)),
+            'q'      => $begriff,
         ]));
 
         /*
@@ -393,9 +412,10 @@ final class Spotify
         }
 
         $daten = $this->get('/search?' . http_build_query([
-            'q'     => $begriff,
-            'type'  => 'artist',
-            'limit' => max(1, min(50, $limit)),
+            'type'   => 'artist',
+            'market' => Music::market($this->app),
+            'limit'  => max(1, min(50, $limit)),
+            'q'      => $begriff,
         ]));
 
         if ($daten === false) {
