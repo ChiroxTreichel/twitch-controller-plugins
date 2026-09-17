@@ -1,0 +1,123 @@
+/*
+ * ===================================================================
+ *  Der laufende Titel im Overlay
+ * ===================================================================
+ *
+ * Aufbau wie im alten obs.php: Bild links, darueber Titel und
+ * Interpret, darunter "gewuenscht von", ganz unten ein
+ * Fortschrittsbalken.
+ *
+ * Das Alte hatte einen weissen Grund mit A0 Deckkraft - im Stream ein
+ * heller Kasten. Hier ist es dasselbe Dunkel wie im Aktivitaeten-Dock,
+ * damit Overlay und Dock nebeneinander nicht nach zwei Programmen
+ * aussehen.
+ */
+
+#ov-slot-music {
+    /*
+     * Der Platz ist so gross wie eingestellt. Der Inhalt fuellt ihn -
+     * darum height:100%, sonst haengt die Leiste oben im Kasten und
+     * der Fortschrittsbalken irgendwo in der Luft.
+     */
+    height: 100%;
+}
+
+.music-bar {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    box-sizing: border-box;
+    padding: 10px 12px;
+    border-radius: 12px;
+    background: rgba(8, 10, 18, 0.82);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    color: #e9ecf1;
+    font: 16px/1.4 "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+
+    /* Nichts laeuft: dann ist der Kasten weg und nicht leer. */
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.music-bar.is-on { opacity: 1; }
+
+.music-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.music-cover {
+    width: 56px;
+    height: 56px;
+    flex: none;
+    border-radius: 8px;
+    object-fit: cover;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+/*
+ * min-width:0 ist der Grund, warum der Text ueberhaupt kuerzt: ein
+ * Flex-Kind ist von sich aus so breit wie sein Inhalt, und dann ragt
+ * ein langer Titel aus dem Kasten heraus, statt mit "..." zu enden.
+ */
+.music-text {
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.music-title,
+.music-artist,
+.music-wish {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.music-title {
+    font-size: 20px;
+    font-weight: 700;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+.music-artist {
+    font-size: 15px;
+    color: #c6cddb;
+}
+
+.music-wish {
+    font-size: 13px;
+    color: #b06cff;
+}
+
+/* --- Der Fortschritt ----------------------------------------------- */
+
+.music-bar-progress {
+    height: 5px;
+    margin-top: 8px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.12);
+    overflow: hidden;
+    flex: none;
+}
+
+.music-bar-fill {
+    display: block;
+    height: 100%;
+    width: 0;
+    border-radius: 999px;
+    background: #b06cff;
+
+    /*
+     * Ohne Uebergang springt der Balken bei jeder Nachricht. Mit einem
+     * langen liefe er der Wahrheit hinterher - eine Sekunde ist der
+     * Takt, in dem das Skript ohnehin nachrechnet.
+     */
+    transition: width 1s linear;
+}
+
+/* Nichts zu zeigen: dann auch kein Balken. */
+.music-bar[data-duration="0"] .music-bar-progress { display: none; }

@@ -1,0 +1,283 @@
+<?php
+
+declare(strict_types=1);
+
+namespace TwitchController\Plugin\Music;
+
+use TwitchController\Core\App;
+use TwitchController\Core\Config\Settings;
+
+/**
+ * ===================================================================
+ *  Songwuensche: was eingestellt ist
+ * ===================================================================
+ *
+ * Im alten System stand das an drei Orten: die Zugangsdaten in einer
+ * .env, der Schalter und die Abkuehlzeit in token.json (mitten unter
+ * den Zugangstoken), und die Regeln als fuenf <li> im HTML.
+ *
+ * Hier liegt alles in den Einstellungen dieses Plugins. Die
+ * Zugangsdaten verschluesselt - sie stehen sonst im Klartext in der
+ * Datenbank, und ein Spotify-Konto ist ein Konto.
+ */
+final class Music
+{
+    public const SLUG = 'music';
+
+    /**
+     * Wie lange ein Zuschauer zwischen zwei Wuenschen warten muss.
+     *
+     * Vorgabe wie im alten System. Die Grenzen sind dieselben wie im
+     * alten Formular: unter einer Minute ist keine Abkuehlzeit, ueber
+     * einer Stunde keine Warteschlange mehr.
+     */
+    public const DEFAULT_COOLDOWN = 15;
+    public const MIN_COOLDOWN = 1;
+    public const MAX_COOLDOWN = 60;
+
+    /**
+     * Die Regeln, die der Zuschauer annehmen muss.
+     *
+     * Im alten System standen sie fest im HTML - wer sie aendern
+     * wollte, aenderte eine PHP-Datei. Es sind die fuenf von dort, als
+     * Vorgabe: wer nichts eintraegt, bekommt sie und muss sich nicht
+     * erst welche ausdenken.
+     *
+     * @var list<string>
+     */
+    public const DEFAULT_RULES = [
+        'Keine politische Musik - weder links, noch rechts, noch sonstwas.',
+        'Keine deutsche Schlagermusik.',
+        'Kein "boeser" Deutschrap.',
+        'Keine Musik, die von Selbstschaedigung handelt.',
+        'Parodie-/Comedysongs sind nur auf Nachfrage erlaubt.',
+    ];
+
+    /** Mehr Regeln liest niemand, und laenger auch nicht. */
+    public const MAX_RULES = 20;
+    public const MAX_RULE_LENGTH = 200;
+
+    public static function scope(): string
+    {
+        return Settings::pluginScope(self::SLUG);
+    }
+
+    // -----------------------------------------------------------------
+    //  Der Betrieb
+    // -----------------------------------------------------------------
+
+    /**
+     * Nimmt die Seite ueberhaupt Wuensche an?
+     *
+     * Getrennt vom Plugin-Schalter: das Plugin kann laufen - Overlay,
+     * Warteschlange, Bannliste - waehrend gerade niemand wuenschen
+     * soll. Genau dafuer gab es im alten Admin das Auswahlfeld
+     * "Songwuensche erlauben".
+     */
+    public static function enabled(App $app): bool
+    {
+        return $app->settings->bool('enabled', true, self::scope());
+    }
+
+    public static function setEnabled(App $app, bool $an): void
+    {
+        $app->settings->set('enabled', $an, self::scope());
+    }
+
+    /** Die Abkuehlzeit in Minuten. */
+    public static function cooldown(App $app): int
+    {
+        return max(self::MIN_COOLDOWN, min(
+            self::MAX_COOLDOWN,
+            $app->settings->int('cooldown', self::DEFAULT_COOLDOWN, self::scope())
+        ));
+    }
+
+    /**
+     * Die Regeln, Zeile fuer Zeile.
+     *
+     * Gespeichert als ein Textfeld mit Zeilenumbruechen und nicht als
+     * Liste von Feldern: es sind fuenf Saetze, und ein Textfeld ist
+     * dafuer das einfachere Werkzeug - hinein, heraus, fertig.
+     *
+     * @return list<string>
+     */
+    public static function rules(App $app): array
+    {
+        $roh = trim($app->settings->string('rules', '', self::scope()));
+
+        if ($roh === '') {
+            return self::DEFAULT_RULES;
+        }
+
+        return self::parseRules($roh);
+    }
+
+    /**
+     * Aus einem Textfeld eine Liste.
+     *
+     * Ohne App, damit sich genau das pruefen laesst: leere Zeilen,
+     * Aufzaehlungszeichen, die jemand mitkopiert, und die Grenzen.
+     *
+     * @return list<string>
+     */
+    public static function parseRules(string $text): array
+    {
+        $zeilen = [];
+
+        foreach (preg_split('/\R/u', $text) ?: [] as $zeile) {
+            // Wer eine Liste aus einem Dokument kopiert, bringt die
+            // Punkte und Striche mit. Die stehen auf der Seite ohnehin
+            // schon davor - zweimal sieht nach Fehler aus.
+            $zeile = trim((string) preg_replace('/^\s*[-*\x{2022}\x{2013}]\s*/u', '', $zeile));
+
+            if ($zeile === '') {
+                continue;
+            }
+
+            if (preg_match('/^.{0,' . self::MAX_RULE_LENGTH . '}/us', $zeile, $treffer) === 1) {
+                $zeile = $treffer[0];
+            }
+
+            $zeilen[] = $zeile;
+
+            if (count($zeilen) >= self::MAX_RULES) {
+                break;
+            }
+        }
+
+        return $zeilen;
+    }
+
+    public static function setRules(App $app, string $text): void
+    {
+        $app->settings->set('rules', implode("\n", self::parseRules($text)), self::scope());
+    }
+
+    // -----------------------------------------------------------------
+    //  Wie gross der Platz im Overlay ist
+    // -----------------------------------------------------------------
+
+    /**
+     * Vorgabe: so breit, dass ein langer Titel neben das Bild passt,
+     * und so hoch wie Bild plus Fortschrittsbalken.
+     *
+     * Im alten System gab es das nicht - die Seite fuellte die
+     * Browserquelle, und die Groesse stellte man in OBS ein. Hier
+     * gehoert der Platz in eine Flaeche mit anderen, und dafuer muss
+     * seine Groesse bekannt sein.
+     */
+    public const DEFAULT_WIDTH = 560;
+    public const DEFAULT_HEIGHT = 120;
+
+    /**
+     * Die Grenzen sind weit: eine Buehne kann 3840 breit sein, und wer
+     * nur das Bild will, nimmt 80. Zu klein waere trotzdem keine
+     * Anzeige mehr, sondern ein Fleck.
+     */
+    public const MIN_SIZE = 80;
+    public const MAX_SIZE = 3840;
+
+    public static function width(App $app): int
+    {
+        return self::size($app->settings->int('width', self::DEFAULT_WIDTH, self::scope()), self::DEFAULT_WIDTH);
+    }
+
+    public static function height(App $app): int
+    {
+        return self::size($app->settings->int('height', self::DEFAULT_HEIGHT, self::scope()), self::DEFAULT_HEIGHT);
+    }
+
+    /**
+     * Eine Groesse auf den erlaubten Bereich bringen.
+     *
+     * Die 0 ist ausdruecklich die Vorgabe und nicht das Kleinstmass:
+     * ein leeres Feld heisst "wie vorgesehen", und das ist die
+     * haeufigste Eingabe.
+     */
+    public static function size(int $wert, int $vorgabe): int
+    {
+        if ($wert <= 0) {
+            return $vorgabe;
+        }
+
+        return max(self::MIN_SIZE, min(self::MAX_SIZE, $wert));
+    }
+
+    // -----------------------------------------------------------------
+    //  Der Zugang zu Spotify
+    // -----------------------------------------------------------------
+
+    /**
+     * Die Anwendungsdaten aus dem Spotify-Entwicklerkonto.
+     *
+     * Die Kennung ist oeffentlich - sie steht in jeder Adresse, die zu
+     * Spotify fuehrt. Das Geheimnis nicht, darum verschluesselt.
+     */
+    public static function clientId(App $app): string
+    {
+        return trim($app->settings->string('client_id', '', self::scope()));
+    }
+
+    public static function clientSecret(App $app): string
+    {
+        return $app->settings->secret('client_secret', '', self::scope());
+    }
+
+    public static function hasCredentials(App $app): bool
+    {
+        return self::clientId($app) !== ''
+            && $app->settings->hasSecret('client_secret', self::scope());
+    }
+
+    /**
+     * Wohin Spotify nach der Anmeldung zurueckschickt.
+     *
+     * Muss im Entwicklerkonto Zeichen fuer Zeichen genauso eingetragen
+     * sein - Spotify vergleicht stur. Darum wird sie hier gebaut und
+     * nicht eingetippt: eine abgetippte Adresse ist eine Fehlerquelle,
+     * die man erst beim Anmelden bemerkt.
+     */
+    public static function redirectUri(App $app): string
+    {
+        return $app->url('/account/music/callback');
+    }
+
+    /**
+     * Die Freigaben, die wir brauchen.
+     *
+     * Genau die des alten Systems, und keine mehr:
+     *
+     *   user-modify-playback-state   Titel in die Warteschlange
+     *   user-read-playback-state     was laeuft, Lautstaerke, Geraet
+     *   user-read-currently-playing  der laufende Titel
+     *   user-read-recently-played    der Titel davor
+     *   user-library-modify          "in die Bibliothek" im Panel
+     */
+    public const SCOPES = [
+        'user-modify-playback-state',
+        'user-read-playback-state',
+        'user-read-currently-playing',
+        'user-read-recently-played',
+        'user-library-modify',
+    ];
+
+    public static function isConnected(App $app): bool
+    {
+        return $app->settings->hasSecret('refresh_token', self::scope());
+    }
+
+    /** Der Name des verbundenen Spotify-Kontos, fuer die Anzeige. */
+    public static function accountName(App $app): string
+    {
+        return $app->settings->string('account_name', '', self::scope());
+    }
+
+    public static function disconnect(App $app): void
+    {
+        $app->settings->set('refresh_token', null, self::scope());
+        $app->settings->set('access_token', null, self::scope());
+        $app->settings->set('token_expires', 0, self::scope());
+        $app->settings->set('account_name', '', self::scope());
+    }
+}

@@ -1,0 +1,312 @@
+/*
+ * ===================================================================
+ *  Die oeffentliche Musikseite
+ * ===================================================================
+ *
+ * Aufbau wie im alten musik.talutah.de - Kopfzeile, schmale Spalte,
+ * Karten - aber im Farbstil dieses Systems. Das alte war hell mit
+ * Spotify-Gruen; hier gilt dasselbe Dunkel wie in der Verwaltung, denn
+ * daneben steht die Spendenseite und die sieht auch so aus.
+ *
+ * Eigene Datei und nicht admin.css: das bringt Navigation, Tabellen
+ * und Rechteraster mit, und davon braucht diese Seite nichts.
+ */
+
+:root {
+    --bg: #0e1014;
+    --panel: #16191f;
+    --panel-2: #1d2129;
+    --line: #272c36;
+    --ink: #e9ecf1;
+    --muted: #98a1b0;
+    --accent: #9146ff;
+    --accent-ink: #ffffff;
+    --ok: #3ecf8e;
+    --warn: #f5a623;
+    --error: #ef4d4d;
+    --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+a { color: inherit; }
+
+/* --- Kopf und Fuss ------------------------------------------------- */
+
+.top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--line);
+    background: var(--panel);
+
+    /* Auf dem Telefon darf der Kopf umbrechen - der Name eines
+       Kanals kann lang sein, und abgeschnitten hilft er niemandem. */
+    flex-wrap: wrap;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 600;
+    text-decoration: none;
+
+    /* Sonst schiebt ein langer Kanalname die Anmeldung aus dem Bild. */
+    min-width: 0;
+}
+
+.brand-dot {
+    width: 12px;
+    height: 12px;
+    flex: none;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 4px rgba(145, 70, 255, 0.18);
+}
+
+.who {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+}
+
+.who-name {
+    color: var(--muted);
+    font-size: 0.9rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.page {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.foot {
+    padding: 0 16px 32px;
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+/* --- Bausteine ----------------------------------------------------- */
+
+h1 { font-size: 1.45rem; margin: 0 0 8px; }
+h2 { font-size: 1.05rem; margin: 0; }
+
+.lead { color: var(--muted); margin: 0 0 18px; }
+.hint { color: var(--muted); font-size: 0.86rem; }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+
+.card {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 20px;
+    margin-bottom: 16px;
+}
+
+.card-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.grow { flex: 1 1 auto; min-width: 0; }
+
+[hidden] { display: none !important; }
+
+/* --- Knoepfe und Felder -------------------------------------------- */
+
+.btn {
+    display: inline-block;
+    padding: 10px 16px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.btn:hover { filter: brightness(1.08); }
+
+.btn:disabled,
+.btn[disabled] {
+    opacity: 0.45;
+    cursor: not-allowed;
+    filter: none;
+}
+
+.btn-small { padding: 6px 12px; font-size: 0.86rem; }
+
+.btn-ghost {
+    background: transparent;
+    border-color: var(--line);
+    color: var(--ink);
+}
+
+.field {
+    display: block;
+    margin-bottom: 12px;
+}
+
+.field .hint { display: block; margin-bottom: 4px; }
+
+.input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-2);
+    color: var(--ink);
+    font: inherit;
+}
+
+.input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+.input:disabled { opacity: 0.5; }
+
+/* --- Meldungen ----------------------------------------------------- */
+
+.note {
+    padding: 12px 14px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    margin-bottom: 16px;
+}
+
+.note-ok    { border-color: rgba(62, 207, 142, 0.45); background: rgba(62, 207, 142, 0.10); }
+.note-warn  { border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.10); }
+.note-error { border-color: rgba(239, 77, 77, 0.45);  background: rgba(239, 77, 77, 0.10); }
+
+.badge {
+    display: inline-block;
+    padding: 3px 9px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    font-size: 0.78rem;
+    color: var(--muted);
+}
+
+.badge-ok { border-color: rgba(62, 207, 142, 0.45); color: var(--ok); }
+
+.badge-line { margin: 0 0 14px; }
+
+/* --- Die Regeln ---------------------------------------------------- */
+
+.rules {
+    margin: 0 0 16px;
+    padding-left: 20px;
+}
+
+.rules li { margin-bottom: 6px; }
+
+.rules-box {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
+.rules-box summary {
+    cursor: pointer;
+    color: var(--muted);
+    font-size: 0.9rem;
+}
+
+.rules-box[open] summary { margin-bottom: 10px; }
+
+/* --- Der Wunsch ---------------------------------------------------- */
+
+.wish .field { margin-bottom: 10px; }
+
+/* --- Die Warteschlange --------------------------------------------- */
+
+.track {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-top: 1px solid var(--line);
+    min-width: 0;
+}
+
+/* Der erste Eintrag braucht keine Linie nach oben - darueber steht
+   schon die Ueberschrift. */
+.track:first-child { border-top: 0; }
+
+.track-cover {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    border-radius: 8px;
+    object-fit: cover;
+    background: var(--panel-2);
+}
+
+.track-text { min-width: 0; }
+
+.track-title,
+.track-sub {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.track-sub { color: var(--muted); font-size: 0.86rem; }
+
+.track-wish {
+    display: block;
+    color: var(--accent);
+    font-size: 0.82rem;
+}
+
+/*
+ * Der laufende Titel steht abgesetzt - im alten System war das eine
+ * eigene Ueberschrift "Laeuft gerade" darueber.
+ */
+.track-current {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 12px;
+}
+
+.track-current .track { border-top: 0; padding: 0; }
+
+.queue-label {
+    color: var(--muted);
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+}
