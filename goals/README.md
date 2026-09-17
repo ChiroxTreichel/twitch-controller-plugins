@@ -83,6 +83,31 @@ Aus dem Gerüst fliegen `script`, `iframe`, `object`, `embed`, `style`
 und Attribute wie `onclick` heraus — hier geht es um das Aussehen. Wer
 Verhalten braucht, liefert eine JS-Datei über `overlay.assets` mit.
 
+### `GOALS.patch()` — selbst etwas in den Balken schreiben
+
+Der Zustand liegt in `goals.js` und muss dort liegen: eine Nachricht
+enthält nur einen Ausschnitt, die übrigen Werte müssen erhalten bleiben.
+Ein eigenes Overlay-Skript kommt also nicht heran. Dafür gibt es eine
+kleine Tür:
+
+```js
+window.GOALS.patch({ tip_title: 'Neue Kamera', tip_current: 100, tip_goal: 400 });
+```
+
+Werte hineinreichen, neu zeichnen — mehr nicht. Wann, wie oft und in
+welcher Reihenfolge ist Sache des Aufrufers.
+
+`Overlay.on('goals', …)` nimmt dabei **mehrere** Zuhörer: dieses Plugin
+ist einer davon und hat schon gezeichnet, wenn deiner an die Reihe
+kommt.
+
+Gedacht ist das für Entscheidungen, die nur ein bestimmtes Plugin
+treffen kann. *Tip-Goals - PayPal* lässt den Spender sein Ziel wählen
+und rotiert deshalb im Overlay durch alle Ziele; *StreamElements* und
+*Streamlabs* bekommen ihre Spenden aus einer Schnittstelle, die nichts
+von Zielen weiß, und bleiben beim obersten. Beides ist richtig — und
+genau darum steht es nicht hier.
+
 ## Rechte
 
 | Recht | erlaubt |

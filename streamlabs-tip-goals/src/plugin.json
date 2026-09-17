@@ -1,12 +1,12 @@
 {
   "slug": "streamlabs-tip-goals",
   "name": "Tip-Goals - Streamlabs",
-  "version": "1.3.0",
+  "version": "1.2.2",
   "description": "Spendenziele als Balken im Overlay, gespeist aus Streamlabs. Jede Spende geht auf das oberste Ziel der Liste.",
   "author": "Twitch-Controller",
   "requires": {
     "core": ">=2.3.0",
-    "goals": ">=1.3.0"
+    "goals": ">=1.2.0"
   },
   "optional": {},
   "conflicts": {

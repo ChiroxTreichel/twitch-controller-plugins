@@ -318,45 +318,25 @@ final class TipGoals
      */
     public static function values(App $app): array
     {
-        /*
-         * Die ganze Liste und nicht nur das erste Ziel.
-         *
-         * Wer drei Ziele pflegt, sah bisher eines - im alten System
-         * wanderte der Balken alle 60 Sekunden zum naechsten weiter.
-         * Das Weiterdrehen macht goals.js; hier steht nur, WAS es
-         * durchlaeuft.
-         *
-         * Ohne Betrag ist ein Eintrag kein Ziel, sondern eine Zeile,
-         * die noch auszufuellen ist - angelegt wird sie leer. Eine
-         * Minute lang einen leeren Balken zu zeigen, waere die
-         * woertlichere, aber schlechtere Uebernahme.
-         */
-        $liste = [];
-
-        foreach (self::all($app) as $eines) {
-            if ($eines['target'] > 0) {
-                $liste[] = [
-                    'title'   => $eines['title'],
-                    'current' => $eines['current'],
-                    'goal'    => $eines['target'],
-                ];
-            }
-        }
-
         $ziel = self::first($app);
 
         if ($ziel === null) {
-            return ['tip_title' => '', 'tip_current' => 0.0, 'tip_goal' => 0.0, 'tip_goals' => []];
+            return ['tip_title' => '', 'tip_current' => 0.0, 'tip_goal' => 0.0];
         }
 
+        /*
+         * Nur das oberste Ziel, und das ist hier die ganze Wahrheit:
+         * eine Spende aus der Schnittstelle weiss nichts von Zielen und
+         * landet immer dort. Die Spendenseite von PayPal schickt
+         * zusaetzlich die ganze Liste, weil dort der Spender waehlt -
+         * und rotiert damit im Overlay durch. Hier waere das eine
+         * Behauptung: ein Ziel im Balken, auf das nichts einzahlen
+         * kann.
+         */
         return [
-            // Die flachen Werte bleiben: sie sind der Anfangszustand,
-            // bevor das erste Weiterdrehen passiert, und ein Geruest,
-            // das nur sie kennt, funktioniert unveraendert weiter.
             'tip_title'   => $ziel['title'],
             'tip_current' => $ziel['current'],
             'tip_goal'    => $ziel['target'],
-            'tip_goals'   => $liste,
         ];
     }
 

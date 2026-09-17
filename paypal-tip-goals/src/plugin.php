@@ -64,6 +64,26 @@ $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     return $assets;
 });
 
+/*
+ * Im Overlay: durch die Ziele rotieren.
+ *
+ * Nur hier und nicht bei den anderen beiden Spendenquellen - auf
+ * dieser Seite waehlt der Spender sein Ziel, also ist jedes in der
+ * Liste eines, auf das gerade eingezahlt werden kann. Wo die Spende
+ * aus einer Schnittstelle kommt und immer auf dem obersten landet,
+ * zeigte ein rotierender Balken ein Ziel, auf das nichts einzahlen
+ * kann.
+ *
+ * Nach Goals: das Skript braucht dessen GOALS.patch. Die Reihenfolge
+ * ergibt sich von selbst, weil dieses Plugin Goals voraussetzt und
+ * die Ladereihenfolge den Abhaengigkeiten folgt.
+ */
+$hooks->on('overlay.assets', static function (array $assets) use ($app): array {
+    $assets['js'][] = $app->asset('/plugin/paypal-tip-goals/assets/tips-overlay.js');
+
+    return $assets;
+});
+
 $hooks->on('plugin.settings', static function (array $links): array {
     $links[TipGoals::SLUG] = [
         'label' => translate('pp_tip.settings'),

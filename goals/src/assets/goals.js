@@ -82,105 +82,6 @@
         return Overlay.slot(SLOT);
     }
 
-    // -----------------------------------------------------------------
-    //  Mehrere Ziele derselben Art: durchrotieren
-    // -----------------------------------------------------------------
-    /*
-     * Wer drei Spendenziele pflegt, sieht sonst nur das erste. Im alten
-     * System wanderte der Balken alle 60 Sekunden zum naechsten weiter,
-     * und genau das fehlte hier.
-     *
-     * Der Vertrag ist eine Erweiterung des bestehenden: schickt eine
-     * Quelle zusaetzlich "<art>_goals" als Liste, gilt sie als
-     * Reihenfolge, und daraus werden reihum die flachen Werte
-     * "<art>_title", "<art>_current" und "<art>_goal" gefuellt. Ein
-     * Geruest, das nur die drei kennt, merkt davon nichts - das ist der
-     * Sinn: kopierte Gerueste aus dem alten System rotieren mit, ohne
-     * geaendert zu werden.
-     *
-     * Eine Quelle, die nur ein Ziel hat, schickt die Liste gar nicht
-     * erst und bleibt, wie sie war.
-     */
-    var ROTATION_MS = 60000;
-
-    /** Bei welchem Eintrag jede Art gerade steht. */
-    var stelle = {};
-
-    /** @return {Array<string>} die Arten, die eine Liste mitgeschickt haben */
-    function arten() {
-        var gefunden = [];
-        var namen = Object.keys(zustand);
-
-        for (var i = 0; i < namen.length; i++) {
-            var name = namen[i];
-
-            if (name.length > 6
-                && name.slice(-6) === '_goals'
-                && Object.prototype.toString.call(zustand[name]) === '[object Array]') {
-                gefunden.push(name.slice(0, -6));
-            }
-        }
-
-        return gefunden;
-    }
-
-    /*
-     * Den gerade sichtbaren Eintrag in die flachen Werte schreiben.
-     *
-     * Nach JEDER Nachricht und nicht nur beim Weiterdrehen: kommt eine
-     * Spende herein, aendert sich der Betrag in der Liste, und der
-     * Balken zeigte sonst weiter den Stand von vorhin.
-     */
-    function uebernehmen() {
-        var gefunden = arten();
-
-        for (var i = 0; i < gefunden.length; i++) {
-            var art = gefunden[i];
-            var liste = zustand[art + '_goals'];
-
-            if (liste.length === 0) {
-                continue;
-            }
-
-            // Die Liste kann kuerzer geworden sein - ein geloeschtes
-            // Ziel darf nicht in eine leere Anzeige laufen.
-            var eintrag = liste[(stelle[art] || 0) % liste.length];
-
-            if (!eintrag) {
-                continue;
-            }
-
-            zustand[art + '_title'] = eintrag.title;
-            zustand[art + '_current'] = eintrag.current;
-            zustand[art + '_goal'] = eintrag.goal;
-        }
-    }
-
-    function weiterdrehen() {
-        var gefunden = arten();
-        var etwasGetan = false;
-
-        for (var i = 0; i < gefunden.length; i++) {
-            var art = gefunden[i];
-            var laenge = zustand[art + '_goals'].length;
-
-            // Bei einem einzigen Ziel gibt es nichts zu drehen - und
-            // ein Balken, der ohne Grund neu gezeichnet wird, kann
-            // seine Uebergaenge neu anstossen.
-            if (laenge > 1) {
-                stelle[art] = ((stelle[art] || 0) + 1) % laenge;
-                etwasGetan = true;
-            }
-        }
-
-        if (etwasGetan) {
-            uebernehmen();
-            zeichnen();
-        }
-    }
-
-    window.setInterval(weiterdrehen, ROTATION_MS);
-
     function zeichnen() {
         var wurzel = kasten();
         if (!wurzel) {
@@ -244,7 +145,6 @@
         }
 
         wurzel.innerHTML = html;
-        uebernehmen();
         zeichnen();
     }
 
@@ -262,9 +162,43 @@
             zustand[namen[i]] = daten[namen[i]];
         }
 
-        uebernehmen();
         zeichnen();
     });
+
+    /*
+     * Fuer Plugins, die selbst etwas in den Balken schreiben wollen.
+     *
+     * Der Zustand liegt hier - er muss hier liegen, weil eine
+     * Nachricht nur einen Ausschnitt enthaelt und die uebrigen Werte
+     * erhalten bleiben muessen. Ein anderes Skript kommt also nicht
+     * heran, und ohne diese Tuer bliebe ihm nur, seine Sache in DIESE
+     * Datei zu schreiben.
+     *
+     * Genau das war der erste Anlauf beim Durchrotieren der
+     * Spendenziele: eine allgemeine Mechanik hier, die nur EIN Plugin
+     * angeht. Wer die Ziele auswaehlen laesst, rotiert; wer immer auf
+     * das oberste bucht, darf es nicht - sonst zeigt der Balken ein
+     * Ziel, auf das gerade nichts einzahlen kann. Diese Entscheidung
+     * gehoert in das Plugin, das sie trifft.
+     *
+     * Absichtlich klein: Werte hineinreichen und neu zeichnen. Alles
+     * Weitere - wann, wie oft, in welcher Reihenfolge - ist Sache des
+     * Aufrufers.
+     */
+    window.GOALS = window.GOALS || {};
+
+    window.GOALS.patch = function (werte) {
+        if (!werte || typeof werte !== 'object') {
+            return;
+        }
+
+        var namen = Object.keys(werte);
+        for (var i = 0; i < namen.length; i++) {
+            zustand[namen[i]] = werte[namen[i]];
+        }
+
+        zeichnen();
+    };
 
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', einsetzen);

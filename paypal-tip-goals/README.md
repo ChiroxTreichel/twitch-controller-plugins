@@ -36,6 +36,31 @@ Darum verträgt sich dieses Plugin mit keinem der beiden: nebeneinander
 zählte jede Spende doppelt. Der Marktplatz lässt das zweite gar nicht
 erst installieren.
 
+Und es ist der Grund, warum der Balken im Overlay **hier** durch alle
+Ziele rotiert und dort nicht — siehe unten.
+
+## Der Balken rotiert durch die Ziele
+
+Alle 60 Sekunden wandert er zum nächsten Ziel, wie im alten System.
+Wer drei Ziele pflegt, sieht auch alle drei.
+
+Nur hier: weil der Spender sein Ziel wählt, ist jedes in der Liste eines,
+auf das gerade eingezahlt werden kann. Wo die Spende aus einer
+Schnittstelle kommt und immer auf dem obersten landet, zeigte ein
+rotierender Balken ein Ziel, auf das nichts einzahlen kann.
+
+Ein Ziel **ohne Betrag** fällt aus der Rotation. Angelegt wird es leer,
+und eine Minute lang einen leeren Balken zu zeigen wäre die wörtlichere,
+aber schlechtere Übernahme.
+
+Kommt eine Spende herein, ändert sich der Betrag sofort — auch wenn
+gerade ein anderes Ziel zu sehen ist als das, auf das gebucht wurde.
+
+Am Gerüst ändert das **nichts**: `tip_title`, `tip_current` und
+`tip_goal` bleiben die Namen, an denen `data-bind` und `data-fill`
+hängen. Ein aus dem alten System kopiertes Gerüst rotiert unverändert
+mit.
+
 ## Bis zum Schluss fließt kein Geld
 
 Der Weg hat drei Schritte, und zwischen zweien davon ist der Spender
