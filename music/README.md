@@ -83,14 +83,47 @@ die Auskunft, mit der der Zuschauer etwas anfangen kann.
 
 ## Die öffentliche Seite
 
-Drei Abschnitte in der Reihenfolge der *ersten* Fassung des alten
-Systems: **Läuft gerade**, **Zuletzt gespielt** (drei Titel) und **Als
-Nächstes**. Der mittlere war später verschwunden; er beantwortet „wie
-hieß das eben nochmal?", und diese Frage kommt sonst im Chat.
+Aufbau, Texte und Knopfbeschriftungen sind die des alten Systems.
+Geändert sind nur die Farben — das Dunkel dieses Systems statt des
+hellen Blau von damals.
+
+**Zwei Spalten.** Links die Songwünsche, rechts die Warteschlange.
+Oben links „Regeln anzeigen", oben rechts „Einstellungen" für alle, die
+sie sehen dürfen.
+
+Links **drei Reiter**:
+
+| | |
+| --- | --- |
+| Favoriten | die eigene Merkliste, „Senden" und „Löschen" je Eintrag |
+| Suche | tippen und aus den Treffern „Auswählen" oder „Favorit" |
+| Manuell eintragen | der Spotify-Teilen-Link, wie gehabt |
+
+Die **Suche** ist der wichtigste davon: mit ihr kommt auch jemand
+zurecht, der selbst kein Spotify hat und deshalb keinen Teilen-Link
+kopieren kann.
+
+Steht die Wartezeit noch, steht statt des Feldes der **Zähler** — „Du
+kannst dir in 12:25 einen Song wünschen." — und er läuft auch im
+Fenstertitel mit.
+
+Rechts drei Abschnitte in der Reihenfolge der *ersten* Fassung des
+alten Systems: **Läuft gerade**, **Zuletzt gespielt** (drei Titel) und
+**Als Nächstes**. Der mittlere war später verschwunden; er beantwortet
+„wie hieß das eben nochmal?", und diese Frage kommt sonst im Chat.
 
 Der laufende Titel fällt aus „Zuletzt gespielt" heraus — Spotify führt
 ihn dort schon, sobald er ein paar Sekunden läuft, und zweimal
 untereinander sieht nach Fehler aus.
+
+Jede Zeile hat **„Favorit"**, solange der Titel nicht schon gemerkt
+ist. Am laufenden steht zusätzlich **„Bannen"** — im alten System an
+zwei fest eingetragene Twitch-Kennungen gebunden, hier an das Recht
+*Sperren verwalten*.
+
+Das **Regelfenster** geht von selbst auf, solange die Regeln nicht
+angenommen sind, und lässt sich dann nicht wegklicken. Danach ist es
+der Knopf oben links.
 
 ## Im Overlay
 
@@ -148,7 +181,6 @@ Die Adresse steht in den Einstellungen zum Herauskopieren.
 
 ## Noch nicht da
 
-Die **Merkliste** („Favoriten") hat ihre Tabelle, aber noch keine
-Oberfläche. Ebenso die Steuerung des alten Panels — Lautstärke, weiter,
-zurück, „in die Bibliothek". Der Draht dorthin (`Spotify::setVolume`,
-`next`, `previous`, `saveTrack`) steht schon.
+Die Steuerung des alten Panels — Lautstärke, weiter, zurück, „in die
+Bibliothek". Der Draht dorthin (`Spotify::setVolume`, `next`,
+`previous`, `saveTrack`) steht schon.

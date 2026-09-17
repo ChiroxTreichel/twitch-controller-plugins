@@ -3,10 +3,15 @@
  *  Die oeffentliche Musikseite
  * ===================================================================
  *
- * Aufbau wie im alten musik.talutah.de - Kopfzeile, schmale Spalte,
- * Karten - aber im Farbstil dieses Systems. Das alte war hell mit
- * Spotify-Gruen; hier gilt dasselbe Dunkel wie in der Verwaltung, denn
- * daneben steht die Spendenseite und die sieht auch so aus.
+ * Aufbau Klasse fuer Klasse aus dem alten musik.talutah.de
+ * (public/assets/style.css): Kopfzeile, zwei Spalten, Karten, Reiter
+ * als Pillen, Medienzeilen. Wer die alte Seite kannte, findet hier
+ * alles an derselben Stelle.
+ *
+ * Geaendert sind nur die Farben. Das alte war hell - weisse Karten auf
+ * hellem Grau, Indigo als Akzent. Hier gilt dasselbe Dunkel wie in der
+ * Verwaltung und auf der Spendenseite, denn das ist der Stil dieses
+ * Systems.
  *
  * Eigene Datei und nicht admin.css: das bringt Navigation, Tabellen
  * und Rechteraster mit, und davon braucht diese Seite nichts.
@@ -20,48 +25,80 @@
     --ink: #e9ecf1;
     --muted: #98a1b0;
     --accent: #9146ff;
+    --accent-soft: rgba(145, 70, 255, 0.14);
     --accent-ink: #ffffff;
+    --accent-pale: #cdb4ff;
     --ok: #3ecf8e;
     --warn: #f5a623;
     --error: #ef4d4d;
-    --radius: 12px;
+
+    color-scheme: dark;
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+}
 
 body {
     margin: 0;
     background: var(--bg);
     color: var(--ink);
-    font: 15px/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-a { color: inherit; }
+[hidden] {
+    display: none !important;
+}
 
-/* --- Kopf und Fuss ------------------------------------------------- */
+/* --- Kopfzeile ----------------------------------------------------- */
 
-.top {
+#topmenu {
+    color: var(--ink);
+    padding: 14px 24px;
+    font-size: 16px;
+    font-weight: 600;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 14px 20px;
+    gap: 16px;
+    background: rgba(22, 25, 31, 0.9);
     border-bottom: 1px solid var(--line);
-    background: var(--panel);
-
-    /* Auf dem Telefon darf der Kopf umbrechen - der Name eines
-       Kanals kann lang sein, und abgeschnitten hilft er niemandem. */
-    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    backdrop-filter: blur(12px);
+    z-index: 20;
 }
 
+#topmenu a {
+    color: inherit;
+    text-decoration: none;
+}
+
+#topmenu .topmenu-left,
+#topmenu .topmenu-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    /* Auf dem Telefon darf die Kopfzeile umbrechen - ein Kanalname
+       kann lang sein, und abgeschnitten hilft er niemandem. */
+    flex-wrap: wrap;
+    min-width: 0;
+}
+
+#topmenu .topmenu-right {
+    margin-left: auto;
+}
+
+#topmenu .topmenu-right:empty {
+    display: none;
+}
+
+/* Der Kanalname links, wie im alten System der Seitentitel. */
 .brand {
     display: flex;
     align-items: center;
     gap: 10px;
-    font-weight: 600;
-    text-decoration: none;
-
-    /* Sonst schiebt ein langer Kanalname die Anmeldung aus dem Bild. */
     min-width: 0;
 }
 
@@ -74,281 +111,610 @@ a { color: inherit; }
     box-shadow: 0 0 0 4px rgba(145, 70, 255, 0.18);
 }
 
-.who {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    min-width: 0;
+.brand-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .who-name {
     color: var(--muted);
-    font-size: 0.9rem;
+    font-size: 14px;
+    font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.page {
-    max-width: 720px;
-    margin: 0 auto;
-    padding: 24px 16px 48px;
+button.link-button {
+    background: transparent;
+    color: inherit;
+    padding: 8px 14px;
+    border-radius: 999px;
+    transform: none;
 }
 
-.foot {
-    padding: 0 16px 32px;
-    text-align: center;
-    color: var(--muted);
-    font-size: 0.8rem;
+button.link-button:hover {
+    background: var(--accent-soft);
+    transform: none;
 }
 
-/* --- Bausteine ----------------------------------------------------- */
+button.link-button:active {
+    transform: none;
+}
 
-h1 { font-size: 1.45rem; margin: 0 0 8px; }
-h2 { font-size: 1.05rem; margin: 0; }
+/* --- Das Raster ---------------------------------------------------- */
 
-.lead { color: var(--muted); margin: 0 0 18px; }
-.hint { color: var(--muted); font-size: 0.86rem; }
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+#pagewrapper {
+    max-width: 1600px;
+    margin: 40px auto;
+    padding: 0 24px 48px;
+}
+
+.layout {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+}
+
+.layout-left,
+.layout-right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.layout-right {
+    min-width: 320px;
+}
 
 .card {
     background: var(--panel);
+    border-radius: 18px;
+    padding: 28px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
     border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 20px;
-    margin-bottom: 16px;
 }
 
-.card-head {
+.card-header {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    align-items: center;
     gap: 16px;
-    margin-bottom: 12px;
+    margin-bottom: 20px;
 }
 
-.row {
+.card-header h2 {
+    margin: 0;
+    font-weight: 650;
+}
+
+h1, h2, h3, h4 {
+    margin: 0 0 12px;
+    font-weight: 650;
+}
+
+p {
+    margin: 0 0 12px;
+}
+
+.rules-list {
+    padding-left: 20px;
+    margin: 0 0 20px;
     display: flex;
-    gap: 10px;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.muted {
+    color: var(--muted);
+    font-size: 14px;
+}
+
+/* --- Knoepfe ------------------------------------------------------- */
+
+button,
+#twitch_login {
+    display: inline-flex;
     align-items: center;
-    flex-wrap: wrap;
-}
-
-.grow { flex: 1 1 auto; min-width: 0; }
-
-[hidden] { display: none !important; }
-
-/* --- Knoepfe und Felder -------------------------------------------- */
-
-.btn {
-    display: inline-block;
-    padding: 10px 16px;
-    border: 1px solid transparent;
-    border-radius: 10px;
-    background: var(--accent);
-    color: var(--accent-ink);
-    font: inherit;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: 999px;
+    border: none;
     font-weight: 600;
-    text-decoration: none;
+    font-size: 14px;
+    background: var(--accent-soft);
+    color: var(--accent-pale);
     cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    text-decoration: none;
+    font-family: inherit;
 }
 
-.btn:hover { filter: brightness(1.08); }
+button:hover,
+#twitch_login:hover {
+    background: rgba(145, 70, 255, 0.26);
+    transform: translateY(-1px);
+}
 
-.btn:disabled,
-.btn[disabled] {
+button:active,
+#twitch_login:active {
+    transform: translateY(0);
+}
+
+button:disabled {
     opacity: 0.45;
     cursor: not-allowed;
-    filter: none;
+    transform: none;
 }
 
-.btn-small { padding: 6px 12px; font-size: 0.86rem; }
+button.primary {
+    background: var(--accent);
+    color: var(--accent-ink);
+}
 
-.btn-ghost {
-    background: transparent;
-    border-color: var(--line);
+button.primary:hover {
+    background: #a063ff;
+}
+
+button.secondary {
+    background: rgba(255, 255, 255, 0.08);
     color: var(--ink);
 }
 
-.field {
-    display: block;
-    margin-bottom: 12px;
+button.secondary:hover {
+    background: rgba(255, 255, 255, 0.14);
 }
 
-.field .hint { display: block; margin-bottom: 4px; }
-
-.input {
-    width: 100%;
-    padding: 10px 12px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--panel-2);
-    color: var(--ink);
-    font: inherit;
+button.danger {
+    background: rgba(239, 77, 77, 0.16);
+    color: #ff9b9b;
 }
 
-.input:focus {
-    outline: none;
-    border-color: var(--accent);
+button.danger:hover {
+    background: rgba(239, 77, 77, 0.26);
 }
 
-.input:disabled { opacity: 0.5; }
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    background: var(--accent-soft);
+    color: var(--accent-pale);
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.status-inline {
+    margin-left: auto;
+}
 
 /* --- Meldungen ----------------------------------------------------- */
 
-.note {
-    padding: 12px 14px;
-    border: 1px solid var(--line);
-    border-radius: 10px;
+.alert {
+    padding: 12px 16px;
+    border-radius: 14px;
+    font-size: 14px;
     margin-bottom: 16px;
+    border: 1px solid transparent;
 }
 
-.note-ok    { border-color: rgba(62, 207, 142, 0.45); background: rgba(62, 207, 142, 0.10); }
-.note-warn  { border-color: rgba(245, 166, 35, 0.45); background: rgba(245, 166, 35, 0.10); }
-.note-error { border-color: rgba(239, 77, 77, 0.45);  background: rgba(239, 77, 77, 0.10); }
+.alert-info {
+    background: rgba(62, 207, 142, 0.12);
+    border-color: rgba(62, 207, 142, 0.35);
+    color: var(--ok);
+}
 
-.badge {
-    display: inline-block;
-    padding: 3px 9px;
-    border: 1px solid var(--line);
+.alert-danger {
+    background: rgba(239, 77, 77, 0.12);
+    border-color: rgba(239, 77, 77, 0.35);
+    color: #ff9b9b;
+}
+
+.alert-warning {
+    background: rgba(245, 166, 35, 0.12);
+    border-color: rgba(245, 166, 35, 0.35);
+    color: var(--warn);
+}
+
+/* --- Die Reiter ---------------------------------------------------- */
+
+.tabs {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.tab-buttons {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.tab-buttons.pills {
+    background: rgba(255, 255, 255, 0.04);
     border-radius: 999px;
-    font-size: 0.78rem;
-    color: var(--muted);
+    padding: 6px;
 }
 
-.badge-ok { border-color: rgba(62, 207, 142, 0.45); color: var(--ok); }
-
-.badge-line { margin: 0 0 14px; }
-
-/* --- Die Regeln ---------------------------------------------------- */
-
-.rules {
-    margin: 0 0 16px;
-    padding-left: 20px;
-}
-
-.rules li { margin-bottom: 6px; }
-
-/*
- * Die Regeln oben links, neben dem Kanalnamen.
- *
- * Ein <details> und kein Kasten, den JavaScript auf- und zuklappt: so
- * funktioniert es auch ohne, und der Browser kuemmert sich um
- * Tastatur und Vorleser. Das alte System hatte dafuer einen Knopf und
- * ein Modal mit eigenem Skript.
- */
-.rules-pop {
-    position: relative;
-
-    /* Zwischen Marke und Anmeldung, und auf dem Telefon nimmt es
-       nicht die ganze Zeile. */
-    flex: 0 1 auto;
-}
-
-.rules-pop summary {
-    cursor: pointer;
-    color: var(--muted);
-    font-size: 0.9rem;
-    padding: 6px 10px;
-    border: 1px solid var(--line);
+.tab-buttons.pills .tab-button {
     border-radius: 999px;
-    list-style: none;
-    white-space: nowrap;
-    user-select: none;
 }
 
-.rules-pop summary::-webkit-details-marker { display: none; }
-.rules-pop summary:hover { color: var(--ink); }
-.rules-pop[open] summary { color: var(--ink); background: var(--panel-2); }
-
-/*
- * Der Kasten liegt UEBER der Seite und schiebt die Kopfzeile nicht
- * auseinander: sonst huepfte beim Aufklappen alles darunter nach
- * unten.
- */
-.rules-panel {
-    position: absolute;
-    left: 0;
-    top: calc(100% + 8px);
-    z-index: 20;
-    width: max-content;
-
-    /* Auf dem Telefon darf er nicht breiter werden als das Fenster. */
-    max-width: min(420px, calc(100vw - 32px));
-
-    padding: 14px 16px;
-    background: var(--panel);
-    border: 1px solid var(--line);
+.tab-button {
+    padding: 10px 18px;
     border-radius: 12px;
-    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+    border: 1px solid transparent;
+    background: var(--accent-soft);
+    color: var(--accent-pale);
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
-.rules-panel .rules { margin: 0; }
+.tab-button:hover {
+    background: rgba(145, 70, 255, 0.26);
+}
 
-/* --- Der Wunsch ---------------------------------------------------- */
+.tab-button.active {
+    background: var(--accent);
+    color: var(--accent-ink);
+    box-shadow: 0 10px 20px rgba(145, 70, 255, 0.25);
+}
 
-.wish .field { margin-bottom: 10px; }
+.tab-panel {
+    display: none;
+    flex-direction: column;
+    gap: 16px;
+}
 
-/* --- Die Warteschlange --------------------------------------------- */
+.tab-panel.active {
+    display: flex;
+}
 
-.track {
+/* --- Felder -------------------------------------------------------- */
+
+.search-section {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+label {
+    font-weight: 600;
+    display: block;
+    margin-bottom: 6px;
+}
+
+input[type="text"] {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: var(--panel-2);
+    color: var(--ink);
+    font: inherit;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(145, 70, 255, 0.25);
+}
+
+/* --- Medienzeilen -------------------------------------------------- */
+
+.media-list,
+.media-results,
+.queue-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.media-item,
+.queue-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 8px 0;
-    border-top: 1px solid var(--line);
+    gap: 16px;
+    padding: 12px 16px;
+    border-radius: 16px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+}
+
+.media-cover {
+    width: 56px;
+    height: 56px;
+    border-radius: 14px;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: rgba(145, 70, 255, 0.18);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: var(--accent-pale);
+    text-transform: uppercase;
+}
+
+.media-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.media-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
     min-width: 0;
 }
 
-/* Der erste Eintrag braucht keine Linie nach oben - darueber steht
-   schon die Ueberschrift. */
-.track:first-child { border-top: 0; }
-
-.track-cover {
-    width: 48px;
-    height: 48px;
-    flex: none;
-    border-radius: 8px;
-    object-fit: cover;
-    background: var(--panel-2);
+.media-title {
+    font-weight: 600;
+    font-size: 16px;
 }
 
-.track-text { min-width: 0; }
+.media-subtitle {
+    font-size: 13px;
+    color: var(--muted);
+}
 
-.track-title,
-.track-sub {
-    display: block;
+.media-meta {
+    font-size: 12px;
+    color: var(--accent-pale);
+}
+
+.media-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.media-actions button {
+    flex: 0 0 auto;
+}
+
+/* --- Die Warteschlange --------------------------------------------- */
+
+.queue-section {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.queue-section h3 {
+    margin: 0;
+    font-size: 16px;
+    font-weight: 650;
+}
+
+.queue-sublist {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.queue-link {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    color: inherit;
+    text-decoration: none;
+    min-width: 0;
+}
+
+.queue-item .media-content {
+    min-width: 0;
+}
+
+.queue-item .media-title,
+.queue-item .media-subtitle {
+    white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+.queue-item .media-actions {
+    margin-left: auto;
+}
+
+.queue-card {
+    position: sticky;
+    top: 110px;
+}
+
+.queue-card.disabled {
+    opacity: 0.8;
+}
+
+.empty-state {
+    padding: 18px;
+    border-radius: 12px;
+    text-align: center;
+    border: 1px dashed var(--line);
+    color: var(--muted);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+/* --- Das Regelfenster ---------------------------------------------- */
+
+.accept-rules {
+    margin-top: 12px;
+    display: flex;
+    justify-content: flex-start;
+}
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+    z-index: 30;
+}
+
+.modal-overlay.open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.modal {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 20px;
+    width: min(520px, 100%);
+    max-height: 90vh;
+    overflow-y: auto;
+    padding: 28px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.55);
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.modal-close {
+    background: transparent;
+    color: var(--muted);
+    font-size: 28px;
+    line-height: 1;
+    padding: 4px 10px;
+    transform: none;
+}
+
+.modal-close:hover {
+    background: rgba(255, 255, 255, 0.06);
+    transform: none;
+}
+
+.modal-close:active {
+    transform: none;
+}
+
+.modal-body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
+/* --- Kurzmeldungen ------------------------------------------------- */
+
+.toast-container {
+    position: fixed;
+    right: 24px;
+    bottom: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 40;
+}
+
+.toast {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    padding: 12px 18px;
+    border-radius: 14px;
+    box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+    transform: translateY(12px);
+    opacity: 0;
+    transition: opacity 0.25s ease, transform 0.25s ease;
+    font-size: 14px;
+}
+
+.toast.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.toast-success {
+    border-color: rgba(62, 207, 142, 0.5);
+    color: var(--ok);
+}
+
+.toast-error {
+    border-color: rgba(239, 77, 77, 0.5);
+    color: #ff9b9b;
+}
+
+.toast-info {
+    border-color: rgba(145, 70, 255, 0.5);
+    color: var(--accent-pale);
+}
+
+/* --- Das Wunschformular -------------------------------------------- */
+
+.wish-form .input-row {
+    display: flex;
+    gap: 10px;
+}
+
+.wish-form button {
     white-space: nowrap;
 }
 
-.track-sub { color: var(--muted); font-size: 0.86rem; }
+/* --- Auf dem Telefon ----------------------------------------------- */
 
-.track-wish {
-    display: block;
-    color: var(--accent);
-    font-size: 0.82rem;
-}
+@media (max-width: 992px) {
+    #pagewrapper {
+        padding: 0 16px 32px;
+        margin: 24px auto;
+    }
 
-/*
- * Der laufende Titel steht abgesetzt - im alten System war das eine
- * eigene Ueberschrift "Laeuft gerade" darueber.
- */
-.track-current {
-    background: var(--panel-2);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-bottom: 12px;
-}
+    .layout {
+        flex-direction: column;
+    }
 
-.track-current .track { border-top: 0; padding: 0; }
+    .layout-right {
+        width: 100%;
+        min-width: auto;
+    }
 
-.queue-label {
-    color: var(--muted);
-    font-size: 0.78rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    margin: 0 0 6px;
+    .queue-card {
+        position: static;
+    }
+
+    button,
+    #twitch_login {
+        width: 100%;
+    }
+
+    button.link-button,
+    .modal-close {
+        width: auto;
+    }
+
+    .wish-form .input-row {
+        flex-direction: column;
+    }
 }

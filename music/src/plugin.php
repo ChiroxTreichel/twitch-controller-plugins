@@ -500,17 +500,24 @@ $oeffentlich = static function (App $app, string $vorlage, array $daten = []) us
     $ich = Visitor::identity($app);
 
     return Response::html($app->view->from($plugin->directory . '/views')->render('public/' . $vorlage, $daten + [
-        'identity'  => $ich,
-        'enabled'   => Music::enabled($app),
-        'bypass'    => Privilege::mayBypass($app, $ich),
-        'rules'     => Music::rules($app),
-        'accepted'  => Visitor::hasAcceptedRules($app, $ich),
-        'favorites' => [],
-        'cooldown'  => Music::cooldown($app),
-        'csrf'      => Visitor::csrfToken($app),
-        'brand'     => $app->settings->string('twitch_broadcaster_name'),
-        'notice'    => '',
-        'error'     => '',
+        'identity'    => $ich,
+        'enabled'     => Music::enabled($app),
+        'rules'       => Music::rules($app),
+        'accepted'    => Visitor::hasAcceptedRules($app, $ich),
+        'banned'      => Bans::isViewerBanned($app, $ich['login'] ?? null),
+
+        /*
+         * Im alten System hingen "Bannen" und "Einstellungen" an zwei
+         * fest eingetragenen Twitch-Kennungen. Hier haengen sie an
+         * Rechten - wer keines hat, sieht die Knoepfe nicht.
+         */
+        'canBan'      => Privilege::has($app, $ich, 'Music.Bans.Manage'),
+        'canSettings' => Privilege::has($app, $ich, 'Music.Global.View'),
+
+        'csrf'        => Visitor::csrfToken($app),
+        'brand'       => $app->settings->string('twitch_broadcaster_name'),
+        'notice'      => '',
+        'error'       => '',
     ], 'public/_layout'));
 };
 
@@ -565,7 +572,6 @@ $router->get('/music', static function (Request $request) use ($app, $oeffentlic
         'title'     => translate('music.public.title'),
         'may'       => $darfWuenschen($app, $ich),
         'connected' => Music::isConnected($app),
-        'favorites' => $ich === null ? [] : Favorites::of($app, $ich['user_id']),
         'notice'    => $request->get('notice'),
         'error'     => $request->get('error'),
     ]);
@@ -617,7 +623,13 @@ $hooks->on('core.oauth.callback', static function (
  */
 $router->get('/music/queue', static function () use ($app): Response {
     if (!Music::isConnected($app)) {
-        return Response::json(['ok' => false, 'items' => [], 'current' => null]);
+        return Response::json([
+            'ok'      => false,
+            'enabled' => Music::enabled($app),
+            'items'   => [],
+            'recent'  => [],
+            'current' => null,
+        ]);
     }
 
     $spotify = new Spotify($app);
@@ -703,10 +715,195 @@ $router->get('/music/queue', static function () use ($app): Response {
 
     return Response::json([
         'ok'      => true,
+
+        /*
+         * Der Schalter kommt mit: das Abzeichen neben "Aktuelle
+         * Warteschlange" sagt "Wuensche aktiv" oder "Wuensche
+         * pausiert", und es soll umspringen, ohne dass jemand die
+         * Seite neu laedt. So machte es das alte System auch
+         * (api.php: 'enabled' => $sp->enabled()).
+         */
+        'enabled' => Music::enabled($app),
+
         'current' => $schlank(is_array($aktuell) ? $aktuell : null),
         'recent'  => array_values(array_filter(array_map($schlank, array_slice($vorher, 0, 3)))),
         'items'   => array_values(array_filter(array_map($schlank, $eintraege))),
     ]);
+});
+
+/**
+ * Die Suche bei Spotify.
+ *
+ * Der wichtigste Weg auf dieser Seite: wer selbst kein Spotify hat,
+ * kann keinen Teilen-Link kopieren. Er tippt hier den Namen und nimmt,
+ * was gefunden wird - genau dafuer gab es die Suche im alten System
+ * (api.php?a=search).
+ *
+ * Nur fuer Angemeldete: die Suche kostet einen Aufruf bei Spotify, und
+ * wer nicht angemeldet ist, kann mit dem Ergebnis ohnehin nichts tun.
+ */
+$router->get('/music/search', static function (Request $request) use ($app): Response {
+    if (Visitor::identity($app) === null) {
+        return Response::json(['tracks' => [], 'error' => translate('music.public.login_first')], 403);
+    }
+
+    if (!Music::isConnected($app)) {
+        return Response::json(['tracks' => []]);
+    }
+
+    $begriff = trim((string) $request->get('q'));
+
+    if ($begriff === '') {
+        return Response::json(['tracks' => []]);
+    }
+
+    $spotify = new Spotify($app);
+    $treffer = [];
+
+    foreach ($spotify->searchTracks($begriff, 25) as $titel) {
+        if (!is_array($titel)) {
+            continue;
+        }
+
+        /*
+         * Nur was die Zeile anzeigt. Spotify schickt zu jedem Titel
+         * die Liste aller Laender, in denen er verfuegbar ist - das
+         * sind Kilobyte je Eintrag, und hier sind es fuenfundzwanzig.
+         */
+        $treffer[] = [
+            'id'     => (string) ($titel['id'] ?? ''),
+            'name'   => (string) ($titel['name'] ?? ''),
+            'artist' => implode(', ', array_filter(array_map(
+                static fn (array $a): string => (string) ($a['name'] ?? ''),
+                (array) ($titel['artists'] ?? [])
+            ))),
+            'image'  => (string) ($titel['album']['images'][0]['url'] ?? ''),
+            'url'    => (string) ($titel['external_urls']['spotify'] ?? ''),
+        ];
+    }
+
+    return Response::json(['tracks' => $treffer]);
+});
+
+/**
+ * Die Merkliste - lesen.
+ *
+ * Als eigene Adresse und nicht in der Seite: sie aendert sich, waehrend
+ * die Seite offen ist. Wer aus der Suche etwas merkt, sieht es sofort
+ * unter "Favoriten", ohne die Seite zu wechseln.
+ */
+$router->get('/music/favorites', static function () use ($app): Response {
+    $ich = Visitor::identity($app);
+
+    if ($ich === null) {
+        return Response::json(['favorites' => []]);
+    }
+
+    $liste = [];
+
+    foreach (Favorites::of($app, $ich['user_id']) as $eintrag) {
+        $liste[] = [
+            'id'     => (string) $eintrag['track_id'],
+            'name'   => (string) $eintrag['name'],
+            'artist' => (string) $eintrag['artists'],
+            'image'  => (string) $eintrag['image'],
+            'url'    => (string) $eintrag['url'],
+        ];
+    }
+
+    return Response::json(['favorites' => $liste]);
+});
+
+/**
+ * Die Merkliste - merken und vergessen.
+ *
+ * Antwortet mit JSON und nicht mit einer Umleitung: der Klick auf
+ * "Favorit" soll die Seite nicht wegreissen. Wuenschen tut das sehr
+ * wohl - dort ist die Antwort des Servers die Nachricht, die oben auf
+ * der Seite steht.
+ */
+$router->post('/music/favorites', static function (Request $request) use ($app): Response {
+    if (!Visitor::checkCsrf($app, (string) $request->input('csrf'))) {
+        return Response::json(['error' => translate('common.error.form_expired')], 400);
+    }
+
+    $ich = Visitor::identity($app);
+
+    if ($ich === null) {
+        return Response::json(['error' => translate('music.public.login_first')], 403);
+    }
+
+    if ($request->input('action') === 'remove') {
+        Favorites::remove($app, $ich['user_id'], trim((string) $request->input('track')));
+
+        return Response::json(['ok' => true]);
+    }
+
+    /*
+     * Was gemerkt wird, kommt von Spotify und nicht aus der Anfrage.
+     * Name, Interpret und Bild aus dem Browser zu uebernehmen hiesse,
+     * dass in der eigenen Liste steht, was jemand hineinschreibt.
+     */
+    $uri = Link::toUri(trim((string) $request->input('link')));
+
+    if ($uri === null) {
+        return Response::json(['error' => translate('music.public.bad_link')], 400);
+    }
+
+    $titel = (new Spotify($app))->track(Link::trackId($uri) ?? '');
+
+    if ($titel === null) {
+        return Response::json(['error' => translate('music.public.track_unknown')], 404);
+    }
+
+    if (!Favorites::add($app, $ich['user_id'], $titel)) {
+        return Response::json(['error' => translate('music.public.favorite_failed')], 409);
+    }
+
+    return Response::json(['ok' => true]);
+});
+
+/**
+ * Den laufenden Titel sperren.
+ *
+ * Aus dem alten System (der Knopf "Bannen" neben "Laeuft gerade", der
+ * auf admin/ban.php zeigte). Dort entschied eine Liste von zwei
+ * Twitch-Kennungen im Code, wer ihn sieht; hier das Recht "Sperren
+ * verwalten".
+ */
+$router->post('/music/ban', static function (Request $request) use ($app): Response {
+    if (!Visitor::checkCsrf($app, (string) $request->input('csrf'))) {
+        return Response::json(['error' => translate('common.error.form_expired')], 400);
+    }
+
+    $ich = Visitor::identity($app);
+
+    if (!Privilege::has($app, $ich, 'Music.Bans.Manage')) {
+        return Response::json(['error' => translate('music.public.ban_denied')], 403);
+    }
+
+    $id = trim((string) $request->input('track'));
+
+    if ($id === '') {
+        return Response::json(['error' => translate('music.public.ban_failed')], 400);
+    }
+
+    $name = trim((string) $request->input('name'));
+
+    $ok = Bans::add(
+        $app,
+        'track',
+        $id,
+        $name !== '' ? $name : $id,
+        trim((string) $request->input('artists')),
+        (string) ($ich['login'] ?? '')
+    );
+
+    if (!$ok) {
+        return Response::json(['error' => translate('music.public.ban_failed')], 400);
+    }
+
+    return Response::json(['ok' => true, 'message' => translate('music.public.ban_done')]);
 });
 
 // -------------------------------------------------------------------
