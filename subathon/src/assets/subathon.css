@@ -112,9 +112,24 @@
 
 /* --- Die Legende --------------------------------------------------- */
 
+/*
+ * Sie erklaert die drei Farben - das liest man einmal und nicht 48
+ * Stunden lang. Darum zeigt sie sich nur kurz; das Ein- und
+ * Ausblenden macht subathon.js.
+ *
+ * Ausgeblendet ueber die Deckkraft und nicht ueber display: so bleibt
+ * ihr Platz stehen, und die Laufschrift darunter huepft nicht bei
+ * jedem Wechsel.
+ */
 .sub-legend {
     margin-top: 100px;
     width: fit-content;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+}
+
+.sub-legend.is-on {
+    opacity: 1;
 }
 
 .sub-legend > div {

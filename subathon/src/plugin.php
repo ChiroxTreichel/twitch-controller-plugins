@@ -92,6 +92,17 @@ $hooks->on('plugin.settings', static function (array $links): array {
     return $links;
 });
 
+/*
+ * Das Skript der Verwaltung: es laesst die grosse Zahl auf der
+ * Uebersicht herunterzaehlen. Ohne es steht dort die Zahl, die beim
+ * Laden galt - nicht falsch, nur langweilig.
+ */
+$hooks->on('admin.assets', static function (array $assets) use ($app): array {
+    $assets['js'][] = $app->asset('/plugin/subathon/assets/subathon-admin.js');
+
+    return $assets;
+});
+
 // -------------------------------------------------------------------
 //  Das Overlay
 // -------------------------------------------------------------------
@@ -413,6 +424,7 @@ $router->get('/tools/subathon/settings', static function (Request $request) use 
         'title'      => translate('subathon.settings'),
         'active'     => 'tools/subathon',
         'showManual' => Subathon::showManual($app),
+        'prices'     => Subathon::tierPrices($app),
         'canEdit'    => $app->auth->can('Subathon.Global.Edit'),
         'csrf'       => $app->auth->csrfToken(),
         'notice'     => $request->get('notice'),
@@ -436,6 +448,20 @@ $router->post('/tools/subathon/settings', static function (Request $request) use
     }
 
     $app->settings->set('show_manual', $request->input('show_manual') !== '', Subathon::scope());
+
+    /*
+     * Die Preise als Zeichenkette: 4,99 ist keine ganze Zahl, und ein
+     * Komma statt eines Punktes soll kein 4 werden.
+     */
+    foreach (Subathon::TIER_PRICE as $stufe => $vorgabe) {
+        $eingabe = str_replace(',', '.', trim((string) $request->input('price_tier' . $stufe)));
+
+        $app->settings->set(
+            'price_tier' . $stufe,
+            (string) Subathon::price((float) $eingabe, $vorgabe),
+            Subathon::scope()
+        );
+    }
 
     return $zurueckHierher(translate('subathon.saved'));
 }, ['auth' => true]);

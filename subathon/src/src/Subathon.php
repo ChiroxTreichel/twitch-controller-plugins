@@ -40,13 +40,52 @@ final class Subathon
     public const DEFAULT_CENT_PER_SUB = 300;
 
     /**
-     * Die Preise der Abostufen, wie Twitch sie berechnet.
+     * Die Preise der Abostufen in Euro.
      *
-     * Das Programm rechnete tier1price / 4.99 * 7.99 - also den Preis
-     * je Stufe in Vielfachen des ersten. Dieselbe Rechnung, nur
-     * einmal aufgeschrieben.
+     * Vorgabe ist, was im Programm fest im Code stand - 4,99 / 7,99 /
+     * 19,99. Twitch verlangt aber nicht ueberall dasselbe und aendert
+     * seine Preise; darum stehen sie in den Einstellungen des Plugins.
+     *
+     * Gebraucht wird daraus nur das VERHAELTNIS: ein Abo der Stufe 1
+     * bringt die eingestellten Minuten, die anderen entsprechend ihrem
+     * Preis. Wer alle drei verdoppelt, aendert also nichts.
      */
     public const TIER_PRICE = ['1000' => 4.99, '2000' => 7.99, '3000' => 19.99];
+
+    /**
+     * Die eingetragenen Preise, mit der Vorgabe als Rueckfall.
+     *
+     * @return array<string, float>
+     */
+    public static function tierPrices(App $app): array
+    {
+        $preise = [];
+
+        foreach (self::TIER_PRICE as $stufe => $vorgabe) {
+            $preise[$stufe] = self::price(
+                (float) $app->settings->string('price_tier' . $stufe, '', self::scope()),
+                $vorgabe
+            );
+        }
+
+        return $preise;
+    }
+
+    /**
+     * Ein Preis, der sich rechnen laesst.
+     *
+     * 0 oder weniger waere eine Division durch Null bei Stufe 1 - und
+     * bei den anderen ein Abo, das nichts bringt. In beiden Faellen
+     * ist die Vorgabe die bessere Antwort als ein Fehler.
+     */
+    public static function price(float $wert, float $vorgabe): float
+    {
+        if ($wert <= 0 || $wert > 9999) {
+            return $vorgabe;
+        }
+
+        return round($wert, 2);
+    }
 
     public static function scope(): string
     {
@@ -306,11 +345,27 @@ final class Subathon
      * Rechnung ist die des Programms, nur ohne die Kommastelle: dort
      * wurde auf int geschnitten, hier auch.
      */
-    public static function secondsForSub(int $secondsPerSub, string $tier): int
+    /**
+     * @param array<string, float> $preise die drei Stufenpreise
+     */
+    public static function secondsForSub(int $secondsPerSub, string $tier, array $preise = self::TIER_PRICE): int
     {
-        $preis = self::TIER_PRICE[$tier] ?? self::TIER_PRICE['1000'];
+        /*
+         * Erst aufraeumen, dann rechnen. Eine 0 in der Liste waere
+         * sonst zweierlei Aerger: als Teiler eine Division durch
+         * Null, als Preis ein Abo, das nichts bringt.
+         */
+        $sauber = [];
 
-        return (int) (($secondsPerSub / self::TIER_PRICE['1000']) * $preis);
+        foreach (self::TIER_PRICE as $stufe => $vorgabe) {
+            $sauber[$stufe] = self::price((float) ($preise[$stufe] ?? 0), $vorgabe);
+        }
+
+        // Eine Stufe, die es nicht gibt, zaehlt wie die erste - so
+        // machte es der Standardfall im switch des Programms.
+        $preis = $sauber[$tier] ?? $sauber['1000'];
+
+        return (int) (($secondsPerSub / $sauber['1000']) * $preis);
     }
 
     public static function secondsForBits(int $secondsPerSub, int $bitsPerSub, int $bits): int

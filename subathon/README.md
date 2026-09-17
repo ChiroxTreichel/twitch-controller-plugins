@@ -8,7 +8,7 @@ denselben sieben Reitern unter *Tools → Subathon*:
 
 | Reiter | was dort steht |
 | --- | --- |
-| Übersicht | Zustand, die große Zahl, ein Knopf: Pausieren / Weiter / Zurücksetzen |
+| Übersicht | Zustand, die große Zahl (läuft sichtbar ab), ein Knopf: Pausieren / Weiter / Zurücksetzen |
 | Einstellungen | Startzeit, Obergrenze, Auslöser, was ein Abo/Bit/Cent bringt |
 | Overlay | die sechs Farben der Anzeige |
 | Nachrichten | die Laufschrift, eine je Zeile, mit Platzhaltern |
@@ -36,7 +36,11 @@ Strich in der Spalte *Zeit* heißt: es kam an, während nichts lief.
 ## Was Zeit bringt
 
 **Abos** bringen die eingestellten Minuten; Stufe 2 und 3 entsprechend
-ihrem Preis (die Rechnung des Programms: `Stufe1 / 4,99 × 7,99`).
+ihrem Preis. Was ein Abo kostet, steht in den **Einstellungen des
+Plugins** — im Programm standen 4,99 / 7,99 / 19,99 fest im Code, und
+Twitch verlangt weder überall dasselbe noch auf Dauer. Gebraucht wird
+daraus nur das **Verhältnis**: wer alle drei verdoppelt, ändert
+nichts.
 **Bits** und **Spenden** rechnen über „Bits pro Sub" und „Cent pro
 Sub" — daraus ergeben sich die Sekunden je Bit und je Cent, und die
 stehen im Reiter daneben.
@@ -94,6 +98,12 @@ einem Dreieck als Zeiger.
 
 Ohne Obergrenze gibt es nur **eine** Zahl, groß in der Mitte: wie lange
 noch. Balken ohne „wovon" ergeben nichts.
+
+Die **Legende** zeigt sich nur kurz: 15 Sekunden, dann 4:45 Minuten
+nicht. Sie erklärt die drei Farben, und das liest man einmal — 48
+Stunden im Bild stehen muss sie dafür nicht. Ausgeblendet wird sie über
+die Deckkraft, damit die Laufschrift darunter nicht bei jedem Wechsel
+springt.
 
 Die Farben stehen im Reiter *Overlay*. Wo der Platz liegt und wie weit
 vorne, entscheidet die Overlay-Seite unter *Konto → Overlay* — wie bei

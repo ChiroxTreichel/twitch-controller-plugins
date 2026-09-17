@@ -110,7 +110,11 @@ final class Booking
     public static function subscription(App $app, string $tier, string $who, bool $gift, int $anzahl = 1): int
     {
         $anzahl = max(1, $anzahl);
-        $sekunden = Subathon::secondsForSub(Subathon::secondsPerSub($app), $tier) * $anzahl;
+        $sekunden = Subathon::secondsForSub(
+            Subathon::secondsPerSub($app),
+            $tier,
+            Subathon::tierPrices($app)
+        ) * $anzahl;
 
         return self::credit($app, $gift ? 'gift' : 'sub', $who, self::tierName($tier), $sekunden);
     }

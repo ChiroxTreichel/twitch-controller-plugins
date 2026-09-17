@@ -30,6 +30,14 @@
     /** Alle zehn Sekunden eine neue Nachricht - wie im Programm. */
     var NACHRICHT_MS = 10000;
 
+    /*
+     * Die Legende zeigt sich alle fuenf Minuten fuer fuenfzehn
+     * Sekunden. Sie erklaert die drei Farben, und das liest man
+     * einmal - im Bild stehen muss sie deshalb nicht.
+     */
+    var LEGENDE_AN_MS = 15000;
+    var LEGENDE_AUS_MS = 285000;
+
     var zustand = {
         now: 0,
         start: 0,
@@ -326,6 +334,32 @@
     }
 
     // -----------------------------------------------------------------
+    //  Die Legende
+    // -----------------------------------------------------------------
+    /**
+     * Zeigen, warten, verstecken, warten - und wieder von vorn.
+     *
+     * Der erste Durchlauf zeigt sie sofort: wer das Overlay gerade
+     * eingerichtet hat, soll sehen, dass sie da ist, und nicht fuenf
+     * Minuten warten, um das zu pruefen.
+     */
+    function legendeUmlauf() {
+        if (!teile.legende) {
+            return;
+        }
+
+        teile.legende.classList.add('is-on');
+
+        window.setTimeout(function () {
+            if (teile.legende) {
+                teile.legende.classList.remove('is-on');
+            }
+
+            window.setTimeout(legendeUmlauf, LEGENDE_AUS_MS);
+        }, LEGENDE_AN_MS);
+    }
+
+    // -----------------------------------------------------------------
     Overlay.on(SLOT, function (daten) {
         if (!daten || typeof daten !== 'object') {
             return;
@@ -352,6 +386,7 @@
 
     zeichnen();
     naechsteNachricht();
+    legendeUmlauf();
 
     window.setInterval(zeichnen, 1000);
     window.setInterval(naechsteNachricht, NACHRICHT_MS);
