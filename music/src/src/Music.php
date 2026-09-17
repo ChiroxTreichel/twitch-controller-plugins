@@ -365,13 +365,50 @@ final class Music
             return '';
         }
 
-        if (!self::overlayState($app)['playing']) {
+        return self::timerTextFor(
+            self::overlayState($app)['playing'],
+            self::enabled($app),
+            self::timerMessageOn($app),
+            self::timerMessageOff($app)
+        );
+    }
+
+    /**
+     * Welcher der beiden Texte jetzt gilt - und ob ueberhaupt einer.
+     *
+     * Die Entscheidung steht fuer sich und nicht zwischen den
+     * Abfragen: so laesst sie sich pruefen, ohne Spotify und ohne
+     * Datenbank. Sie ist der Kern der ganzen Karte, und ein Kern, den
+     * man nur im laufenden Betrieb sehen kann, ist einer, den niemand
+     * ansieht.
+     *
+     * Gefragt wird im Moment des Postens. Wer die Wuensche mitten im
+     * Stream abschaltet, bekommt beim naechsten Mal den anderen Text -
+     * und nicht den, der beim Einstellen galt.
+     *
+     * @param bool   $laeuft   spielt Spotify gerade etwas?
+     * @param bool   $offen    duerfen Zuschauer sich etwas wuenschen?
+     * @param string $wennAuf  Text fuer "Songwuensche erlaubt"
+     * @param string $wennZu   Text fuer "Songwuensche nicht erlaubt"
+     */
+    public static function timerTextFor(bool $laeuft, bool $offen, string $wennAuf, string $wennZu): string
+    {
+        /*
+         * Laeuft nichts, gibt es nichts zu sagen - auch dann nicht,
+         * wenn gewuenscht werden darf. Ein Hinweis auf die Seite waere
+         * eine Einladung zu einer leeren Warteschlange.
+         */
+        if (!$laeuft) {
             return '';
         }
 
-        $text = self::enabled($app) ? self::timerMessageOn($app) : self::timerMessageOff($app);
-
-        return trim($text);
+        /*
+         * Ein leeres Feld ist eine Antwort und kein Versehen: wer den
+         * Text fuer diesen Zustand nicht schreibt, will ihn nicht
+         * posten. Dann bleibt es still, und der andere Zustand postet
+         * trotzdem.
+         */
+        return trim($offen ? $wennAuf : $wennZu);
     }
 
     // -----------------------------------------------------------------
