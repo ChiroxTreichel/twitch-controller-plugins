@@ -78,6 +78,11 @@ $hooks->on('admin.nav', static function (array $nav) use ($app): array {
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/timers/assets/timers.css');
 
+    // Nachrichtenzeilen im Browser anhaengen und wegnehmen, wie im
+    // alten System. Eine Zugabe: ohne das Skript uebernehmen die
+    // Absende-Knoepfe, und das Formular funktioniert weiter.
+    $assets['js'][] = $app->asset('/plugin/timers/assets/timers.js');
+
     return $assets;
 });
 

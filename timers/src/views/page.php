@@ -105,6 +105,15 @@ $dauer = static function (int $sekunden) use ($e): string {
                     <input type="hidden" name="action" value="save">
                     <input type="hidden" name="id" value="<?= $e($id) ?>">
 
+                    <?php /*
+                        Enter in einem Feld schickt das Formular ueber den
+                        ERSTEN Absende-Knopf darin ab - und das waere
+                        "Loeschen" bei der ersten Nachricht. Dieser hier
+                        steht davor und traegt nichts bei: Enter speichert,
+                        wie man es erwartet.
+                    */ ?>
+                    <button class="default-submit" type="submit" tabindex="-1" aria-hidden="true"></button>
+
                     <div class="row">
                         <label class="field grow">
                             <span class="hint"><?= $e(translate('timers.field.title')) ?></span>
@@ -153,36 +162,61 @@ $dauer = static function (int $sekunden) use ($e): string {
                         kein Textfeld. Nur so gibt es ein "Loeschen" fuer
                         die einzelne Zeile.
 
-                        Hinzufuegen und Loeschen sind Absende-Knoepfe im
-                        selben Formular: die uebrigen Eingaben gehen
-                        dabei nicht verloren. Das alte System brauchte
-                        dafuer JavaScript, hier geht es ohne.
+                        Hinzufuegen und Loeschen macht timers.js im
+                        Browser, wie im alten System. Die Knoepfe sind
+                        trotzdem Absende-Knoepfe: ohne das Skript
+                        uebernimmt der Server, und das Formular
+                        funktioniert weiter.
                     */ ?>
                     <span class="hint"><?= $e(translate('timers.field.messages')) ?></span>
 
-                    <div class="timer-message-list">
+                    <div class="timer-message-list" data-message-list>
                         <?php $nachrichten = (array) $timer['messages']; ?>
                         <?php foreach ($nachrichten as $n => $nachricht): ?>
-                            <div class="row timer-message-row">
+                            <div class="row timer-message-row" data-message-row>
                                 <textarea class="input timer-message grow" name="messages[]" rows="2"
                                           maxlength="<?= $e((string) $limits['message']) ?>"
                                           <?= $darfAendern ? '' : 'disabled' ?>><?= $e((string) $nachricht) ?></textarea>
 
-                                <?php /* Die letzte bleibt stehen: ein Timer ohne Nachricht kann nichts tun. */ ?>
-                                <?php if ($darfAendern && count($nachrichten) > 1): ?>
+                                <?php /*
+                                    Die letzte bleibt stehen: ein Timer ohne
+                                    Nachricht kann nichts tun. Stumpf und nicht
+                                    weg - ein Knopf, der verschwindet und
+                                    wiederkommt, laesst die Zeile springen.
+                                */ ?>
+                                <?php if ($darfAendern): ?>
                                     <button class="btn btn-ghost btn-small" type="submit"
-                                            name="remove_message" value="<?= $e((string) $n) ?>">
+                                            name="remove_message" value="<?= $e((string) $n) ?>"
+                                            data-remove-message
+                                            <?= count($nachrichten) > 1 ? '' : 'disabled' ?>>
                                         <?= $e(translate('timers.delete')) ?>
                                     </button>
                                 <?php endif ?>
                             </div>
                         <?php endforeach ?>
+
+                        <?php if ($darfAendern): ?>
+                            <?php /*
+                                Woraus timers.js die naechste Zeile baut. Im
+                                Formular und nicht im Skript: so stehen
+                                Klassen und Grenzen an einer Stelle.
+                            */ ?>
+                            <template data-message-template>
+                                <div class="row timer-message-row" data-message-row>
+                                    <textarea class="input timer-message grow" name="messages[]" rows="2"
+                                              maxlength="<?= $e((string) $limits['message']) ?>"></textarea>
+                                    <button class="btn btn-ghost btn-small" type="submit"
+                                            name="remove_message" value=""
+                                            data-remove-message><?= $e(translate('timers.delete')) ?></button>
+                                </div>
+                            </template>
+                        <?php endif ?>
                     </div>
 
                     <?php if ($darfAendern): ?>
                         <div class="row">
                             <button class="btn btn-ghost btn-small" type="submit"
-                                    name="add_message" value="1">
+                                    name="add_message" value="1" data-add-message>
                                 <?= $e(translate('timers.add_message')) ?>
                             </button>
                         </div>
@@ -276,6 +310,9 @@ $dauer = static function (int $sekunden) use ($e): string {
                     <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                     <input type="hidden" name="action" value="create">
 
+                    <?php /* Wie oben: Enter soll anlegen, nicht loeschen. */ ?>
+                    <button class="default-submit" type="submit" tabindex="-1" aria-hidden="true"></button>
+
                     <div class="row">
                         <label class="field grow">
                             <span class="hint"><?= $e(translate('timers.field.title')) ?></span>
@@ -297,13 +334,44 @@ $dauer = static function (int $sekunden) use ($e): string {
                         </label>
                     </div>
 
-                    <?php /* Beim Anlegen genuegt eine Zeile - weitere kommen danach dazu. */ ?>
-                    <label class="field">
-                        <span class="hint"><?= $e(translate('timers.field.messages')) ?></span>
-                        <textarea class="input timer-message" name="messages[]" rows="2"
-                                  maxlength="<?= $e((string) $limits['message']) ?>"
-                                  placeholder="<?= $e(translate('timers.messages_example')) ?>"></textarea>
-                    </label>
+                    <?php /*
+                        Auch hier eine Liste und kein einzelnes Feld: wer
+                        einen Timer anlegt, hat oft schon zwei Nachrichten
+                        im Kopf, und im alten System konnte man sie gleich
+                        beide eintragen. Vorher musste man anlegen,
+                        aufklappen und nachtragen.
+                    */ ?>
+                    <span class="hint"><?= $e(translate('timers.field.messages')) ?></span>
+
+                    <div class="timer-message-list" data-message-list>
+                        <div class="row timer-message-row" data-message-row>
+                            <textarea class="input timer-message grow" name="messages[]" rows="2"
+                                      maxlength="<?= $e((string) $limits['message']) ?>"
+                                      placeholder="<?= $e(translate('timers.messages_example')) ?>"></textarea>
+                            <button class="btn btn-ghost btn-small" type="submit"
+                                    name="remove_message" value="0"
+                                    data-remove-message disabled>
+                                <?= $e(translate('timers.delete')) ?>
+                            </button>
+                        </div>
+
+                        <template data-message-template>
+                            <div class="row timer-message-row" data-message-row>
+                                <textarea class="input timer-message grow" name="messages[]" rows="2"
+                                          maxlength="<?= $e((string) $limits['message']) ?>"></textarea>
+                                <button class="btn btn-ghost btn-small" type="submit"
+                                        name="remove_message" value=""
+                                        data-remove-message><?= $e(translate('timers.delete')) ?></button>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="row">
+                        <button class="btn btn-ghost btn-small" type="submit"
+                                name="add_message" value="1" data-add-message>
+                            <?= $e(translate('timers.add_message')) ?>
+                        </button>
+                    </div>
 
                     <label class="switch-field">
                         <input type="checkbox" name="enabled" value="1" checked>
