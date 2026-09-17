@@ -97,10 +97,25 @@ $hooks->on('plugin.settings', static function (array $links): array {
 $hooks->on('overlay.slots', static function (array $slots) use ($app): array {
     $slots[Music::SLUG] = [
         'label'    => translate('music.name'),
-        // Wie im alten obs.php: eine Leiste, und die stand unten.
-        'position' => 'bottom-left',
+
+        /*
+         * Wie im alten obs.php: eine Leiste, und die stand unten.
+         *
+         * Steht ein Abstand, haengt der Kasten oben links und wird um
+         * die eingetragenen Werte verschoben - dann laesst er sich
+         * ueberall hinstellen. Ohne Abstand bleibt es, wie es war.
+         */
+        'position' => Music::isPlaced($app) ? 'top-left' : 'bottom-left',
         'width'    => Music::width($app) . 'px',
         'height'   => Music::height($app) . 'px',
+
+        // Die beiden Abstaende als CSS-Variablen; overlay.css macht
+        // Raender daraus. Der Platz selbst nimmt nur Laengen an.
+        'vars'     => [
+            '--music-x' => Music::offsetX($app) . 'px',
+            '--music-y' => Music::offsetY($app) . 'px',
+        ],
+
         // Unter den Alerts, ueber den Zielen: ein Alert soll den
         // laufenden Titel verdecken duerfen, ein Zielbalken nicht.
         'z'        => 25,
@@ -133,6 +148,14 @@ $router->get('/display/music/state.js', static function () use ($app): Response 
         Music::overlayState($app),
         JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
     ) . ";\n";
+
+    /*
+     * Das Farbschema kommt MIT der Seite und nicht mit den Nachrichten
+     * des Taktes: es aendert sich nicht, waehrend etwas laeuft. Wer es
+     * umstellt, laedt die Browserquelle neu - so wie bei Breite und
+     * Hoehe auch.
+     */
+    $js .= 'window.MUSIC_THEME = ' . json_encode(Music::theme($app)) . ";\n";
 
     return Response::html($js, 200, [
         'Content-Type' => 'application/javascript; charset=utf-8',
@@ -420,6 +443,9 @@ $router->get('/display/music/settings', static function (Request $request) use (
         'rules'       => implode("\n", Music::rules($app)),
         'width'       => Music::width($app),
         'height'      => Music::height($app),
+        'offsetX'     => Music::offsetX($app),
+        'offsetY'     => Music::offsetY($app),
+        'theme'       => Music::theme($app),
         'clientId'    => Music::clientId($app),
         'hasSecret'   => $app->settings->hasSecret('client_secret', Music::scope()),
         'hasCreds'    => Music::hasCredentials($app),
@@ -449,6 +475,9 @@ $router->post('/display/music/settings', static function (Request $request) use 
             $app->settings->set('cooldown', (int) $request->input('cooldown'), Music::scope());
             $app->settings->set('width', Music::size((int) $request->input('width'), Music::DEFAULT_WIDTH), Music::scope());
             $app->settings->set('height', Music::size((int) $request->input('height'), Music::DEFAULT_HEIGHT), Music::scope());
+            $app->settings->set('offset_x', Music::offset((int) $request->input('offset_x')), Music::scope());
+            $app->settings->set('offset_y', Music::offset((int) $request->input('offset_y')), Music::scope());
+            $app->settings->set('theme', Music::normalizeTheme((string) $request->input('theme')), Music::scope());
             Music::setRules($app, (string) $request->input('rules'));
 
             return $zurueckEinstellungen($app, translate('music.saved'));

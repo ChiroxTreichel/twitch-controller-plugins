@@ -20,6 +20,15 @@
      * der Fortschrittsbalken irgendwo in der Luft.
      */
     height: 100%;
+
+    /*
+     * Der Abstand aus den Einstellungen. Als Rand und nicht als
+     * left/top: die Stelle im Overlay setzt der Kern ueber
+     * data-position, und zwei Stellen, die dasselbe bestimmen, gehen
+     * irgendwann auseinander.
+     */
+    margin-left: var(--music-x, 0);
+    margin-top: var(--music-y, 0);
 }
 
 .music-bar {
@@ -40,6 +49,26 @@
 }
 
 .music-bar.is-on { opacity: 1; }
+
+/*
+ * Hell - wie das alte obs.php.
+ *
+ * Dort war der Grund #ffffffA0: weiss mit etwa zwei Dritteln Deckkraft,
+ * damit das Spiel durchscheint. Dieselbe Rechnung, nur lesbar
+ * geschrieben.
+ */
+.music-bar.is-light {
+    background: rgba(255, 255, 255, 0.63);
+    border-color: rgba(0, 0, 0, 0.12);
+    color: #12141a;
+}
+
+.music-bar.is-light .music-title { text-shadow: none; }
+.music-bar.is-light .music-artist { color: #3f4654; }
+.music-bar.is-light .music-wish { color: #6d28d9; }
+.music-bar.is-light .music-cover { background: rgba(0, 0, 0, 0.06); }
+.music-bar.is-light .music-bar-progress { background: rgba(0, 0, 0, 0.12); }
+.music-bar.is-light .music-bar-fill { background: #6d28d9; }
 
 .music-row {
     display: flex;

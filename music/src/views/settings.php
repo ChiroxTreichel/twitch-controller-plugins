@@ -19,6 +19,9 @@
  * @var string $rules
  * @var int $width
  * @var int $height
+ * @var int $offsetX
+ * @var int $offsetY
+ * @var string $theme
  * @var string $clientId
  * @var bool $hasSecret
  * @var bool $hasCreds
@@ -216,6 +219,40 @@
                        value="<?= (int) $height ?>" <?= $canEdit ? '' : 'readonly' ?>>
             </label>
         </div>
+
+        <p class="hint"><?= $e(translate('music.offset_hint')) ?></p>
+
+        <div class="row">
+            <label class="field">
+                <span class="hint"><?= $e(translate('music.offset_x')) ?></span>
+                <input class="input" type="number" name="offset_x" min="0" max="3840" step="1"
+                       value="<?= (int) $offsetX ?>" <?= $canEdit ? '' : 'readonly' ?>>
+            </label>
+
+            <label class="field">
+                <span class="hint"><?= $e(translate('music.offset_y')) ?></span>
+                <input class="input" type="number" name="offset_y" min="0" max="3840" step="1"
+                       value="<?= (int) $offsetY ?>" <?= $canEdit ? '' : 'readonly' ?>>
+            </label>
+        </div>
+
+        <?php /*
+            Hell oder dunkel: das alte obs.php war ein weisser Kasten
+            mit schwarzer Schrift. Auf einem dunklen Spiel ist das gut
+            zu lesen - auf einem hellen nicht, und dann will man das
+            Dunkle.
+        */ ?>
+        <label class="field">
+            <span class="hint"><?= $e(translate('music.theme')) ?></span>
+            <select class="input" name="theme" <?= $canEdit ? '' : 'disabled' ?>>
+                <option value="dark" <?= $theme === 'dark' ? 'selected' : '' ?>>
+                    <?= $e(translate('music.theme_dark')) ?>
+                </option>
+                <option value="light" <?= $theme === 'light' ? 'selected' : '' ?>>
+                    <?= $e(translate('music.theme_light')) ?>
+                </option>
+            </select>
+        </label>
     </div>
 
     <?php if ($canEdit): ?>

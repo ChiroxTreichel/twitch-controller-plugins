@@ -77,6 +77,15 @@
         kasten = document.createElement('div');
         kasten.className = 'music-bar';
 
+        /*
+         * Hell oder dunkel - steht in den Einstellungen und kommt mit
+         * /display/music/state.js. Es aendert sich nicht, waehrend
+         * etwas laeuft; wer es umstellt, laedt die Browserquelle neu.
+         */
+        if (window.MUSIC_THEME === 'light') {
+            kasten.classList.add('is-light');
+        }
+
         var reihe = document.createElement('div');
         reihe.className = 'music-row';
 

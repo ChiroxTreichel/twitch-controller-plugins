@@ -128,8 +128,22 @@ der Knopf oben links.
 ## Im Overlay
 
 Ein eigener Platz mit Bild, Titel, Interpret, „gewünscht von" und einem
-Fortschrittsbalken — wie das alte `obs.php`, nur im dunklen Stil statt
-auf weißem Grund. Breite und Höhe stehen in den Einstellungen.
+Fortschrittsbalken — wie das alte `obs.php`. **Breite**, **Höhe**,
+**Abstand von links**, **Abstand von oben** und das **Farbschema**
+stehen in den Einstellungen.
+
+Das Farbschema ist **dunkel** wie der Rest dieses Systems oder **hell**
+wie das alte `obs.php` — weißer Grund mit schwarzer Schrift. Auf einem
+hellen Spiel verschwindet ein dunkler Kasten, auf einem dunklen ein
+heller; darum die Wahl.
+
+Die beiden Abstände verschieben den Kasten von der **linken oberen
+Ecke** aus. Solange beide 0 sind, bleibt er unten links wie bisher —
+wer nie einen Abstand eingetragen hat, soll nach einem Update nicht
+suchen müssen, wo seine Musik hin ist.
+
+Größe, Stelle und Farbschema greifen beim **Neuladen** der
+Browserquelle.
 
 Der Balken läuft **im Browser** weiter. Der Worker meldet sich alle
 fünfzehn Sekunden und nur bei Änderung; ein Balken, der so nachgeführt

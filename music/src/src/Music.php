@@ -188,6 +188,79 @@ final class Music
         return self::size($app->settings->int('height', self::DEFAULT_HEIGHT, self::scope()), self::DEFAULT_HEIGHT);
     }
 
+    // -----------------------------------------------------------------
+    //  Wo der Platz im Overlay steht
+    // -----------------------------------------------------------------
+
+    /**
+     * Der groesste sinnvolle Abstand: eine Buehne ist 3840 breit, und
+     * weiter weg als ihr Rand faengt niemand etwas an.
+     */
+    public const MAX_OFFSET = 3840;
+
+    /** Abstand von links. */
+    public static function offsetX(App $app): int
+    {
+        return self::offset($app->settings->int('offset_x', 0, self::scope()));
+    }
+
+    /** Abstand von oben. */
+    public static function offsetY(App $app): int
+    {
+        return self::offset($app->settings->int('offset_y', 0, self::scope()));
+    }
+
+    /**
+     * Steht ein Abstand? Dann haengt der Kasten oben links und wird um
+     * die beiden Werte verschoben.
+     *
+     * Solange beide leer sind, bleibt alles, wie es war: unten links.
+     * Ein Abstand von oben ist dort ohne Wirkung - und wer nie einen
+     * eingetragen hat, soll nach einem Update nicht suchen muessen, wo
+     * seine Musik hin ist.
+     */
+    public static function isPlaced(App $app): bool
+    {
+        return self::offsetX($app) > 0 || self::offsetY($app) > 0;
+    }
+
+    /**
+     * Ein Abstand liegt zwischen 0 und dem Rand der Buehne.
+     *
+     * Die 0 ist hier - anders als bei der Groesse - kein Platzhalter
+     * fuer eine Vorgabe, sondern die Antwort: kein Abstand.
+     */
+    public static function offset(int $wert): int
+    {
+        return max(0, min(self::MAX_OFFSET, $wert));
+    }
+
+    // -----------------------------------------------------------------
+    //  Wie der Platz im Overlay aussieht
+    // -----------------------------------------------------------------
+
+    /**
+     * Dunkel wie der Rest dieses Systems, oder hell wie das alte
+     * obs.php (weisser Grund, schwarze Schrift).
+     *
+     * Eine Entscheidung ueber den Stream und nicht ueber den
+     * Geschmack: auf einem hellen Spiel verschwindet ein dunkler
+     * Kasten, auf einem dunklen ein heller.
+     */
+    public const THEMES = ['dark', 'light'];
+
+    public static function theme(App $app): string
+    {
+        return self::normalizeTheme($app->settings->string('theme', 'dark', self::scope()));
+    }
+
+    public static function normalizeTheme(string $wert): string
+    {
+        $wert = strtolower(trim($wert));
+
+        return in_array($wert, self::THEMES, true) ? $wert : 'dark';
+    }
+
     /**
      * Eine Groesse auf den erlaubten Bereich bringen.
      *
