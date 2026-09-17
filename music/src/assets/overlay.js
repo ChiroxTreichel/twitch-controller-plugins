@@ -109,8 +109,18 @@
         text.appendChild(teile.interpret);
         text.appendChild(teile.wunsch);
 
+        /*
+         * Das Logo rechts in der Leiste - wie im alten obs.php. Es
+         * steht dort nicht zur Zierde: wer die Daten von Spotify
+         * anzeigt, soll sagen, woher sie kommen. Welches Bild es ist,
+         * steht im Stylesheet.
+         */
+        var marke = document.createElement('span');
+        marke.className = 'music-brand';
+
         reihe.appendChild(teile.bild);
         reihe.appendChild(text);
+        reihe.appendChild(marke);
 
         var balken = document.createElement('div');
         balken.className = 'music-bar-progress';

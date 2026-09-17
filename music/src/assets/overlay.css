@@ -122,6 +122,24 @@
     color: #b06cff;
 }
 
+/*
+ * Das Logo. Runder weisser Knopf mit dem Zeichen darin, genau wie im
+ * alten obs.php - auch im dunklen Stil weiss, denn das Zeichen ist
+ * gruen auf weiss.
+ *
+ * Die Adresse ist relativ: sie loest sich gegen die dieser Datei auf
+ * und stimmt damit auch, wenn das System in einem Unterverzeichnis
+ * liegt.
+ */
+.music-brand {
+    width: 48px;
+    height: 48px;
+    flex: none;
+    margin-left: 12px;
+    border-radius: 50%;
+    background: #ffffff url('spotify.png') center/cover no-repeat;
+}
+
 /* --- Der Fortschritt ----------------------------------------------- */
 
 .music-bar-progress {

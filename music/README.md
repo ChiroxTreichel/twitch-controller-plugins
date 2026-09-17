@@ -173,8 +173,10 @@ großzügiger; dort galt ein pausierter Player als laufend.
 
 ## Im Overlay
 
-Ein eigener Platz mit Bild, Titel, Interpret, „gewünscht von" und einem
-Fortschrittsbalken — wie das alte `obs.php`. **Breite**, **Höhe**,
+Ein eigener Platz mit Bild, Titel, Interpret, „gewünscht von", dem
+**Spotify-Logo** rechts und einem Fortschrittsbalken — wie das alte
+`obs.php`. Das Logo ist keine Zierde: wer die Daten von Spotify
+anzeigt, soll sagen, woher sie kommen. **Breite**, **Höhe**,
 **Abstand von links**, **Abstand von oben** und das **Farbschema**
 stehen in den Einstellungen.
 
