@@ -262,21 +262,6 @@ $reiterListe['history'] = translate('subathon.tab.history');
                 </tbody>
             </table>
 
-            <?php /*
-                Der Reiter "Manuelles Buchen" - aus, solange ihn
-                niemand braucht. Der Schalter steht hier und nicht
-                dort: einen Reiter schaltet man nicht in ihm selbst
-                ein, sonst kaeme man nach dem Ausschalten nicht mehr
-                an den Schalter.
-            */ ?>
-            <label class="row" style="gap:8px;margin-top:14px;">
-                <input type="checkbox" name="show_manual" value="1"
-                       <?= $showManual ? 'checked' : '' ?> <?= $canEdit ? '' : 'disabled' ?>>
-                <span><?= $e(translate('subathon.field.show_manual')) ?></span>
-            </label>
-
-            <p class="hint"><?= $e(translate('subathon.show_manual_hint')) ?></p>
-
             <?php if ($canEdit): ?>
                 <div class="row" style="margin-top:14px;">
                     <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>

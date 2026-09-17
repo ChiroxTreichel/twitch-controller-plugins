@@ -88,7 +88,9 @@
     "subathon.saved": "Gespeichert.",
     "subathon.second": "Sekunde",
     "subathon.seconds": "Sekunden",
+    "subathon.settings": "Tools - Subathon",
     "subathon.settings_hint": "Startzeit und Obergrenze legen fest, wann es losgeht und wie lange es höchstens dauert. Die drei Werte darunter bestimmen, was ein Abo, ein Bit und ein Cent bringen – die Sekunden daneben ergeben sich daraus.",
+    "subathon.settings_lead": "Was das Plugin betrifft. Wie der Subathon läuft – Startzeit, Obergrenze, was ein Abo bringt – steht auf seiner eigenen Seite.",
     "subathon.show_manual_hint": "Abos, Bits und Spenden buchen sich von selbst. Von Hand braucht man es nur, wenn etwas auf einem Weg ankommt, den dieses System nicht sieht – eine Überweisung, ein Geschenk im Chat.",
     "subathon.status.ended": "Beendet",
     "subathon.status.idle": "In Vorbereitung",
@@ -100,5 +102,6 @@
     "subathon.tab.messages": "Nachrichten",
     "subathon.tab.overlay": "Overlay",
     "subathon.tab.overview": "Übersicht",
-    "subathon.tab.settings": "Einstellungen"
+    "subathon.tab.settings": "Einstellungen",
+    "subathon.to_page": "Zur Subathon-Seite"
 }

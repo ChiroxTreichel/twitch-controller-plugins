@@ -88,7 +88,9 @@
     "subathon.saved": "Saved.",
     "subathon.second": "second",
     "subathon.seconds": "seconds",
+    "subathon.settings": "Tools - Subathon",
     "subathon.settings_hint": "Start and cap decide when it begins and how long it can last. The three values below decide what a sub, a bit and a cent are worth – the seconds next to them follow from that.",
+    "subathon.settings_lead": "About the plugin itself. How the subathon runs – start, cap, what a sub is worth – is on its own page.",
     "subathon.show_manual_hint": "Subs, bits and donations book themselves. By hand is only needed when something arrives on a route this system cannot see – a bank transfer, a gift in chat.",
     "subathon.status.ended": "Finished",
     "subathon.status.idle": "Getting ready",
@@ -100,5 +102,6 @@
     "subathon.tab.messages": "Messages",
     "subathon.tab.overlay": "Overlay",
     "subathon.tab.overview": "Overview",
-    "subathon.tab.settings": "Settings"
+    "subathon.tab.settings": "Settings",
+    "subathon.to_page": "To the subathon page"
 }

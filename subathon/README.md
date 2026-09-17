@@ -19,10 +19,13 @@ denselben sieben Reitern unter *Tools → Subathon*:
 **Manuelles Buchen** ist aus. Abos, Bits und Spenden buchen sich von
 selbst; von Hand braucht man es nur, wenn etwas auf einem Weg ankommt,
 den dieses System nicht sieht — eine Überweisung, ein Geschenk im Chat.
-Einschalten lässt es sich in den *Einstellungen*; der Schalter steht
-dort und nicht im Reiter selbst, sonst käme man nach dem Ausschalten
-nicht mehr an ihn heran. Ausgeblendet heißt aus: auch ein altes
-Formular bucht dann nichts mehr.
+Einschalten lässt es sich in den **Einstellungen des Plugins** —
+*Konto → Plugins → Tools - Subathon*, dort wo auch „Ausschalten" und
+„Entfernen" stehen. Dort und nicht im Reiter *Einstellungen*: der
+gehört dem laufenden Subathon (Startzeit, Obergrenze, was ein Abo
+bringt), und ob es einen Reiter gibt, ist eine Frage an das Plugin.
+Ausgeblendet heißt aus: auch ein altes Formular bucht dann nichts
+mehr.
 
 Der **Verlauf** hieß im Programm „Info" und trug die Nachweise mit
 sich. Die stehen jetzt hier im Paket; der Reiter zeigt nur noch den

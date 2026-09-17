@@ -75,6 +75,23 @@ $hooks->on('admin.nav', static function (array $nav): array {
     return $nav;
 });
 
+/*
+ * Die Einstellungen des PLUGINS - erreichbar aus der Plugin-Liste,
+ * neben "Ausschalten" und "Entfernen".
+ *
+ * Hier steht, was das Plugin betrifft, und nicht, was den laufenden
+ * Subathon betrifft: Startzeit und Obergrenze gehoeren in den Reiter
+ * "Einstellungen", die Frage nach einem Reiter gehoert hierher.
+ */
+$hooks->on('plugin.settings', static function (array $links): array {
+    $links[Subathon::SLUG] = [
+        'label' => translate('subathon.settings'),
+        'href'  => '/tools/subathon/settings',
+    ];
+
+    return $links;
+});
+
 // -------------------------------------------------------------------
 //  Das Overlay
 // -------------------------------------------------------------------
@@ -391,6 +408,38 @@ $router->get('/tools/subathon', static function (Request $request) use ($app, $p
     ]));
 }, ['auth' => true, 'permission' => 'Subathon.Global.View']);
 
+$router->get('/tools/subathon/settings', static function (Request $request) use ($app, $plugin): Response {
+    return Response::html($app->view->from($plugin->directory . '/views')->render('settings', [
+        'title'      => translate('subathon.settings'),
+        'active'     => 'tools/subathon',
+        'showManual' => Subathon::showManual($app),
+        'canEdit'    => $app->auth->can('Subathon.Global.Edit'),
+        'csrf'       => $app->auth->csrfToken(),
+        'notice'     => $request->get('notice'),
+        'error'      => $request->get('error'),
+    ]));
+}, ['auth' => true, 'permission' => 'Subathon.Global.View']);
+
+$router->post('/tools/subathon/settings', static function (Request $request) use ($app): Response {
+    $zurueckHierher = static function (?string $notice = null, ?string $error = null) use ($app): Response {
+        $query = array_filter(['notice' => $notice, 'error' => $error], static fn (?string $w): bool => $w !== null && $w !== '');
+
+        return Response::redirect($app->url('/tools/subathon/settings') . ($query === [] ? '' : '?' . http_build_query($query)));
+    };
+
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $zurueckHierher(null, translate('common.error.form_expired'));
+    }
+
+    if (!$app->auth->can('Subathon.Global.Edit')) {
+        return $zurueckHierher(null, translate('common.error.no_permission'));
+    }
+
+    $app->settings->set('show_manual', $request->input('show_manual') !== '', Subathon::scope());
+
+    return $zurueckHierher(translate('subathon.saved'));
+}, ['auth' => true]);
+
 $router->post('/tools/subathon', static function (Request $request) use ($app, $zurueck, $melden): Response {
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return $zurueck($app, null, translate('common.error.form_expired'));
@@ -481,7 +530,6 @@ $router->post('/tools/subathon', static function (Request $request) use ($app, $
                 'seconds_per_sub' => $minuten * 60,
                 'bits_per_sub'    => max(1, (int) $request->input('bits_per_sub')),
                 'cent_per_sub'    => max(1, (int) $request->input('cent_per_sub')),
-                'show_manual'     => $request->input('show_manual') !== '',
             ], Subathon::scope());
 
             $melden($app);
