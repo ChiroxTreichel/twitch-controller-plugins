@@ -119,10 +119,6 @@ $hooks->on('overlay.slots', static function (array $slots) use ($app): array {
             '--music-x' => Music::offsetX($app) . 'px',
             '--music-y' => Music::offsetY($app) . 'px',
         ],
-
-        // Unter den Alerts, ueber den Zielen: ein Alert soll den
-        // laufenden Titel verdecken duerfen, ein Zielbalken nicht.
-        'z'        => 25,
     ];
 
     return $slots;

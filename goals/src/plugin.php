@@ -86,9 +86,6 @@ $hooks->on('overlay.slots', static function (array $slots) use ($app): array {
         // Wie in der Legacy: waagerecht mittig, oben.
         'position' => 'top-center',
         'width'    => Goals::width($app) . 'px',
-        // Unter den Alerts: ein Alert soll ueber den Zielen liegen,
-        // nicht darunter verschwinden.
-        'z'        => 20,
         'vars'     => [
             '--goals-offset-top' => Goals::offsetTop($app) . 'px',
         ],

@@ -1,11 +1,11 @@
 {
   "slug": "music",
   "name": "Musik - Spotify",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "description": "Songwünsche über Spotify: eine öffentliche Seite zum Wünschen, die Warteschlange im Overlay und eine Bannliste für Titel, Interpreten, Genres und Zuschauer.",
   "author": "Twitch-Controller",
   "requires": {
-    "core": ">=2.8.0"
+    "core": ">=2.11.0"
   },
   "optional": {
     "timers": ">=1.2.0"

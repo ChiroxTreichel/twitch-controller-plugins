@@ -127,7 +127,6 @@ $hooks->on('overlay.slots', static function (array $slots) use ($app): array {
         // oberen Rand.
         'position' => 'top-center',
         'width'    => Alerts::width($app) . 'px',
-        'z'        => 50,
         // Die einstellbaren Werte als CSS-Variablen. So braucht das
         // JavaScript sie nicht zu kennen, und das Stylesheet bleibt
         // eine gewoehnliche Datei ohne PHP darin.
