@@ -335,6 +335,27 @@ $dauer = static function (int $sekunden) use ($e): string {
                     </div>
 
                     <?php /*
+                        Dieselben Felder wie beim vorhandenen Timer. Sie
+                        fehlten hier, und der Server nahm sie trotzdem
+                        entgegen - man musste also anlegen, aufklappen und
+                        gleich wieder speichern, um einzutragen, was man
+                        schon wusste.
+                    */ ?>
+                    <div class="row">
+                        <label class="field grow">
+                            <span class="hint"><?= $e(translate('timers.field.keywords')) ?></span>
+                            <input class="input" type="text" name="title_keywords" maxlength="200"
+                                   placeholder="<?= $e(translate('timers.field.keywords_hint')) ?>">
+                        </label>
+
+                        <label class="field grow">
+                            <span class="hint"><?= $e(translate('timers.field.game')) ?></span>
+                            <input class="input" type="text" name="game" maxlength="80"
+                                   placeholder="<?= $e(translate('timers.field.game_hint')) ?>">
+                        </label>
+                    </div>
+
+                    <?php /*
                         Auch hier eine Liste und kein einzelnes Feld: wer
                         einen Timer anlegt, hat oft schon zwei Nachrichten
                         im Kopf, und im alten System konnte man sie gleich
@@ -373,11 +394,28 @@ $dauer = static function (int $sekunden) use ($e): string {
                         </button>
                     </div>
 
-                    <label class="switch-field">
-                        <input type="checkbox" name="enabled" value="1" checked>
-                        <span class="switch-track"><span class="switch-knob"></span></span>
-                        <span><?= $e(translate('timers.field.active')) ?></span>
-                    </label>
+                    <div class="row">
+                        <label class="switch-field">
+                            <input type="checkbox" name="enabled" value="1" checked>
+                            <span class="switch-track"><span class="switch-knob"></span></span>
+                            <span><?= $e(translate('timers.field.active')) ?></span>
+                        </label>
+
+                        <?php /*
+                            Welcher Befehl daraus wird, steht erst fest,
+                            wenn der Titel getippt ist - hier also der
+                            Hinweis statt des Namens. Beim vorhandenen
+                            Timer steht an derselben Stelle "!spende".
+                        */ ?>
+                        <label class="switch-field">
+                            <input type="checkbox" name="allow_as_command" value="1">
+                            <span class="switch-track"><span class="switch-knob"></span></span>
+                            <span>
+                                <?= $e(translate('timers.field.as_command')) ?>
+                                <span class="hint"><?= $e(translate('timers.field.as_command_impossible')) ?></span>
+                            </span>
+                        </label>
+                    </div>
 
                     <div class="row">
                         <button class="btn" type="submit"><?= $e(translate('timers.create')) ?></button>
