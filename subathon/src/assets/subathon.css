@@ -1,0 +1,189 @@
+/*
+ * ===================================================================
+ *  Subathon im Overlay
+ * ===================================================================
+ *
+ * Aufbau 1:1 aus dem Programm (overlay.html): eine Leiste aus drei
+ * Abschnitten - abgelaufen, noch zu streamen, noch kaufbar -, darunter
+ * eine Legende und eine Laufschrift.
+ *
+ * Die Farben stehen NICHT hier, sondern kommen als CSS-Variablen aus
+ * den Einstellungen. Im Programm wurden sie beim Ausliefern in die
+ * HTML-Datei hineingeschrieben; hier setzt sie das Skript am Platz,
+ * und damit greift eine Aenderung ohne Neuladen.
+ *
+ * Alle Masse sind die von damals: 50 Pixel hohe Balken, 20 Pixel
+ * Schrift, die Ausweich-Fahne 30 Pixel hoch.
+ */
+
+#ov-slot-subathon {
+    padding: 5px;
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+/* Nichts laeuft: dann ist die Leiste weg und nicht leer. */
+.sub-wrap {
+    display: none;
+    position: relative;
+}
+
+.sub-wrap.is-on {
+    display: block;
+}
+
+.sub-bars {
+    width: 100%;
+    overflow: hidden;
+}
+
+.sub-part {
+    text-align: center;
+    overflow: hidden;
+    height: 50px;
+    line-height: 50px;
+    float: left;
+    font-weight: bold;
+    font-size: 20px;
+}
+
+.sub-part.done {
+    background-color: var(--sub-done, lightgreen);
+    color: var(--sub-done-text, black);
+}
+
+.sub-part.todo {
+    background-color: var(--sub-todo, #f79191);
+    color: var(--sub-todo-text, black);
+}
+
+.sub-part.possible {
+    background-color: var(--sub-possible, skyblue);
+    color: var(--sub-possible-text, black);
+}
+
+/*
+ * Die Ausweich-Fahne.
+ *
+ * Wird ein Abschnitt zu schmal fuer seine Zahl, steht sie darunter -
+ * mit einem Dreieck als Zeiger. Genau so macht es das Programm, und
+ * es ist der Grund, warum die Leiste auch am Anfang lesbar ist, wenn
+ * "abgelaufen" noch ein Strich ist.
+ */
+.sub-flag {
+    position: absolute;
+    display: none;
+    width: fit-content;
+    padding: 0 5px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border: 3px solid;
+    background-color: white;
+    color: black;
+    font-weight: bold;
+    white-space: nowrap;
+}
+
+.sub-flag.is-on {
+    display: block;
+}
+
+.sub-flag.done     { border-color: var(--sub-done, lightgreen); }
+.sub-flag.todo     { border-color: var(--sub-todo, #f79191); }
+.sub-flag.possible { border-color: var(--sub-possible, skyblue); }
+
+.sub-arrow {
+    position: absolute;
+    display: none;
+    width: 0;
+    height: 0;
+    border-left: 10px solid transparent;
+    border-right: 10px solid transparent;
+    border-bottom: 10px solid;
+}
+
+.sub-arrow.is-on {
+    display: block;
+}
+
+.sub-arrow.done     { border-bottom-color: var(--sub-done, lightgreen); }
+.sub-arrow.todo     { border-bottom-color: var(--sub-todo, #f79191); }
+.sub-arrow.possible { border-bottom-color: var(--sub-possible, skyblue); }
+
+/* --- Die Legende --------------------------------------------------- */
+
+.sub-legend {
+    margin-top: 100px;
+    width: fit-content;
+}
+
+.sub-legend > div {
+    padding: 5px 10px;
+    font-weight: bold;
+    text-align: center;
+}
+
+.sub-legend > div.done {
+    background-color: var(--sub-done, lightgreen);
+    color: var(--sub-done-text, black);
+}
+
+.sub-legend > div.todo {
+    background-color: var(--sub-todo, #f79191);
+    color: var(--sub-todo-text, black);
+}
+
+.sub-legend > div.possible {
+    background-color: var(--sub-possible, skyblue);
+    color: var(--sub-possible-text, black);
+}
+
+/* --- Die Laufschrift ----------------------------------------------- */
+
+.sub-message {
+    position: absolute;
+    top: 75px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 30px;
+    background-color: rgba(255, 255, 255, 0.8);
+    color: black;
+    border-radius: 10px;
+    padding: 5px;
+    white-space: nowrap;
+
+    /* Das Programm blendete mit jQuery um - dasselbe ohne jQuery. */
+    transition: opacity 0.5s ease;
+}
+
+/*
+ * Ohne Obergrenze zeigt das Programm nur die verbleibende Zeit, gross
+ * in der Mitte, ohne Balken und ohne Legende.
+ */
+.sub-wrap.no-limit .sub-part.done,
+.sub-wrap.no-limit .sub-part.possible,
+.sub-wrap.no-limit .sub-legend {
+    display: none;
+}
+
+.sub-wrap.no-limit .sub-part.todo {
+    background-color: transparent;
+    height: 80px;
+    line-height: 80px;
+    width: 100% !important;
+    display: inline-flex;
+    justify-content: center;
+    float: none;
+}
+
+.sub-wrap.no-limit .sub-part.todo > span {
+    display: block;
+    width: fit-content;
+    font-size: 80px;
+    background-color: rgba(255, 255, 255, 0.8);
+    border-radius: 10px;
+}
+
+.sub-wrap.no-limit .sub-message {
+    top: 90px;
+}

@@ -1,0 +1,123 @@
+# Tools - Subathon
+
+Ein Stream, der länger wird: jedes Abo, jede Handvoll Bits und jede
+Spende schiebt das Ende nach hinten — bis zu einer Obergrenze.
+
+Übernommen aus dem Windows-Programm (`legacy/subathon-tool`), mit
+denselben sieben Reitern unter *Tools → Subathon*:
+
+| Reiter | was dort steht |
+| --- | --- |
+| Übersicht | Zustand, die große Zahl, ein Knopf: Pausieren / Weiter / Zurücksetzen |
+| Einstellungen | Startzeit, Obergrenze, Auslöser, was ein Abo/Bit/Cent bringt |
+| Overlay | die sechs Farben der Anzeige |
+| Nachrichten | die Laufschrift, eine je Zeile, mit Platzhaltern |
+| Manuelles Buchen | Abo, Geschenk-Abos, Bits, Spende, Minuten von Hand |
+| Happy Hour | Stunden, in denen Spenden mehr bringen |
+| Info | Verlauf und Nachweise |
+
+## Was Zeit bringt
+
+**Abos** bringen die eingestellten Minuten; Stufe 2 und 3 entsprechend
+ihrem Preis (die Rechnung des Programms: `Stufe1 / 4,99 × 7,99`).
+**Bits** und **Spenden** rechnen über „Bits pro Sub" und „Cent pro
+Sub" — daraus ergeben sich die Sekunden je Bit und je Cent, und die
+stehen im Reiter daneben.
+
+**Spenden** zählen von **PayPal**, **StreamElements**, **StreamLabs**
+und **Throne**. Die ersten drei melden sich über den Haken
+`tips.donation`, Throne über sein Ereignis — das Plugin muss dafür
+jeweils installiert sein.
+
+Abos, Geschenk-Abos und Bits kommen über die **EventSub des Kerns**.
+Das Programm brachte dafür eigene Twitch-Tokens und eine eigene
+Websocket-Verbindung mit; die fünf Zeilen für Zugangsdaten im Reiter
+*Einstellungen* sind deshalb weggefallen — alles andere dort ist
+1:1 geblieben.
+
+Ein geschenktes Abo meldet Twitch **zweimal** (als `subscribe` mit
+`is_gift` und als `subscription.gift`). Gebucht wird nur der zweite
+Weg, sonst zählt es doppelt.
+
+## Die Happy Hour
+
+Eine Stunde am Tag, in der **Spenden** mehr bringen — Abos und Bits
+nicht, so war es im Programm auch. Drei Arten:
+
+| | |
+| --- | --- |
+| Double-Time | die Zeit zählt doppelt |
+| Extend-Time-Only | die Spende verlängert **nur die Obergrenze**, nicht die Zeit |
+| Extend-Time | beides |
+
+*Extend-Only* ist der interessante Fall: die Spende macht den Stream
+nicht länger, sondern macht es **möglich**, ihn später länger zu
+machen.
+
+## Nichts läuft im Sekundentakt
+
+Das Programm zählte jede Sekunde hoch und schrieb die Pausenzeit in
+die `config.json` — eine Datei, jede Sekunde, für einen Wert, den man
+auch ausrechnen kann. Hier stehen drei Zahlen in den Einstellungen:
+
+```
+Ende = Start + Dauer + Pause
+```
+
+Die laufende Anzeige rechnet der Browser, und der kann das. Über die
+Leitung geht nur, was sich wirklich ändert.
+
+## Das Overlay
+
+Dieselbe Anzeige wie im Programm: eine Leiste aus drei Abschnitten —
+*abgelaufen*, *noch zu streamen*, *noch kaufbar* —, darunter eine
+Legende und eine Laufschrift, die alle zehn Sekunden wechselt. Wird ein
+Abschnitt zu schmal für seine Zahl, klappt sie als Fahne darunter, mit
+einem Dreieck als Zeiger.
+
+Ohne Obergrenze gibt es nur **eine** Zahl, groß in der Mitte: wie lange
+noch. Balken ohne „wovon" ergeben nichts.
+
+Die Farben stehen im Reiter *Overlay*. Wo der Platz liegt und wie weit
+vorne, entscheidet die Overlay-Seite unter *Konto → Overlay* — wie bei
+jedem anderen Platz auch.
+
+## Die Platzhalter der Laufschrift
+
+`{{Conf.MIN_PER_SUB}}`, `{{Conf.BITS_PER_SUB}}`,
+`{{Conf.SECONDS_PER_BIT}}`, `{{Conf.CENT_PER_SUB}}`,
+`{{Conf.SECONDS_PER_CENT}}`, `{{Conf.CENT_PER_HOUR}}`,
+`{{Conf.EURO_PER_HOUR}}`, `{{Conf.EURO_UNTIL_FULL}}`,
+`{{Conf.OWNER}}`, `{{Conf.HAPPY_HOUR_START}}`,
+`{{Conf.HAPPY_HOUR_END}}` — dazu die sechs Farben als `{{Color.DONE}}`
+und so weiter. Der aktuelle Wert steht im Reiter daneben.
+
+Das Präfix `Conf.` ist **freiwillig**: beide Schreibweisen gelten. Im
+Programm wurden zwei der Platzhalter nur ohne Präfix ersetzt, in der
+mitgelieferten Nachrichtenliste standen sie aber mit — die blieben im
+Stream als geschweifte Klammern stehen.
+
+## Rechte
+
+| Recht | erlaubt |
+| --- | --- |
+| `Subathon.Global.View` | die Seite sehen |
+| `Subathon.Global.Edit` | einstellen, pausieren, zurücksetzen |
+| `Subathon.Global.Book` | Zeit von Hand buchen |
+
+Buchen ist ein eigenes Recht: wer im Stream eine Spende nachträgt, muss
+deshalb nicht auch die Obergrenze verstellen dürfen.
+
+## Was das Plugin speichert
+
+`subathon_log` — eine Buchung je Zeile, mit Zeitpunkt. Dazu im Bereich
+`plugin:subathon`: Start, Dauer, Obergrenze, Pause, die Werte je
+Abo/Bit/Cent, die Farben, die Nachrichten und die Happy Hours.
+
+Beim Entfernen des Plugins geht alles mit — auch die laufende Zeit.
+
+## Was weggefallen ist
+
+Die `seconds_per_follow` aus der `config.json`: sie stand dort, wurde
+aber nirgends benutzt — das Programm hat `channel.follow` nie
+abonniert.
