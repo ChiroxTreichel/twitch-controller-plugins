@@ -25,7 +25,8 @@
 /**
  * Ein Feld für eine Datei-Adresse. Der Knopf löst die verborgene
  * Dateiauswahl aus; verdrahtet ist das im Kern (layout.php).
- * Hochgeladen wird nichts - die Datei muss schon auf dem Server liegen.
+ * Hochgeladen wird im Kern (layout.php): die Datei geht an
+ * /account/uploads, und der Pfad, der zurueckkommt, landet im Feld.
  */
 $dateifeld = static function (string $name, string $wert, string $accept) use ($e, $canEdit): void {
     $id = 'f-' . substr(hash('crc32b', $name), 0, 8);
