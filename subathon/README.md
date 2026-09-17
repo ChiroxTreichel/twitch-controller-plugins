@@ -9,7 +9,7 @@ denselben sieben Reitern unter *Tools → Subathon*:
 | Reiter | was dort steht |
 | --- | --- |
 | Übersicht | Zustand, die große Zahl (läuft sichtbar ab), ein Knopf: Pausieren / Weiter / Zurücksetzen |
-| Einstellungen | Startzeit, Obergrenze, Auslöser, was ein Abo/Bit/Cent bringt |
+| Einstellungen | Startzeit, Obergrenze, Auslöser, was ein Abo/Bit/Cent bringt — **zu, solange er läuft** |
 | Overlay | die sechs Farben der Anzeige |
 | Nachrichten | die Laufschrift, eine je Zeile, mit Platzhaltern |
 | Manuelles Buchen | Abo, Geschenk-Abos, Bits, Spende, Minuten von Hand — **ausgeblendet** |
@@ -59,6 +59,24 @@ Websocket-Verbindung mit; die fünf Zeilen für Zugangsdaten im Reiter
 Ein geschenktes Abo meldet Twitch **zweimal** (als `subscribe` mit
 `is_gift` und als `subscription.gift`). Gebucht wird nur der zweite
 Weg, sonst zählt es doppelt.
+
+## Zu, solange er läuft
+
+Sobald der Subathon angefangen hat, lassen sich die Einstellungen nicht
+mehr ändern — Startzeit, Obergrenze und die Werte je Abo, Bit und Cent.
+**Pausieren hilft nicht**: pausiert ist gestartet.
+
+Die Startzeit mitten im Lauf zu verschieben hieße, das Ende zu
+verschieben, nachdem alle es gesehen haben. Und „Minuten pro Sub"
+nachträglich zu ändern hieße, dass zwei Abos derselben Stunde
+verschieden viel gebracht haben, ohne dass es irgendwo steht.
+
+Die Zahlen bleiben sichtbar — man will ja wissen, womit gerade
+gerechnet wird. Vor dem Start und nach dem Ende ist alles offen: davor
+ist nichts passiert, danach ist alles vorbei.
+
+Die Sperre sitzt in der Route und nicht nur an den Feldern: ein
+`readonly` im HTML ist eine Bitte, keine Zusage.
 
 ## Die Happy Hour
 

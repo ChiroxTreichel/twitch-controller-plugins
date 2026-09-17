@@ -297,6 +297,23 @@ final class Subathon
     }
 
     /**
+     * Sind die Einstellungen zu?
+     *
+     * Sobald er laeuft - und pausiert ist gelaufen. Wer die Startzeit
+     * mitten im Lauf verschiebt, verschiebt das Ende, nachdem alle es
+     * gesehen haben; wer "Minuten pro Sub" aendert, sorgt dafuer, dass
+     * zwei Abos derselben Stunde verschieden viel gebracht haben,
+     * ohne dass es irgendwo steht.
+     *
+     * Vorher und nachher geht es: davor ist noch nichts passiert,
+     * danach ist alles vorbei.
+     */
+    public static function isLocked(string $status): bool
+    {
+        return $status === 'running' || $status === 'paused';
+    }
+
+    /**
      * Die drei Balken des Overlays - 1:1 aus OverlayServer.ServeCalc.
      *
      *   done      wie lange schon gestreamt wird (ohne Pausen)

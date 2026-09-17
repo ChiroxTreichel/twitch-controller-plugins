@@ -55,6 +55,7 @@
     "subathon.kind.manual": "By hand",
     "subathon.kind.sub": "Sub",
     "subathon.lead": "A stream that grows: subs, bits and donations push the end back – up to the cap.",
+    "subathon.locked": "The subathon is running – start, cap and the values per sub cannot be changed now. Pausing does not help: the numbers hold for the whole run.",
     "subathon.log.how_much": "Amount",
     "subathon.log.time": "Time",
     "subathon.log.what": "What",

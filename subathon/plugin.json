@@ -1,7 +1,7 @@
 {
   "slug": "subathon",
   "name": "Tools - Subathon",
-  "version": "1.3.0",
+  "version": "1.4.0",
   "description": "Ein Stream, der länger wird: Abos, Bits und Spenden verlängern die Zeit bis zu einer Obergrenze. Mit Overlay, Happy Hour, Laufschrift und Verlauf.",
   "author": "Twitch-Controller",
   "requires": {

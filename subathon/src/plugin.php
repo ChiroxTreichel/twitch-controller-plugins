@@ -412,6 +412,7 @@ $router->get('/tools/subathon', static function (Request $request) use ($app, $p
 
         'canEdit'  => $app->auth->can('Subathon.Global.Edit'),
         'canBook'  => $app->auth->can('Subathon.Global.Book'),
+        'locked'   => Subathon::isLocked(Subathon::statusOf($start, $ende, Subathon::isPaused($app), $jetzt)),
         'showManual' => Subathon::showManual($app),
         'csrf'     => $app->auth->csrfToken(),
         'notice'   => $request->get('notice'),
@@ -542,6 +543,29 @@ $router->post('/tools/subathon', static function (Request $request) use ($app, $
         case 'settings':
             if (!$darfAendern) {
                 return $zurueck($app, null, translate('common.error.no_permission'));
+            }
+
+            /*
+             * Zu ist zu - auch fuer ein Formular, das noch offen war,
+             * als er startete. Die Sperre gehoert hierher und nicht
+             * nur an die Felder: ein readonly im HTML ist eine Bitte.
+             */
+            $jetzt = time();
+            $start = Subathon::start($app);
+            $pause = Subathon::effectiveBreak(
+                Subathon::breakTime($app),
+                Subathon::isPaused($app),
+                Subathon::pausedAt($app),
+                $jetzt
+            );
+
+            if (Subathon::isLocked(Subathon::statusOf(
+                $start,
+                Subathon::endAt($start, Subathon::timer($app), $pause),
+                Subathon::isPaused($app),
+                $jetzt
+            ))) {
+                return $zurueck($app, null, translate('subathon.locked'), 'settings');
             }
 
             $startText = trim((string) $request->input('start'));

@@ -55,6 +55,7 @@
     "subathon.kind.manual": "Von Hand",
     "subathon.kind.sub": "Abo",
     "subathon.lead": "Ein Stream, der länger wird: Abos, Bits und Spenden schieben das Ende nach hinten – bis zur Obergrenze.",
+    "subathon.locked": "Der Subathon läuft – Startzeit, Obergrenze und die Werte je Abo lassen sich jetzt nicht mehr ändern. Pausieren ändert daran nichts: die Zahlen gelten für den ganzen Durchgang.",
     "subathon.log.how_much": "Menge",
     "subathon.log.time": "Zeit",
     "subathon.log.what": "Was",

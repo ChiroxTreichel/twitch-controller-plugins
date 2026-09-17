@@ -35,6 +35,7 @@
  * @var array<string, string> $preview
  * @var bool $canEdit
  * @var bool $canBook
+ * @var bool $locked
  * @var bool $showManual
  * @var string $csrf
  * @var string $notice
@@ -55,6 +56,13 @@ $uhr = static function (int $sekunden): string {
 };
 
 $zeit = static fn (int $stempel): string => $stempel <= 0 ? '—' : date('d.m.Y H:i', $stempel);
+
+/*
+ * Laeuft er, sind die Einstellungen zu - unabhaengig davon, was
+ * jemand darf. Das eine ist eine Frage der Rechte, das andere eine
+ * des Zeitpunkts.
+ */
+$darfEinstellen = $canEdit && !$locked;
 ?>
 <h1><?= $e(translate('subathon.name')) ?></h1>
 <p class="lead"><?= $e(translate('subathon.lead')) ?></p>
@@ -194,44 +202,52 @@ $reiterListe['history'] = translate('subathon.tab.history');
 
             <p class="hint"><?= $e(translate('subathon.settings_hint')) ?></p>
 
+            <?php if ($locked): ?>
+                <?php /*
+                    Zu, solange er laeuft. Die Zahlen bleiben sichtbar -
+                    man will ja wissen, womit gerade gerechnet wird.
+                */ ?>
+                <div class="note note-warn"><?= $e(translate('subathon.locked')) ?></div>
+            <?php endif ?>
+
             <div class="row">
                 <label class="field">
                     <span class="hint"><?= $e(translate('subathon.field.start')) ?></span>
                     <input class="input" type="datetime-local" name="start"
                            value="<?= $e($start > 0 ? date('Y-m-d\TH:i', $start) : '') ?>"
-                           <?= $canEdit ? '' : 'readonly' ?>>
+                           <?= $darfEinstellen ? '' : 'readonly' ?>>
                 </label>
 
                 <label class="field">
                     <span class="hint"><?= $e(translate('subathon.field.max_hours')) ?></span>
                     <input class="input" type="number" name="max_hours" min="0" max="720" step="1"
-                           value="<?= (int) intdiv($max, 3600) ?>" <?= $canEdit ? '' : 'readonly' ?>>
+                           value="<?= (int) intdiv($max, 3600) ?>" <?= $darfEinstellen ? '' : 'readonly' ?>>
                 </label>
             </div>
 
             <label class="field">
                 <span class="hint"><?= $e(translate('subathon.field.owner')) ?></span>
                 <input class="input" type="text" name="owner" value="<?= $e($owner) ?>"
-                       <?= $canEdit ? '' : 'readonly' ?>>
+                       <?= $darfEinstellen ? '' : 'readonly' ?>>
             </label>
 
             <div class="row">
                 <label class="field">
                     <span class="hint"><?= $e(translate('subathon.field.minutes_per_sub')) ?></span>
                     <input class="input" type="number" name="minutes_per_sub" min="1" max="1440" step="1"
-                           value="<?= (int) intdiv($perSub, 60) ?>" <?= $canEdit ? '' : 'readonly' ?>>
+                           value="<?= (int) intdiv($perSub, 60) ?>" <?= $darfEinstellen ? '' : 'readonly' ?>>
                 </label>
 
                 <label class="field">
                     <span class="hint"><?= $e(translate('subathon.field.bits_per_sub')) ?></span>
                     <input class="input" type="number" name="bits_per_sub" min="1" max="100000" step="1"
-                           value="<?= (int) $perBits ?>" <?= $canEdit ? '' : 'readonly' ?>>
+                           value="<?= (int) $perBits ?>" <?= $darfEinstellen ? '' : 'readonly' ?>>
                 </label>
 
                 <label class="field">
                     <span class="hint"><?= $e(translate('subathon.field.cent_per_sub')) ?></span>
                     <input class="input" type="number" name="cent_per_sub" min="1" max="100000" step="1"
-                           value="<?= (int) $perCent ?>" <?= $canEdit ? '' : 'readonly' ?>>
+                           value="<?= (int) $perCent ?>" <?= $darfEinstellen ? '' : 'readonly' ?>>
                 </label>
             </div>
 
@@ -262,7 +278,7 @@ $reiterListe['history'] = translate('subathon.tab.history');
                 </tbody>
             </table>
 
-            <?php if ($canEdit): ?>
+            <?php if ($darfEinstellen): ?>
                 <div class="row" style="margin-top:14px;">
                     <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
                 </div>
