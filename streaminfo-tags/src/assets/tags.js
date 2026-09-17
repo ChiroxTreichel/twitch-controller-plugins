@@ -70,4 +70,12 @@
     } else {
         start();
     }
+
+    /*
+     * Noch einmal, wenn ein Formular ohne Seitenwechsel abgeschickt
+     * wurde: die Elemente von eben sind dann ausgetauscht, und mit
+     * ihnen ihre Zuhoerer. Was am Dokument haengt, braucht das nicht -
+     * das haelt, und ein zweites Anhaengen taete alles doppelt.
+     */
+    document.addEventListener('overlay:swapped', start);
 }());
