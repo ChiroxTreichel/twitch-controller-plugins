@@ -229,19 +229,61 @@ h2 { font-size: 1.05rem; margin: 0; }
 
 .rules li { margin-bottom: 6px; }
 
-.rules-box {
-    margin-top: 16px;
-    padding-top: 14px;
-    border-top: 1px solid var(--line);
+/*
+ * Die Regeln oben links, neben dem Kanalnamen.
+ *
+ * Ein <details> und kein Kasten, den JavaScript auf- und zuklappt: so
+ * funktioniert es auch ohne, und der Browser kuemmert sich um
+ * Tastatur und Vorleser. Das alte System hatte dafuer einen Knopf und
+ * ein Modal mit eigenem Skript.
+ */
+.rules-pop {
+    position: relative;
+
+    /* Zwischen Marke und Anmeldung, und auf dem Telefon nimmt es
+       nicht die ganze Zeile. */
+    flex: 0 1 auto;
 }
 
-.rules-box summary {
+.rules-pop summary {
     cursor: pointer;
     color: var(--muted);
     font-size: 0.9rem;
+    padding: 6px 10px;
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    list-style: none;
+    white-space: nowrap;
+    user-select: none;
 }
 
-.rules-box[open] summary { margin-bottom: 10px; }
+.rules-pop summary::-webkit-details-marker { display: none; }
+.rules-pop summary:hover { color: var(--ink); }
+.rules-pop[open] summary { color: var(--ink); background: var(--panel-2); }
+
+/*
+ * Der Kasten liegt UEBER der Seite und schiebt die Kopfzeile nicht
+ * auseinander: sonst huepfte beim Aufklappen alles darunter nach
+ * unten.
+ */
+.rules-panel {
+    position: absolute;
+    left: 0;
+    top: calc(100% + 8px);
+    z-index: 20;
+    width: max-content;
+
+    /* Auf dem Telefon darf er nicht breiter werden als das Fenster. */
+    max-width: min(420px, calc(100vw - 32px));
+
+    padding: 14px 16px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.45);
+}
+
+.rules-panel .rules { margin: 0; }
 
 /* --- Der Wunsch ---------------------------------------------------- */
 

@@ -37,6 +37,24 @@
         playing: false
     };
 
+    /*
+     * Der Anfangszustand kommt MIT der Seite - von /display/music/state.js,
+     * das vor dieser Datei geladen wird.
+     *
+     * Er muss von dort kommen: die Leitung ins Overlay beginnt bei der
+     * hoechsten bekannten Nachrichtennummer und spielt nichts nach, und
+     * der Worker meldet sich nur bei Aenderung. Ohne ihn blieb der
+     * Platz leer, bis der Titel wechselte - bei einem langen Lied
+     * minutenlang.
+     */
+    if (window.MUSIC_STATE && typeof window.MUSIC_STATE === 'object') {
+        var anfang = Object.keys(window.MUSIC_STATE);
+
+        for (var a = 0; a < anfang.length; a++) {
+            zustand[anfang[a]] = window.MUSIC_STATE[anfang[a]];
+        }
+    }
+
     /* Wann der Stand zuletzt gemeldet wurde - davon aus wird gezaehlt. */
     var seit = Date.now();
 

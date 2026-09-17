@@ -19,6 +19,7 @@
  * @var list<string> $rules
  * @var bool $accepted
  * @var int $cooldown
+ * @var list<array<string, mixed>> $favorites
  * @var string $csrf
  * @var string $notice
  * @var string $error
@@ -95,15 +96,34 @@
 
                 <label class="field">
                     <span class="hint"><?= $e(translate('music.public.link')) ?></span>
+                    <?php /*
+                        Das Feld bleibt benutzbar, auch wenn gerade
+                        nicht gewuenscht werden darf: merken geht
+                        trotzdem, und ein Feld, in das man nichts
+                        eintippen kann, macht den zweiten Knopf
+                        nutzlos.
+                    */ ?>
                     <input class="input" type="text" name="link"
                            placeholder="https://open.spotify.com/track/…"
-                           autocomplete="off" inputmode="url"
-                        <?= $may['ok'] ? '' : 'disabled' ?>>
+                           autocomplete="off" inputmode="url">
                 </label>
 
-                <button class="btn" type="submit" <?= $may['ok'] ? '' : 'disabled' ?>>
-                    <?= $e(translate('music.public.submit')) ?>
-                </button>
+                <div class="row">
+                    <button class="btn" type="submit" <?= $may['ok'] ? '' : 'disabled' ?>>
+                        <?= $e(translate('music.public.submit')) ?>
+                    </button>
+
+                    <?php /*
+                        Merken geht auch dann, wenn gerade nicht
+                        gewuenscht werden darf - es landet ja nichts in
+                        der Warteschlange. Genau dafuer ist die Liste
+                        da: den Titel jetzt ablegen, wenn es wieder
+                        geht, wuenschen.
+                    */ ?>
+                    <button class="btn btn-ghost" type="submit" name="action" value="favorite">
+                        <?= $e(translate('music.public.favorite')) ?>
+                    </button>
+                </div>
             </form>
 
             <?php if (!$may['ok']): ?>
@@ -116,14 +136,59 @@
             <?php endif ?>
         <?php endif ?>
 
-        <details class="rules-box">
-            <summary><?= $e(translate('music.public.rules_title')) ?></summary>
-            <ul class="rules">
-                <?php foreach ($rules as $regel): ?>
-                    <li><?= $e($regel) ?></li>
+        <?php /*
+            Die Merkliste, wie im alten System: wer einen Titel gut
+            findet, legt ihn ab und wuenscht ihn spaeter mit einem
+            Klick, ohne den Link wieder heraussuchen zu muessen.
+
+            Der zweite Knopf im Wunschformular merkt statt zu wuenschen
+            - derselbe Link, zwei Absichten.
+        */ ?>
+        <?php if ($identity !== null && $accepted): ?>
+            <?php if ($favorites !== []): ?>
+                <h2 style="margin-top:22px;"><?= $e(translate('music.public.favorites')) ?></h2>
+
+                <?php foreach ($favorites as $eintrag): ?>
+                    <div class="track">
+                        <?php if ((string) $eintrag['image'] !== ''): ?>
+                            <img class="track-cover" src="<?= $e((string) $eintrag['image']) ?>" alt="" loading="lazy">
+                        <?php else: ?>
+                            <span class="track-cover"></span>
+                        <?php endif ?>
+
+                        <span class="track-text grow">
+                            <span class="track-title"><?= $e((string) $eintrag['name']) ?></span>
+                            <span class="track-sub"><?= $e((string) $eintrag['artists']) ?></span>
+                        </span>
+
+                        <?php /*
+                            Zwei Knoepfe, zwei Formulare: jedes schickt
+                            genau eine Absicht. Ein Formular mit zwei
+                            Absende-Knoepfen taete dasselbe, waere aber
+                            beim Druecken von Enter eine Ueberraschung.
+                        */ ?>
+                        <form method="post" action="<?= $e($url('/music')) ?>">
+                            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                            <input type="hidden" name="action" value="wish">
+                            <input type="hidden" name="track" value="<?= $e((string) $eintrag['track_id']) ?>">
+                            <button class="btn btn-small" type="submit" <?= $may['ok'] ? '' : 'disabled' ?>>
+                                <?= $e(translate('music.public.submit')) ?>
+                            </button>
+                        </form>
+
+                        <form method="post" action="<?= $e($url('/music')) ?>">
+                            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                            <input type="hidden" name="action" value="unfavorite">
+                            <input type="hidden" name="track" value="<?= $e((string) $eintrag['track_id']) ?>">
+                            <button class="btn btn-ghost btn-small" type="submit">
+                                <?= $e(translate('music.public.unfavorite')) ?>
+                            </button>
+                        </form>
+                    </div>
                 <?php endforeach ?>
-            </ul>
-        </details>
+            <?php endif ?>
+        <?php endif ?>
+
     </div>
 
     <?php /*

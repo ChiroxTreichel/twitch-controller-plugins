@@ -262,6 +262,57 @@ final class Music
         'user-library-modify',
     ];
 
+    /**
+     * Was das Overlay anzeigt.
+     *
+     * An EINER Stelle, weil es von zweien gebraucht wird: der Takt
+     * schickt es bei Aenderung, und die frisch geladene Seite bekommt
+     * es gleich mit. Zwei Fassungen desselben Zustands liefen
+     * auseinander, sobald eine davon ein Feld dazubekommt.
+     *
+     * @return array<string, mixed>
+     */
+    public static function overlayState(App $app): array
+    {
+        $leer = [
+            'playing'  => false,
+            'uri'      => '',
+            'name'     => '',
+            'artists'  => '',
+            'image'    => '',
+            'duration' => 0,
+            'progress' => 0,
+            'wishedBy' => '',
+        ];
+
+        if (!self::isConnected($app)) {
+            return $leer;
+        }
+
+        $laeuft = (new Spotify($app))->currentlyPlaying();
+        $titel = is_array($laeuft) ? ($laeuft['item'] ?? null) : null;
+
+        if (!is_array($titel)) {
+            return $leer;
+        }
+
+        $uri = (string) ($titel['uri'] ?? '');
+
+        return [
+            'playing'  => (bool) ($laeuft['is_playing'] ?? false),
+            'uri'      => $uri,
+            'name'     => (string) ($titel['name'] ?? ''),
+            'artists'  => implode(', ', array_filter(array_map(
+                static fn (array $a): string => (string) ($a['name'] ?? ''),
+                (array) ($titel['artists'] ?? [])
+            ))),
+            'image'    => (string) ($titel['album']['images'][0]['url'] ?? ''),
+            'duration' => (int) ($titel['duration_ms'] ?? 0),
+            'progress' => (int) ($laeuft['progress_ms'] ?? 0),
+            'wishedBy' => $uri !== '' ? Wishes::wishedBy($app, $uri) : '',
+        ];
+    }
+
     public static function isConnected(App $app): bool
     {
         return $app->settings->hasSecret('refresh_token', self::scope());

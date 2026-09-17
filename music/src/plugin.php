@@ -27,6 +27,7 @@ use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
 use TwitchController\Core\Overlay\Bus;
 use TwitchController\Plugin\Music\Bans;
+use TwitchController\Plugin\Music\Favorites;
 use TwitchController\Plugin\Music\Link;
 use TwitchController\Plugin\Music\Music;
 use TwitchController\Plugin\Music\Privilege;
@@ -110,10 +111,35 @@ $hooks->on('overlay.slots', static function (array $slots) use ($app): array {
 
 $hooks->on('overlay.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/music/assets/overlay.css');
+
+    /*
+     * Reihenfolge zaehlt: state.js legt den Anfangszustand ab,
+     * overlay.js zeigt ihn an.
+     *
+     * Ohne den Anfangszustand blieb der Platz leer, obwohl Musik lief.
+     * Die Leitung ins Overlay beginnt bei der hoechsten bekannten
+     * Nachrichtennummer und spielt nichts nach - und der Takt schickt
+     * nur BEI AENDERUNG. Eine frisch geladene Browserquelle bekam also
+     * nichts, bis der Titel wechselte.
+     */
+    $assets['js'][] = $app->url('/display/music/state.js');
     $assets['js'][] = $app->asset('/plugin/music/assets/overlay.js');
 
     return $assets;
 });
+
+$router->get('/display/music/state.js', static function () use ($app): Response {
+    $js = 'window.MUSIC_STATE = ' . json_encode(
+        Music::overlayState($app),
+        JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES
+    ) . ";\n";
+
+    return Response::html($js, 200, [
+        'Content-Type' => 'application/javascript; charset=utf-8',
+        // Nicht zwischenspeichern: hier steht, was GERADE laeuft.
+        'Cache-Control' => 'no-store, must-revalidate',
+    ]);
+}, ['auth' => true, 'permission' => 'Account.Overlay.View']);
 
 // -------------------------------------------------------------------
 //  Der Takt: was laeuft gerade?
@@ -136,25 +162,7 @@ $hooks->on('cron.tick', static function () use ($app): void {
         return;
     }
 
-    $spotify = new Spotify($app);
-    $laeuft = $spotify->currentlyPlaying();
-
-    $titel = is_array($laeuft) ? ($laeuft['item'] ?? null) : null;
-    $uri = is_array($titel) ? (string) ($titel['uri'] ?? '') : '';
-
-    $zustand = [
-        'playing'  => is_array($laeuft) ? (bool) ($laeuft['is_playing'] ?? false) : false,
-        'uri'      => $uri,
-        'name'     => is_array($titel) ? (string) ($titel['name'] ?? '') : '',
-        'artists'  => is_array($titel) ? implode(', ', array_filter(array_map(
-            static fn (array $a): string => (string) ($a['name'] ?? ''),
-            (array) ($titel['artists'] ?? [])
-        ))) : '',
-        'image'    => is_array($titel) ? (string) ($titel['album']['images'][0]['url'] ?? '') : '',
-        'duration' => is_array($titel) ? (int) ($titel['duration_ms'] ?? 0) : 0,
-        'progress' => is_array($laeuft) ? (int) ($laeuft['progress_ms'] ?? 0) : 0,
-        'wishedBy' => $uri !== '' ? Wishes::wishedBy($app, $uri) : '',
-    ];
+    $zustand = Music::overlayState($app);
 
     /*
      * Der Fortschritt bleibt beim Vergleich aussen vor: er aendert
@@ -497,6 +505,7 @@ $oeffentlich = static function (App $app, string $vorlage, array $daten = []) us
         'bypass'    => Privilege::mayBypass($app, $ich),
         'rules'     => Music::rules($app),
         'accepted'  => Visitor::hasAcceptedRules($app, $ich),
+        'favorites' => [],
         'cooldown'  => Music::cooldown($app),
         'csrf'      => Visitor::csrfToken($app),
         'brand'     => $app->settings->string('twitch_broadcaster_name'),
@@ -556,6 +565,7 @@ $router->get('/music', static function (Request $request) use ($app, $oeffentlic
         'title'     => translate('music.public.title'),
         'may'       => $darfWuenschen($app, $ich),
         'connected' => Music::isConnected($app),
+        'favorites' => $ich === null ? [] : Favorites::of($app, $ich['user_id']),
         'notice'    => $request->get('notice'),
         'error'     => $request->get('error'),
     ]);
@@ -808,27 +818,70 @@ $router->post('/music', static function (Request $request) use ($app, $darfWuens
         return $zurueck(translate('music.public.rules_accepted'));
     }
 
-    if ($request->input('action') !== 'wish') {
+    /*
+     * Vergessen geht immer - auch wenn gerade nicht gewuenscht werden
+     * darf. Es ist die eigene Liste, und sie aufzuraeumen hat mit dem
+     * Andrang nichts zu tun.
+     */
+    if ($request->input('action') === 'unfavorite') {
+        Favorites::remove($app, $ich['user_id'], trim((string) $request->input('track')));
+
+        return $zurueck(translate('music.public.unfavorited'));
+    }
+
+    if (!in_array($request->input('action'), ['wish', 'favorite'], true)) {
         return $zurueck(null, translate('common.error.unknown_action'));
+    }
+
+    $spotify = new Spotify($app);
+
+    /*
+     * Zwei Wege zu demselben Titel: ein eingefuegter Link, oder einer
+     * aus der Merkliste. Der zweite spart den Weg zu Spotify - was
+     * dort steht, wurde beim Merken schon geholt.
+     */
+    $gemerkt = trim((string) $request->input('track'));
+
+    if ($gemerkt !== '') {
+        $eintrag = Favorites::find($app, $ich['user_id'], $gemerkt);
+
+        if ($eintrag === null) {
+            return $zurueck(null, translate('music.public.not_favorited'));
+        }
+
+        $uri = (string) $eintrag['track_uri'];
+        $titel = $spotify->track($gemerkt);
+    } else {
+        $uri = \TwitchController\Plugin\Music\Link::toUri(trim((string) $request->input('link')));
+
+        if ($uri === null) {
+            return $zurueck(null, translate('music.public.bad_link'));
+        }
+
+        $titel = $spotify->track(\TwitchController\Plugin\Music\Link::trackId($uri) ?? '');
+    }
+
+    if ($titel === null) {
+        return $zurueck(null, translate('music.public.track_unknown'));
+    }
+
+    /*
+     * Merken ist KEIN Wunsch: es landet nichts in der Warteschlange,
+     * niemand hoert es, und die Wartezeit hat damit nichts zu tun.
+     * Deshalb steht es vor der Pruefung - und die Bannliste auch
+     * nicht: was gesperrt ist, merkt man sich vergeblich, aber
+     * erfahren tut man das beim Wuenschen.
+     */
+    if ($request->input('action') === 'favorite') {
+        return Favorites::add($app, $ich['user_id'], $titel)
+            ? $zurueck(translate('music.public.favorited'))
+            : $zurueck(null, translate('music.public.favorite_failed'));
     }
 
     $darf = $darfWuenschen($app, $ich);
 
     if (!$darf['ok']) {
         return $zurueck(null, \TwitchController\Plugin\Music\Texts::denied($darf['reason']));
-    }
-
-    $uri = \TwitchController\Plugin\Music\Link::toUri(trim((string) $request->input('link')));
-
-    if ($uri === null) {
-        return $zurueck(null, translate('music.public.bad_link'));
-    }
-
-    $spotify = new Spotify($app);
-    $titel = $spotify->track(\TwitchController\Plugin\Music\Link::trackId($uri) ?? '');
-
-    if ($titel === null) {
-        return $zurueck(null, translate('music.public.track_unknown'));
     }
 
     // Die Genres haengen bei Spotify am INTERPRETEN, nicht am Titel -

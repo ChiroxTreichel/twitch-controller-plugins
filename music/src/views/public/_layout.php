@@ -21,6 +21,7 @@
  * @var string $content
  * @var string $title
  * @var string $brand
+ * @var list<string> $rules
  * @var array{login: string, display_name: string, user_id: string}|null $identity
  */
 ?>
@@ -39,6 +40,24 @@
         <span class="brand-dot"></span>
         <span><?= $e($brand !== '' ? $brand : translate('music.public.title')) ?></span>
     </a>
+
+    <?php /*
+        Die Regeln stehen oben links neben dem Kanalnamen und nicht
+        unten auf der Seite: sie gelten fuer alles, was man hier tut,
+        und wer sie nachlesen will, sucht sie dort, wo er hergekommen
+        ist. Im alten System war es ein Knopf "Regeln anzeigen" - hier
+        ein <details>, das ohne JavaScript auskommt.
+    */ ?>
+    <details class="rules-pop">
+        <summary><?= $e(translate('music.public.rules_title')) ?></summary>
+        <div class="rules-panel">
+            <ul class="rules">
+                <?php foreach ($rules as $regel): ?>
+                    <li><?= $e($regel) ?></li>
+                <?php endforeach ?>
+            </ul>
+        </div>
+    </details>
 
     <div class="who">
         <?php if ($identity === null): ?>
