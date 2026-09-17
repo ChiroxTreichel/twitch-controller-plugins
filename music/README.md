@@ -59,6 +59,11 @@ Vier Arten, in der Prüfreihenfolge des alten Systems:
 | Genre | Spotify hängt Genres an den **Interpreten**, nicht an den Titel |
 | Zuschauer | über den Twitch-Namen |
 
+Jede Art ist ein **Reiter**, und der Reiter *ist* die Art: auf „Titel"
+sucht man Titel, auf „Interpreten" Interpreten. Die Zahl steht am
+Reiter, sonst müsste man jeden aufmachen, um zu sehen, wo etwas
+drinsteht. Ein fünfter Reiter zeigt die letzten Wünsche.
+
 Titel und Interpreten kommen aus der Suche — ihre Kennung tippt niemand
 von Hand. Genres und Zuschauer werden eingetippt und kleingeschrieben
 verglichen.
@@ -66,6 +71,17 @@ verglichen.
 Die Reihenfolge entscheidet, **was in der Absage steht**: ein gesperrter
 Titel eines gesperrten Interpreten wird als Titel gemeldet, und das ist
 die Auskunft, mit der der Zuschauer etwas anfangen kann.
+
+## Die öffentliche Seite
+
+Drei Abschnitte in der Reihenfolge der *ersten* Fassung des alten
+Systems: **Läuft gerade**, **Zuletzt gespielt** (drei Titel) und **Als
+Nächstes**. Der mittlere war später verschwunden; er beantwortet „wie
+hieß das eben nochmal?", und diese Frage kommt sonst im Chat.
+
+Der laufende Titel fällt aus „Zuletzt gespielt" heraus — Spotify führt
+ihn dort schon, sobald er ein paar Sekunden läuft, und zweimal
+untereinander sieht nach Fehler aus.
 
 ## Im Overlay
 
@@ -111,10 +127,19 @@ Beim Entfernen des Plugins geht alles mit — die Bannliste auch. Die ist
 über Monate gewachsen und lässt sich aus Spotify nicht zurückholen; wer
 sie behalten will, schreibt sie vorher heraus.
 
+## Das Panel für OBS
+
+**`/music/panel`** liefert reinen Text — Songname, Interpret, wer ihn
+sich gewünscht hat, und die nächsten fünf aus der Warteschlange. Genau
+wie `panel.php` im alten System, und aus demselben Grund ohne HTML: es
+ist für eine **Textquelle in OBS** gedacht, die eine Adresse ausliest,
+und die zeigt HTML als HTML an.
+
+Die Adresse steht in den Einstellungen zum Herauskopieren.
+
 ## Noch nicht da
 
 Die **Merkliste** („Favoriten") hat ihre Tabelle, aber noch keine
-Oberfläche. Ebenso das **Panel** des alten Systems — Lautstärke, weiter,
-zurück, „in die Bibliothek". Beides kommt als eigener Schritt; der
-Draht dorthin (`Spotify::setVolume`, `next`, `previous`, `saveTrack`)
-steht schon.
+Oberfläche. Ebenso die Steuerung des alten Panels — Lautstärke, weiter,
+zurück, „in die Bibliothek". Der Draht dorthin (`Spotify::setVolume`,
+`next`, `previous`, `saveTrack`) steht schon.

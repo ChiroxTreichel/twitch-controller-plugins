@@ -311,10 +311,19 @@ final class Spotify
         return $this->get('/me/player');
     }
 
-    /** @return array<string, mixed>|null|false */
-    public function recentTrack(): array|null|false
+    /**
+     * Die zuletzt gespielten Titel, neuester zuerst.
+     *
+     * Die ganz alte Fassung des alten Systems zeigte drei davon
+     * zwischen "Laeuft gerade" und "Als Naechstes" - und das ist die
+     * Antwort auf "wie hiess das eben nochmal?", die sonst im Chat
+     * landet.
+     *
+     * @return array<string, mixed>|null|false
+     */
+    public function recent(int $limit = 3): array|null|false
     {
-        return $this->get('/me/player/recently-played?limit=1');
+        return $this->get('/me/player/recently-played?limit=' . max(1, min(50, $limit)));
     }
 
     /**

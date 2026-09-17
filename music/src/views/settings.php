@@ -26,6 +26,7 @@
  * @var string $account
  * @var string $redirectUri
  * @var string $publicUrl
+ * @var string $panelUrl
  * @var bool $canEdit
  * @var string $csrf
  * @var string $notice
@@ -159,6 +160,17 @@
                 <?= $e(translate('music.open_public')) ?>
             </a>
         </div>
+
+        <?php /*
+            Das Panel aus dem alten System: reiner Text fuer eine
+            Textquelle in OBS, die eine Adresse ausliest. Es steht hier
+            und nicht im Menue - man traegt es einmal in OBS ein und
+            sieht es danach nie wieder in der Verwaltung.
+        */ ?>
+        <p class="hint" style="margin-top:14px;">
+            <?= $e(translate('music.panel_url')) ?>
+            <span class="mono" style="word-break:break-all;"><?= $e($panelUrl) ?></span>
+        </p>
 
         <label class="field" style="margin-top:14px;">
             <span class="hint"><?= $e(translate('music.cooldown')) ?></span>

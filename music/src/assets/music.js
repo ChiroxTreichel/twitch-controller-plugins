@@ -67,7 +67,7 @@
         if (titel.wishedBy) {
             var wunsch = document.createElement('span');
             wunsch.className = 'track-wish';
-            text(wunsch, 'Gewünscht von ' + titel.wishedBy);
+            text(wunsch, (document.getElementById('queue').dataset.labelWish || '') + ' ' + titel.wishedBy);
             text_.appendChild(wunsch);
         }
 
@@ -104,7 +104,27 @@
 
         var leer = kasten.querySelector('[data-empty]');
         var jetzt = kasten.querySelector('[data-current]');
+        var vorher = kasten.querySelector('[data-recent]');
         var liste = kasten.querySelector('[data-items]');
+
+        /* Eine Ueberschrift ueber einem Abschnitt - aber nur, wenn
+           darunter etwas steht. */
+        function abschnitt(ziel, titel, eintraege) {
+            ziel.textContent = '';
+
+            if (!eintraege || eintraege.length === 0) {
+                return;
+            }
+
+            var kopf = document.createElement('p');
+            kopf.className = 'queue-label';
+            text(kopf, titel);
+            ziel.appendChild(kopf);
+
+            eintraege.forEach(function (eines) {
+                ziel.appendChild(zeile(eines));
+            });
+        }
 
         function holen() {
             fetch(kasten.dataset.src, { credentials: 'same-origin' })
@@ -115,12 +135,11 @@
                     }
 
                     jetzt.textContent = '';
-                    liste.textContent = '';
 
                     if (daten.current) {
                         var kopf = document.createElement('p');
                         kopf.className = 'queue-label';
-                        text(kopf, 'Läuft gerade');
+                        text(kopf, kasten.dataset.labelCurrent);
 
                         var kasten2 = document.createElement('div');
                         kasten2.className = 'track-current';
@@ -130,15 +149,22 @@
                         jetzt.appendChild(kasten2);
                     }
 
-                    (daten.items || []).forEach(function (titel) {
-                        liste.appendChild(zeile(titel));
-                    });
+                    /*
+                     * Zwischen "Laeuft gerade" und "Als Naechstes" -
+                     * genau dort stand es in der ersten Fassung des
+                     * alten Systems, und das ist die Antwort auf "wie
+                     * hiess das eben nochmal?".
+                     */
+                    abschnitt(vorher, kasten.dataset.labelRecent, daten.recent);
+                    abschnitt(liste, kasten.dataset.labelNext, daten.items);
 
-                    var nichts = !daten.current && (daten.items || []).length === 0;
+                    var nichts = !daten.current
+                        && (daten.items || []).length === 0
+                        && (daten.recent || []).length === 0;
 
                     if (leer) {
                         leer.hidden = !nichts;
-                        text(leer, nichts ? 'Gerade ist nichts in der Warteschlange.' : '');
+                        text(leer, nichts ? kasten.dataset.labelEmpty : '');
                     }
                 })
                 .catch(function () {

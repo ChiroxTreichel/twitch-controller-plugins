@@ -132,10 +132,29 @@
         im alten System war es dasselbe, nur mit einem Aufruf je Klick
         statt von selbst.
     */ ?>
-    <div class="card" id="queue" data-src="<?= $e($url('/music/queue')) ?>">
+    <?php /*
+        Die Beschriftungen stehen am Kasten und nicht im Skript: dort
+        waeren sie deutscher Text in einer JS-Datei, und bin/lang.php
+        haette recht, wenn es sich beschwert.
+    */ ?>
+    <div class="card" id="queue"
+         data-src="<?= $e($url('/music/queue')) ?>"
+         data-label-current="<?= $e(translate('music.public.now')) ?>"
+         data-label-recent="<?= $e(translate('music.public.recent')) ?>"
+         data-label-next="<?= $e(translate('music.public.next')) ?>"
+         data-label-wish="<?= $e(translate('music.public.wished_by')) ?>"
+         data-label-empty="<?= $e(translate('music.public.queue_empty')) ?>">
         <h2><?= $e(translate('music.public.queue')) ?></h2>
         <p class="hint" data-empty><?= $e(translate('music.public.loading')) ?></p>
+
+        <?php /*
+            Drei Abschnitte in der Reihenfolge des alten Systems:
+            was laeuft, was eben lief, was kommt. "Zuletzt gespielt"
+            stand dort dazwischen - es beantwortet "wie hiess das eben
+            nochmal?", und diese Frage kommt sonst im Chat.
+        */ ?>
         <div data-current></div>
+        <div data-recent></div>
         <div data-items></div>
     </div>
 <?php endif ?>

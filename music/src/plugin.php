@@ -230,23 +230,42 @@ $router->get('/display/music', static function (Request $request) use ($app, $pl
     $spotify = new Spotify($app);
 
     /*
-     * Die Suche steht in der ADRESSE und nicht im Formularergebnis.
+     * Der Reiter IST die Art. Auf "Titel" sucht man Titel, auf
+     * "Interpreten" Interpreten - ein zweites Auswahlfeld daneben
+     * waere eine zweite Stelle, an der dasselbe steht.
      *
-     * So laesst sich ein Suchergebnis verschicken und neu laden, und
-     * der Zurueck-Knopf des Browsers tut, was er soll. Im alten System
-     * war es ein POST, und jedes Neuladen fragte "Formular erneut
-     * senden?".
+     * Und er steht in der ADRESSE, wie die Suche: so laesst sich ein
+     * Ergebnis verschicken und neu laden, und der Zurueck-Knopf des
+     * Browsers tut, was er soll. Im alten System war die Suche ein
+     * POST, und jedes Neuladen fragte "Formular erneut senden?".
      */
+    $reiter = (string) $request->get('tab');
+    $reiter = in_array($reiter, ['track', 'artist', 'genre', 'twitch', 'wishes'], true)
+        ? $reiter
+        : 'track';
+
     $suche = trim($request->get('q'));
-    $art = $request->get('kind');
-    $art = in_array($art, ['track', 'artist'], true) ? $art : 'track';
 
     $treffer = [];
 
-    if ($suche !== '' && Music::isConnected($app)) {
-        $treffer = $art === 'artist'
+    if ($suche !== '' && Music::isConnected($app) && in_array($reiter, ['track', 'artist'], true)) {
+        $treffer = $reiter === 'artist'
             ? $spotify->searchArtists($suche, 12)
             : $spotify->searchTracks($suche, 12);
+    }
+
+    /*
+     * Alle vier Listen werden geholt, obwohl nur eine angezeigt wird -
+     * die Zahlen stehen an den Reitern. Ohne sie muesste man jeden
+     * aufmachen, um zu sehen, wo ueberhaupt etwas drinsteht, und das
+     * ist der eine Vorteil, den die alte Ansicht untereinander hatte.
+     */
+    $alle = Bans::all($app);
+
+    $zahlen = [];
+
+    foreach ($alle as $art => $eintraege) {
+        $zahlen[$art] = count($eintraege);
     }
 
     return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
@@ -254,9 +273,10 @@ $router->get('/display/music', static function (Request $request) use ($app, $pl
         'active'    => 'display/music',
         'enabled'   => Music::enabled($app),
         'connected' => Music::isConnected($app),
-        'bans'      => Bans::all($app),
-        'wishes'    => Wishes::recent($app, 20),
-        'kind'      => $art,
+        'tab'       => $reiter,
+        'entries'   => $alle[$reiter] ?? [],
+        'counts'    => $zahlen,
+        'wishes'    => $reiter === 'wishes' ? Wishes::recent($app, 50) : [],
         'query'     => $suche,
         'results'   => $treffer,
         'canEdit'   => $app->auth->can('Music.Bans.Manage'),
@@ -292,8 +312,8 @@ $router->post('/display/music', static function (Request $request) use ($app, $z
     }
 
     $behalten = [
-        'q'    => trim($request->input('q')),
-        'kind' => $request->input('kind'),
+        'q'   => trim($request->input('q')),
+        'tab' => $request->input('tab'),
     ];
 
     switch ($request->input('action')) {
@@ -344,6 +364,7 @@ $router->get('/display/music/settings', static function (Request $request) use (
         'account'     => Music::accountName($app),
         'redirectUri' => Music::redirectUri($app),
         'publicUrl'   => $app->url('/music'),
+        'panelUrl'    => $app->url('/music/panel'),
         'canEdit'     => $app->auth->can('Music.Global.Edit'),
         'csrf'        => $app->auth->csrfToken(),
         'notice'      => $request->get('notice'),
@@ -586,10 +607,126 @@ $router->get('/music/queue', static function () use ($app): Response {
         ];
     };
 
+    /*
+     * Und was eben lief. Die ganz alte Fassung des alten Systems hatte
+     * das zwischen "Laeuft gerade" und "Als Naechstes" - drei Titel,
+     * und damit die Antwort auf "wie hiess das eben nochmal?", die
+     * sonst im Chat landet.
+     *
+     * Spotify liefert hier Eintraege mit einem "track" darin, nicht
+     * den Titel selbst - eine andere Form als bei der Warteschlange.
+     */
+    $vorher = [];
+
+    foreach ((array) (is_array($zuletzt = $spotify->recent(3)) ? ($zuletzt['items'] ?? []) : []) as $eintrag) {
+        if (is_array($eintrag) && is_array($eintrag['track'] ?? null)) {
+            $vorher[] = $eintrag['track'];
+        }
+    }
+
+    /*
+     * Der laufende Titel steht bei Spotify auch schon in "zuletzt
+     * gespielt", sobald er ein paar Sekunden laeuft. Zweimal
+     * untereinander sieht nach Fehler aus.
+     */
+    $laufendeUri = is_array($aktuell) ? (string) ($aktuell['uri'] ?? '') : '';
+
+    $vorher = array_values(array_filter(
+        $vorher,
+        static fn (array $titel): bool => (string) ($titel['uri'] ?? '') !== $laufendeUri
+    ));
+
     return Response::json([
         'ok'      => true,
         'current' => $schlank(is_array($aktuell) ? $aktuell : null),
+        'recent'  => array_values(array_filter(array_map($schlank, array_slice($vorher, 0, 3)))),
         'items'   => array_values(array_filter(array_map($schlank, $eintraege))),
+    ]);
+});
+
+// -------------------------------------------------------------------
+//  Das Panel: Text fuer OBS
+// -------------------------------------------------------------------
+/*
+ * Aus dem alten System uebernommen (public/panel.php): reiner Text,
+ * kein HTML. Er ist fuer eine Textquelle in OBS gedacht, die eine
+ * Adresse ausliest - und die zeigt HTML als HTML an.
+ *
+ * Aufbau Zeile fuer Zeile wie dort: Songname, Interpret, "Von", dann
+ * die Warteschlange mit fuenf Eintraegen und "-> von X" darunter.
+ */
+$router->get('/music/panel', static function () use ($app): Response {
+    $zeilen = [];
+
+    if (Music::isConnected($app)) {
+        $spotify = new Spotify($app);
+        $laeuft = $spotify->currentlyPlaying();
+        $titel = is_array($laeuft) ? ($laeuft['item'] ?? null) : null;
+
+        $name = static fn (?array $eines): string => is_array($eines)
+            ? (string) ($eines['artists'][0]['name'] ?? '')
+            : '';
+
+        if (is_array($titel)) {
+            $uri = (string) ($titel['uri'] ?? '');
+            $wer = Wishes::wishedBy($app, $uri);
+
+            $zeilen[] = translate('music.panel.track');
+            $zeilen[] = '     ' . (string) ($titel['name'] ?? '');
+            $zeilen[] = '';
+            $zeilen[] = translate('music.panel.artist');
+            $zeilen[] = '     ' . $name($titel);
+            $zeilen[] = '';
+
+            if ($wer !== '') {
+                $zeilen[] = translate('music.panel.by');
+                $zeilen[] = '     ' . $wer;
+                $zeilen[] = '';
+            }
+        }
+
+        $zeilen[] = translate('music.panel.queue');
+        $zeilen[] = '';
+
+        $warteschlange = $spotify->queue();
+        $eintraege = array_slice(
+            (array) (is_array($warteschlange) ? ($warteschlange['queue'] ?? []) : []),
+            0,
+            5
+        );
+
+        $uris = array_map(
+            static fn (array $eines): string => (string) ($eines['uri'] ?? ''),
+            array_filter($eintraege, 'is_array')
+        );
+
+        $wer = Wishes::wishedByMany($app, array_values($uris));
+
+        foreach ($eintraege as $eines) {
+            if (!is_array($eines)) {
+                continue;
+            }
+
+            $zeilen[] = '   ' . $name($eines) . ' - ' . (string) ($eines['name'] ?? '');
+
+            $wunsch = $wer[(string) ($eines['uri'] ?? '')] ?? '';
+
+            if ($wunsch !== '') {
+                $zeilen[] = '      -> ' . translate('music.panel.from', ['name' => $wunsch]);
+            }
+
+            $zeilen[] = '';
+        }
+    }
+
+    /*
+     * text/plain und ohne Zwischenspeicher: OBS liest die Adresse in
+     * einem eigenen Takt, und ein Browser-Zwischenspeicher zeigte
+     * dort den Titel von vorhin.
+     */
+    return Response::html(implode("\n", $zeilen), 200, [
+        'Content-Type'  => 'text/plain; charset=utf-8',
+        'Cache-Control' => 'no-store, must-revalidate',
     ]);
 });
 
