@@ -252,6 +252,15 @@ final class Spotify
         $token = $this->accessToken();
 
         if ($token === '') {
+            /*
+             * Das gehoert ins Log wie jede andere Absage. Ohne diese
+             * Zeile war es der einzige Weg, auf dem ein Aufruf
+             * scheitern konnte, ohne eine Spur zu hinterlassen - und
+             * dann sucht man den Fehler bei Spotify, obwohl hier
+             * schlicht kein Zugang hinterlegt ist.
+             */
+            $this->app->log('Musik: Spotify ' . $methode . ' ' . $pfad . ' - kein Zugangstoken');
+
             return false;
         }
 
@@ -271,11 +280,24 @@ final class Spotify
         }
 
         if (!$antwort->ok()) {
-            // 429 ist das Kontingent. Es steht im Log, aber es wird
-            // nicht gemerkt: das alte System schrieb dafuer eine Datei
-            // "blocked_until" - und die Stelle, die sie las, war
-            // auskommentiert.
-            $this->app->log('Musik: Spotify ' . $methode . ' ' . $pfad . ' -> ' . $code);
+            /*
+             * Mit der Antwort von Spotify im Klartext, gekuerzt.
+             * Spotify schreibt dort hin, woran es lag ("Invalid access
+             * token", "API rate limit exceeded", "Bad request") - und
+             * eine nackte Zahl im Log heisst sonst: ausprobieren, bis
+             * man es errraet.
+             *
+             * 429 ist das Kontingent. Es steht im Log, aber es wird
+             * nicht gemerkt: das alte System schrieb dafuer eine Datei
+             * "blocked_until" - und die Stelle, die sie las, war
+             * auskommentiert.
+             */
+            $grund = trim(preg_replace('/\s+/', ' ', substr($antwort->body, 0, 200)) ?? '');
+
+            $this->app->log(
+                'Musik: Spotify ' . $methode . ' ' . $pfad . ' -> ' . $code
+                . ($grund === '' ? '' : ' | ' . $grund)
+            );
 
             return false;
         }
