@@ -141,7 +141,13 @@
             return;
         }
 
-        var etwas = zustand.uri !== '' && zustand.name !== '';
+        /*
+         * Pausiert heisst weg. Frueher stand die Leiste weiter da, mit
+         * einem Balken, der nicht laeuft - im Stream sieht das aus wie
+         * ein Standbild, und wer es sieht, glaubt dem Balken auch
+         * nicht mehr, wenn er wieder laeuft.
+         */
+        var etwas = zustand.playing && zustand.uri !== '' && zustand.name !== '';
 
         kasten.classList.toggle('is-on', etwas);
         kasten.dataset.duration = String(zustand.duration || 0);

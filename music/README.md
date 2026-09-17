@@ -195,8 +195,13 @@ bestehende Installationen nichts ändert. Damit stand dann aber ein Feld
 „Abstand von oben" auf der Seite, dessen 0 unten landete — und einem
 solchen Feld glaubt man danach auch die anderen Zahlen nicht mehr.)
 
-Größe, Stelle und Farbschema greifen beim **Neuladen** der
-Browserquelle.
+Größe und Stelle greifen **sofort** — die Fläche zieht sie über die
+Leitung nach, ohne Neuladen. Das Farbschema kommt mit der Seite und
+greift beim nächsten Laden der Browserquelle.
+
+**Pausiert heißt weg:** steht die Musik, verschwindet die Leiste. Ein
+Standbild mit einem Balken, der nicht läuft, sieht im Stream nach
+einem Fehler aus.
 
 Der Balken läuft **im Browser** weiter. Der Worker meldet sich alle
 fünfzehn Sekunden und nur bei Änderung; ein Balken, der so nachgeführt
