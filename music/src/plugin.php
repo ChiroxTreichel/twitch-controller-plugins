@@ -226,7 +226,7 @@ $zurueckVerwaltung = static function (App $app, ?string $notice = null, ?string 
     );
 };
 
-$router->get('/display/music', static function (Request $request) use ($app): Response {
+$router->get('/display/music', static function (Request $request) use ($app, $plugin): Response {
     $spotify = new Spotify($app);
 
     /*
@@ -249,7 +249,7 @@ $router->get('/display/music', static function (Request $request) use ($app): Re
             : $spotify->searchTracks($suche, 12);
     }
 
-    return Response::html($app->view->render('page', [
+    return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
         'title'     => translate('music.name'),
         'active'    => 'display/music',
         'enabled'   => Music::enabled($app),
@@ -328,8 +328,8 @@ $zurueckEinstellungen = static function (App $app, ?string $notice = null, ?stri
     );
 };
 
-$router->get('/display/music/settings', static function (Request $request) use ($app): Response {
-    return Response::html($app->view->render('settings', [
+$router->get('/display/music/settings', static function (Request $request) use ($app, $plugin): Response {
+    return Response::html($app->view->from($plugin->directory . '/views')->render('settings', [
         'title'       => translate('music.settings'),
         'active'      => 'display/music',
         'enabled'     => Music::enabled($app),
@@ -415,7 +415,7 @@ $router->post('/display/music/settings', static function (Request $request) use 
 $oeffentlich = static function (App $app, string $vorlage, array $daten = []) use ($plugin): Response {
     $ich = Visitor::identity($app);
 
-    return Response::html($app->view->render('public/' . $vorlage, $daten + [
+    return Response::html($app->view->from($plugin->directory . '/views')->render('public/' . $vorlage, $daten + [
         'identity'  => $ich,
         'enabled'   => Music::enabled($app),
         'bypass'    => Privilege::mayBypass($app, $ich),
