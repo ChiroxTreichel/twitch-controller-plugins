@@ -211,24 +211,12 @@ final class Music
     }
 
     /**
-     * Steht ein Abstand? Dann haengt der Kasten oben links und wird um
-     * die beiden Werte verschoben.
-     *
-     * Solange beide leer sind, bleibt alles, wie es war: unten links.
-     * Ein Abstand von oben ist dort ohne Wirkung - und wer nie einen
-     * eingetragen hat, soll nach einem Update nicht suchen muessen, wo
-     * seine Musik hin ist.
-     */
-    public static function isPlaced(App $app): bool
-    {
-        return self::offsetX($app) > 0 || self::offsetY($app) > 0;
-    }
-
-    /**
      * Ein Abstand liegt zwischen 0 und dem Rand der Buehne.
      *
      * Die 0 ist hier - anders als bei der Groesse - kein Platzhalter
-     * fuer eine Vorgabe, sondern die Antwort: kein Abstand.
+     * fuer eine Vorgabe, sondern die Antwort: kein Abstand. Der Kasten
+     * haengt dann in der oberen linken Ecke, denn von dort wird
+     * gemessen.
      */
     public static function offset(int $wert): int
     {

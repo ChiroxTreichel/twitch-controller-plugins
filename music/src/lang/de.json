@@ -43,7 +43,7 @@
     "music.need_credentials": "Erst Kennung und Geheimnis hinterlegen.",
     "music.not_connected": "Spotify ist nicht verbunden – es kann gerade nichts gewünscht werden.",
     "music.not_connected_badge": "nicht verbunden",
-    "music.offset_hint": "Verschiebt den Kasten von der linken oberen Ecke aus. Beides 0 heißt: unten links, wie bisher.",
+    "music.offset_hint": "Gemessen von der oberen linken Ecke der Bühne. 0 und 0 heißt: direkt in der Ecke.",
     "music.offset_x": "Abstand von links (px)",
     "music.offset_y": "Abstand von oben (px)",
     "music.open_public": "Seite öffnen",

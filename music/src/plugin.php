@@ -99,13 +99,17 @@ $hooks->on('overlay.slots', static function (array $slots) use ($app): array {
         'label'    => translate('music.name'),
 
         /*
-         * Wie im alten obs.php: eine Leiste, und die stand unten.
+         * Immer oben links verankert - von dort messen die beiden
+         * Abstaende. 0 und 0 ist also die Ecke, und nicht "irgendwo,
+         * wo es frueher einmal war": ein Feld, das "Abstand von oben"
+         * heisst und bei 0 unten landet, ist ein Feld, dem man nicht
+         * mehr glaubt.
          *
-         * Steht ein Abstand, haengt der Kasten oben links und wird um
-         * die eingetragenen Werte verschoben - dann laesst er sich
-         * ueberall hinstellen. Ohne Abstand bleibt es, wie es war.
+         * Damit steht der Kasten anders als im alten obs.php, wo die
+         * Leiste unten hing. Wer sie dort haben will, traegt den
+         * Abstand ein - und sieht dann auch, dass er es getan hat.
          */
-        'position' => Music::isPlaced($app) ? 'top-left' : 'bottom-left',
+        'position' => 'top-left',
         'width'    => Music::width($app) . 'px',
         'height'   => Music::height($app) . 'px',
 

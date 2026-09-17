@@ -43,7 +43,7 @@
     "music.need_credentials": "Store the ID and secret first.",
     "music.not_connected": "Spotify is not connected – nothing can be requested right now.",
     "music.not_connected_badge": "not connected",
-    "music.offset_hint": "Moves the box away from the top left corner. Both at 0 means: bottom left, as before.",
+    "music.offset_hint": "Measured from the top left corner of the stage. 0 and 0 means: right in the corner.",
     "music.offset_x": "Distance from the left (px)",
     "music.offset_y": "Distance from the top (px)",
     "music.open_public": "Open page",

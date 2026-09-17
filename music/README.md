@@ -183,10 +183,15 @@ wie das alte `obs.php` — weißer Grund mit schwarzer Schrift. Auf einem
 hellen Spiel verschwindet ein dunkler Kasten, auf einem dunklen ein
 heller; darum die Wahl.
 
-Die beiden Abstände verschieben den Kasten von der **linken oberen
-Ecke** aus. Solange beide 0 sind, bleibt er unten links wie bisher —
-wer nie einen Abstand eingetragen hat, soll nach einem Update nicht
-suchen müssen, wo seine Musik hin ist.
+Die beiden Abstände messen von der **linken oberen Ecke** der Bühne.
+`0` und `0` heißt also: direkt in der Ecke. Der Platz hängt immer dort
+— anders als im alten `obs.php`, wo die Leiste unten klebte. Wer sie
+dort haben will, trägt den Abstand von oben ein.
+
+(Bis 1.9.0 blieb der Kasten bei 0/0 unten links stehen, damit sich für
+bestehende Installationen nichts ändert. Damit stand dann aber ein Feld
+„Abstand von oben" auf der Seite, dessen 0 unten landete — und einem
+solchen Feld glaubt man danach auch die anderen Zahlen nicht mehr.)
 
 Größe, Stelle und Farbschema greifen beim **Neuladen** der
 Browserquelle.
