@@ -228,17 +228,24 @@ $reiterUrl = static function (string $art) use ($url, $query): string {
         <?php endif ?>
 
         <?php /*
-            Genres und Zuschauer haben keine Spotify-Kennung - sie
-            werden eingetippt. Titel und Interpreten kommen aus der
-            Suche darueber, denn ihre Kennung tippt niemand von Hand.
+            Ein Feld auf jedem Reiter, und zwar aus demselben Grund:
+            man hat, was man sperren will, oft schon in der Hand.
+
+            Bei Genres und Zuschauern ist das ein Name. Bei Titeln und
+            Interpreten ein LINK - ihre Kennung tippt niemand ab, aber
+            einen Link aus der Spotify-App hat man in zwei Sekunden,
+            und genau den fuegen die Zuschauer auf /music den ganzen
+            Tag ein. Den Namen holt der Server dann selbst.
+
+            Die Suche darueber bleibt: wer den Link NICHT hat, sucht.
         */ ?>
-        <?php if ($canEdit && in_array($tab, ['genre', 'twitch'], true)): ?>
+        <?php if ($canEdit): ?>
             <form method="post" action="<?= $e($url('/display/music')) ?>" class="row" style="margin-top:12px;">
                 <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                 <input type="hidden" name="action" value="ban">
                 <input type="hidden" name="kind_add" value="<?= $e($tab) ?>">
                 <input type="hidden" name="tab" value="<?= $e($tab) ?>">
-                <input class="input grow" type="text" name="key" maxlength="80"
+                <input class="input grow" type="text" name="key" maxlength="200"
                        placeholder="<?= $e(Texts::banPlaceholder($tab)) ?>">
                 <button class="btn btn-small" type="submit"><?= $e(translate('music.ban.add')) ?></button>
             </form>

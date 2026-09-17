@@ -42,11 +42,19 @@ final class Texts
         };
     }
 
-    /** Der Platzhalter im Eingabefeld der Bannliste. */
+    /**
+     * Der Platzhalter im Eingabefeld der Bannliste.
+     *
+     * Vier Arten, vier Saetze - und die zwei fuer Titel und Interpret
+     * nennen einen LINK, denn eine Spotify-Kennung tippt niemand ab.
+     */
     public static function banPlaceholder(string $art): string
     {
-        return $art === 'twitch'
-            ? translate('music.ban.add_twitch')
-            : translate('music.ban.add_genre');
+        return match ($art) {
+            'track'  => translate('music.ban.add_track'),
+            'artist' => translate('music.ban.add_artist'),
+            'twitch' => translate('music.ban.add_twitch'),
+            default  => translate('music.ban.add_genre'),
+        };
     }
 }

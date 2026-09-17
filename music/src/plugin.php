@@ -27,6 +27,7 @@ use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
 use TwitchController\Core\Overlay\Bus;
 use TwitchController\Plugin\Music\Bans;
+use TwitchController\Plugin\Music\Link;
 use TwitchController\Plugin\Music\Music;
 use TwitchController\Plugin\Music\Privilege;
 use TwitchController\Plugin\Music\Spotify;
@@ -321,8 +322,62 @@ $router->post('/display/music', static function (Request $request) use ($app, $z
             $art = (string) $request->input('kind_add');
             $schluessel = trim($request->input('key'));
             $name = trim($request->input('name'));
+            $zusatz = trim($request->input('detail'));
 
-            if (!Bans::add($app, $art, $schluessel, $name, trim($request->input('detail')), $app->auth->user()['login'] ?? '')) {
+            /*
+             * Bei Titeln und Interpreten darf auch ein Link eingefuegt
+             * werden - das Feld daneben ist dafuer da. Kommt einer, wird
+             * daraus die Kennung, und der NAME wird bei Spotify geholt:
+             * eine Liste voller "4cOdK2wGLETKBW3PvgPWqT" waere keine
+             * Liste, sondern ein Raetsel.
+             *
+             * Aus der Suche kommt der Name schon mit; dann passiert
+             * hier nichts.
+             */
+            if (in_array($art, ['track', 'artist'], true) && $name === '') {
+                $kennung = Link::idFor($art, $schluessel);
+
+                if ($kennung === null) {
+                    return $zurueckVerwaltung($app, null, translate('music.ban.bad_link'), $behalten);
+                }
+
+                $schluessel = $kennung;
+
+                if (Music::isConnected($app)) {
+                    $spotify = new Spotify($app);
+
+                    if ($art === 'track') {
+                        $titel = $spotify->track($kennung);
+
+                        if (is_array($titel)) {
+                            $name = (string) ($titel['name'] ?? '');
+                            $zusatz = implode(', ', array_filter(array_map(
+                                static fn (array $a): string => (string) ($a['name'] ?? ''),
+                                (array) ($titel['artists'] ?? [])
+                            )));
+                        }
+                    } else {
+                        $interpreten = $spotify->artists([$kennung]);
+                        $interpret = $interpreten[0] ?? null;
+
+                        if (is_array($interpret)) {
+                            $name = (string) ($interpret['name'] ?? '');
+                            $zusatz = implode(', ', array_slice((array) ($interpret['genres'] ?? []), 0, 4));
+                        }
+                    }
+                }
+
+                /*
+                 * Spotify kennt die Kennung nicht - dann steht sie auf
+                 * der Liste, aber sie wird nie greifen. Lieber jetzt
+                 * sagen als spaeter suchen lassen.
+                 */
+                if ($name === '') {
+                    return $zurueckVerwaltung($app, null, translate('music.ban.unknown'), $behalten);
+                }
+            }
+
+            if (!Bans::add($app, $art, $schluessel, $name, $zusatz, $app->auth->user()['login'] ?? '')) {
                 return $zurueckVerwaltung($app, null, translate('music.ban.failed'), $behalten);
             }
 

@@ -64,9 +64,18 @@ sucht man Titel, auf „Interpreten" Interpreten. Die Zahl steht am
 Reiter, sonst müsste man jeden aufmachen, um zu sehen, wo etwas
 drinsteht. Ein fünfter Reiter zeigt die letzten Wünsche.
 
-Titel und Interpreten kommen aus der Suche — ihre Kennung tippt niemand
-von Hand. Genres und Zuschauer werden eingetippt und kleingeschrieben
-verglichen.
+Jeder Reiter hat ein **Eingabefeld** — man hat ja oft schon in der
+Hand, was man sperren will. Bei Genres und Zuschauern ist das ein Name;
+bei Titeln und Interpreten ein **Spotify-Link**, denn ihre Kennung
+tippt niemand ab. Den Namen holt der Server dann selbst, sonst stünde
+in der Liste `4cOdK2wGLETKBW3PvgPWqT`.
+
+Ein Interpreten-Link auf dem Titel-Reiter wird abgewiesen: die
+Kennungen sind gleich gebaut, und die Sperre hätte einfach nie
+gegriffen.
+
+Die **Suche** bleibt daneben — für alles, wovon man keinen Link hat.
+Genres und Zuschauer werden kleingeschrieben verglichen.
 
 Die Reihenfolge entscheidet, **was in der Absage steht**: ein gesperrter
 Titel eines gesperrten Interpreten wird als Titel gemeldet, und das ist
