@@ -138,6 +138,18 @@ final class Config
      *   100 Bits  -> Stufe "ab 100"
      *   5000 Bits -> Stufe "ab 1000"
      *
+     * UNTER der untersten Stufe kommt null zurueck, und dann kommt kein
+     * Alert. Das ist eine Entscheidung und kein Versehen: wer als
+     * unterste Stufe "ab 100" einstellt, meint damit "unter 100 nicht".
+     *
+     * Das alte System fiel hier auf die unterste Stufe zurueck, womit
+     * sich eine Untergrenze gar nicht ausdruecken liess. Bei den
+     * Spenden-Alerts ist es umgekehrt geloest, und auch das mit Grund:
+     * dort faengt die unterste Stufe bei einem Euro an, Spenden darunter
+     * gibt es aber - die waeren sonst reihum stumm. Bits und Raider
+     * fangen bei eins an, ein "darunter" gibt es also nur, wenn man es
+     * selbst eingerichtet hat.
+     *
      * @param list<array<string, mixed>> $tiers
      * @return array<string, mixed>|null
      */
