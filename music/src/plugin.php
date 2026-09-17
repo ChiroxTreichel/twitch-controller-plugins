@@ -499,7 +499,6 @@ $router->get('/display/music/settings', static function (Request $request) use (
          */
         'hasTimers'   => $app->plugins->isEnabled('timers'),
         'timer'       => [
-            'enabled'  => Music::timerEnabled($app),
             'interval' => Music::timerInterval($app),
             'lines'    => Music::timerLines($app),
             'on'       => Music::timerMessageOn($app),
@@ -530,7 +529,6 @@ $router->post('/display/music/settings', static function (Request $request) use 
             $app->settings->set('offset_y', Music::offset((int) $request->input('offset_y')), Music::scope());
             $app->settings->set('theme', Music::normalizeTheme((string) $request->input('theme')), Music::scope());
 
-            $app->settings->set('timer_enabled', $request->input('timer_enabled') !== '', Music::scope());
             $app->settings->set('timer_interval', Music::timerIntervalOf((int) $request->input('timer_interval')), Music::scope());
             $app->settings->set('timer_lines', max(0, (int) $request->input('timer_lines')), Music::scope());
 

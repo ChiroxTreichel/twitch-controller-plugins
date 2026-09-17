@@ -311,9 +311,17 @@ final class Music
             : substr($text, 0, $laenge);
     }
 
+    /**
+     * Gibt es ueberhaupt etwas zu posten?
+     *
+     * Kein eigener Schalter: die beiden Textfelder SIND der Schalter.
+     * Wer nichts geschrieben hat, will nichts posten - und ein Haken
+     * daneben, den man auch noch setzen muss, ist eine zweite Stelle
+     * fuer dieselbe Entscheidung.
+     */
     public static function timerEnabled(App $app): bool
     {
-        return $app->settings->bool('timer_enabled', false, self::scope());
+        return trim(self::timerMessageOn($app)) !== '' || trim(self::timerMessageOff($app)) !== '';
     }
 
     public static function timerInterval(App $app): int
@@ -365,8 +373,14 @@ final class Music
             return '';
         }
 
+        /*
+         * Hier wird bei Spotify nachgefragt und nicht im eigenen
+         * Zustand nachgesehen: der Takt schreibt ihn nur bei
+         * Aenderung, und "seit zwoelf Minuten unveraendert" heisst
+         * weder laeuft noch laeuft nicht.
+         */
         return self::timerTextFor(
-            self::overlayState($app)['playing'],
+            (new Spotify($app))->isPlaying(),
             self::enabled($app),
             self::timerMessageOn($app),
             self::timerMessageOff($app)

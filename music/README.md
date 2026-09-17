@@ -153,14 +153,23 @@ Karte *Hinweis im Chat*: Intervall, Min. Zeilen und **zwei** Texte —
 einer für „Songwünsche sind offen", einer für „sind zu". Welcher
 gepostet wird, entscheidet der Schalter im Moment des Postens.
 
+Einen eigenen Ein/Aus-Haken gibt es nicht: die **Textfelder sind der
+Schalter**. Sind beide leer, postet der Timer nicht; steht nur einer
+da, postet er nur in dessen Zustand.
+
 Gezählt, gewartet und gepostet wird im Timer-Plugin (Haken
 `timers.external`); hier steht nur, *was* gesagt wird. Ohne das Plugin
 gibt es die Karte nicht — sie würde etwas einstellen, das niemand
 postet.
 
 **Läuft gerade keine Musik, postet er nicht.** Ein Hinweis auf die
-Seite ist sonst eine Einladung zu einer leeren Warteschlange. Ein
-leeres Textfeld heißt dasselbe für seinen Zustand: dann bleibt es still.
+Seite ist sonst eine Einladung zu einer leeren Warteschlange. Gefragt
+wird dafür bei Spotify (`/me/player/currently-playing`), und zwar in
+dem Moment, in dem der Timer dran ist — nicht im zuletzt gemerkten
+Zustand, denn den schreibt der Takt nur bei Änderung.
+
+**Pausiert zählt als „läuft nicht".** Das alte System war da
+großzügiger; dort galt ein pausierter Player als laufend.
 
 ## Im Overlay
 

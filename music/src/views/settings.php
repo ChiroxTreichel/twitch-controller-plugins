@@ -23,7 +23,7 @@
  * @var int $offsetY
  * @var string $theme
  * @var bool $hasTimers
- * @var array{enabled: bool, interval: int, lines: int, on: string, off: string} $timer
+ * @var array{interval: int, lines: int, on: string, off: string} $timer
  * @var string $clientId
  * @var bool $hasSecret
  * @var bool $hasCreds
@@ -213,12 +213,6 @@
             </div>
 
             <p class="hint"><?= $e(translate('music.timer_hint')) ?></p>
-
-            <label class="row" style="gap:8px;margin-bottom:12px;">
-                <input type="checkbox" name="timer_enabled" value="1"
-                       <?= $timer['enabled'] ? 'checked' : '' ?> <?= $canEdit ? '' : 'disabled' ?>>
-                <span><?= $e(translate('music.timer_enabled')) ?></span>
-            </label>
 
             <div class="row">
                 <label class="field">

@@ -341,6 +341,36 @@ final class Spotify
         return $this->get('/me/player/currently-playing');
     }
 
+    /**
+     * Laeuft gerade wirklich etwas?
+     *
+     * Drei Dinge muessen stimmen, und jedes davon kommt vor:
+     *
+     *   - Spotify antwortet ueberhaupt mit etwas. Ist der Player zu,
+     *     kommt 204 ohne Inhalt.
+     *   - Es haengt ein Titel dran. Bei einer Werbung oder einem
+     *     Podcast-Kapitel kann das Feld leer sein.
+     *   - is_playing ist wahr. Pausiert ist nicht "laeuft" - auf einen
+     *     Hinweis hin landet man sonst auf einer Seite, auf der nichts
+     *     passiert.
+     *
+     * Das alte System hatte dafuer isSpotifyRunning() und fragte nur,
+     * ob ueberhaupt etwas kam - ein pausierter Player galt dort als
+     * laufend.
+     *
+     * Schlank mit Absicht: die Ueberlegung "ist gerade etwas zu
+     * sagen?" soll nicht die halbe Warteschlange und einen
+     * Datenbankzugriff kosten.
+     */
+    public function isPlaying(): bool
+    {
+        $laeuft = $this->currentlyPlaying();
+
+        return is_array($laeuft)
+            && !empty($laeuft['is_playing'])
+            && is_array($laeuft['item'] ?? null);
+    }
+
     /** @return array<string, mixed>|null|false */
     public function playerState(): array|null|false
     {
