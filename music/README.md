@@ -146,6 +146,22 @@ Das **Regelfenster** geht von selbst auf, solange die Regeln nicht
 angenommen sind, und lässt sich dann nicht wegklicken. Danach ist es
 der Knopf oben links.
 
+## Der Hinweis im Chat
+
+Ist das **Timer-Plugin** installiert, steht in den Einstellungen eine
+Karte *Hinweis im Chat*: Intervall, Min. Zeilen und **zwei** Texte —
+einer für „Songwünsche sind offen", einer für „sind zu". Welcher
+gepostet wird, entscheidet der Schalter im Moment des Postens.
+
+Gezählt, gewartet und gepostet wird im Timer-Plugin (Haken
+`timers.external`); hier steht nur, *was* gesagt wird. Ohne das Plugin
+gibt es die Karte nicht — sie würde etwas einstellen, das niemand
+postet.
+
+**Läuft gerade keine Musik, postet er nicht.** Ein Hinweis auf die
+Seite ist sonst eine Einladung zu einer leeren Warteschlange. Ein
+leeres Textfeld heißt dasselbe für seinen Zustand: dann bleibt es still.
+
 ## Im Overlay
 
 Ein eigener Platz mit Bild, Titel, Interpret, „gewünscht von" und einem

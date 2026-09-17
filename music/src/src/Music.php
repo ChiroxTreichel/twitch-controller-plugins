@@ -278,6 +278,103 @@ final class Music
     }
 
     // -----------------------------------------------------------------
+    //  Der Hinweis im Chat
+    // -----------------------------------------------------------------
+
+    /**
+     * Grenzen wie beim Timer-Plugin - dort laeuft er ja.
+     *
+     * Nachgebaut und nicht von dort geholt: das Timer-Plugin kann
+     * fehlen, und eine Klasse, die es dann nicht gibt, waere hier ein
+     * Fehler beim Laden statt einer Karte, die nicht erscheint.
+     */
+    public const TIMER_INTERVAL_MIN = 5;
+    public const TIMER_INTERVAL_MAX = 120;
+    public const TIMER_DEFAULT_INTERVAL = 30;
+    public const TIMER_MAX_MESSAGE = 400;
+
+    /** Die Kennung, unter der der Timer beim Timer-Plugin steht. */
+    public const TIMER_ID = 'music';
+
+    /**
+     * Einen Text auf seine Laenge bringen.
+     *
+     * Mit mb_substr, wo es das gibt: sonst faellt der Schnitt mitten
+     * in einen Umlaut, und im Chat steht ein Fragezeichen. Ohne
+     * mbstring ist substr die zweitbeste Antwort - dieselbe Stelle,
+     * nur zeichenweise unsauber.
+     */
+    public static function cut(string $text, int $laenge): string
+    {
+        return function_exists('mb_substr')
+            ? mb_substr($text, 0, $laenge)
+            : substr($text, 0, $laenge);
+    }
+
+    public static function timerEnabled(App $app): bool
+    {
+        return $app->settings->bool('timer_enabled', false, self::scope());
+    }
+
+    public static function timerInterval(App $app): int
+    {
+        return self::timerIntervalOf($app->settings->int('timer_interval', self::TIMER_DEFAULT_INTERVAL, self::scope()));
+    }
+
+    public static function timerIntervalOf(int $wert): int
+    {
+        if ($wert <= 0) {
+            return self::TIMER_DEFAULT_INTERVAL;
+        }
+
+        return max(self::TIMER_INTERVAL_MIN, min(self::TIMER_INTERVAL_MAX, $wert));
+    }
+
+    public static function timerLines(App $app): int
+    {
+        return max(0, $app->settings->int('timer_lines', 0, self::scope()));
+    }
+
+    /** Was im Chat steht, solange gewuenscht werden darf. */
+    public static function timerMessageOn(App $app): string
+    {
+        return $app->settings->string('timer_message_on', '', self::scope());
+    }
+
+    /** Und was, solange nicht. */
+    public static function timerMessageOff(App $app): string
+    {
+        return $app->settings->string('timer_message_off', '', self::scope());
+    }
+
+    /**
+     * Der Text, der jetzt dran waere - oder nichts.
+     *
+     * Drei Gruende fuer "nichts", und alle drei sind dasselbe: es gibt
+     * gerade nichts zu sagen.
+     *
+     *   - Es laeuft keine Musik. Dann ist ein Hinweis auf die Seite
+     *     eine Einladung zu einer leeren Warteschlange.
+     *   - Der Text fuer diesen Fall ist leer. Wer ihn nicht schreibt,
+     *     will ihn nicht posten.
+     *   - Spotify ist nicht verbunden.
+     */
+    public static function timerMessage(App $app): string
+    {
+        if (!self::isConnected($app) || !self::timerEnabled($app)) {
+            return '';
+        }
+
+        if (!self::overlayState($app)['playing']) {
+            return '';
+        }
+
+        $text = self::enabled($app) ? self::timerMessageOn($app) : self::timerMessageOff($app);
+
+        return trim($text);
+    }
+
+    // -----------------------------------------------------------------
     //  Der Zugang zu Spotify
     // -----------------------------------------------------------------
 

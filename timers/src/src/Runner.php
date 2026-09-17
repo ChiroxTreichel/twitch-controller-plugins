@@ -37,7 +37,10 @@ final class Runner
             return;
         }
 
-        $timer = Timers::all($this->app);
+        // Fremde Timer zaehlen mit: sie haben dieselbe Bedingung
+        // "Min. Zeilen", und ein Zaehler, der nicht laeuft, steht.
+        $timer = array_merge(Timers::all($this->app), Timers::external($this->app));
+
         if ($timer === []) {
             return;
         }
@@ -60,7 +63,8 @@ final class Runner
             return '';
         }
 
-        $timer = Timers::all($this->app);
+        $timer = array_merge(Timers::all($this->app), Timers::external($this->app));
+
         if ($timer === []) {
             return '';
         }
@@ -85,7 +89,16 @@ final class Runner
                 continue;
             }
 
-            $text = Timers::messageAt($eintrag, $einzeln['message_index']);
+            /*
+             * Ein fremder Timer entscheidet erst hier, was er sagt -
+             * und ob ueberhaupt. Eine leere Antwort heisst "gerade
+             * nicht": dann bleibt der Stand stehen, und beim naechsten
+             * Takt wird wieder gefragt.
+             */
+            $text = isset($eintrag['resolve'])
+                ? (string) ($eintrag['resolve'])($this->app)
+                : Timers::messageAt($eintrag, $einzeln['message_index']);
+
             if ($text === '') {
                 continue;
             }
@@ -105,11 +118,13 @@ final class Runner
                 return '';
             }
 
-            $this->app->log(sprintf(
-                'Timer: "%s" gepostet (Nachricht %d).',
-                (string) $eintrag['title'],
-                $einzeln['message_index'] % max(1, count(Timers::activeMessages($eintrag))) + 1
-            ));
+            $this->app->log(isset($eintrag['resolve'])
+                ? sprintf('Timer: "%s" gepostet.', (string) $eintrag['title'])
+                : sprintf(
+                    'Timer: "%s" gepostet (Nachricht %d).',
+                    (string) $eintrag['title'],
+                    $einzeln['message_index'] % max(1, count(Timers::activeMessages($eintrag))) + 1
+                ));
 
             $stand = State::set($stand, $id, [
                 'lines'          => 0,

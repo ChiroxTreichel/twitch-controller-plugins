@@ -85,6 +85,43 @@ Oben auf der Seite und in der Seitenleiste. Aus heißt: kein Timer
 postet, und es wird auch nichts gezählt. Die eingestellten Timer
 bleiben stehen.
 
+## Timer aus anderen Plugins
+
+Ein Plugin, das regelmäßig etwas in den Chat schreiben will, meldet
+seinen Timer über den Haken **`timers.external`** an. Zählen, warten,
+Abstand halten und posten macht dann dieser hier — nachgebaut werden
+müsste sonst der ganze Betrieb.
+
+```php
+$hooks->on('timers.external', static function (array $timer) use ($app): array {
+    $timer[] = [
+        'id'               => 'music',   // fest, der Laufzeitstand hängt daran
+        'title'            => 'music',   // steht so im Log
+        'interval_minutes' => 30,
+        'min_lines'        => 20,
+        'enabled'          => true,
+        'resolve'          => static fn (App $app): string => '…',
+    ];
+
+    return $timer;
+});
+```
+
+Der Unterschied zu einem Timer aus der Liste: Ein solcher hat **keine
+Nachrichtenliste**, sondern `resolve` — eine Funktion, die den Text
+liefert, *wenn* der Timer dran ist. Eine leere Antwort heißt „gerade
+nicht"; dann bleibt der Stand stehen und beim nächsten Takt wird wieder
+gefragt. So kann ein Plugin von der Lage abhängig machen, ob und was es
+sagt.
+
+Der Haken wird bei **jeder Chatzeile** gefragt — die Antwort muss also
+billig sein. Was nachzuschlagen ist, gehört in `resolve`.
+
+Diese Timer stehen **nicht** in der Liste auf dieser Seite und lassen
+sich hier nicht bearbeiten. Sie gehören dem Plugin, das sie anmeldet,
+und werden dort eingestellt. Der Hauptschalter gilt trotzdem: aus ist
+aus.
+
 ## Rechte
 
 | Recht | erlaubt |

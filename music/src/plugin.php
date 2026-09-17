@@ -165,6 +165,38 @@ $router->get('/display/music/state.js', static function () use ($app): Response 
 }, ['auth' => true, 'permission' => 'Account.Overlay.View']);
 
 // -------------------------------------------------------------------
+//  Der Hinweis im Chat
+// -------------------------------------------------------------------
+/*
+ * Ein Timer, der beim Timer-Plugin angemeldet wird. Den Betrieb macht
+ * dort der Runner: Zeilen zaehlen, Sitzung erkennen, Abstand halten,
+ * nur waehrend des Streams posten. Hier steht nur, WAS gepostet wird.
+ *
+ * Ist das Timer-Plugin nicht da, laeuft dieser Haken nie - dann gibt
+ * es die Karte in den Einstellungen auch nicht.
+ *
+ * Die Antwort muss billig sein: gefragt wird bei jeder Chatzeile. Was
+ * nachzuschlagen ist, steht in 'resolve' und wird erst gefragt, wenn
+ * der Timer dran ist.
+ */
+$hooks->on('timers.external', static function (array $timer) use ($app): array {
+    if (!Music::timerEnabled($app)) {
+        return $timer;
+    }
+
+    $timer[] = [
+        'id'               => Music::TIMER_ID,
+        'title'            => Music::TIMER_ID,
+        'interval_minutes' => Music::timerInterval($app),
+        'min_lines'        => Music::timerLines($app),
+        'enabled'          => true,
+        'resolve'          => static fn (App $app): string => Music::timerMessage($app),
+    ];
+
+    return $timer;
+});
+
+// -------------------------------------------------------------------
 //  Der Takt: was laeuft gerade?
 // -------------------------------------------------------------------
 /*
@@ -460,14 +492,27 @@ $router->get('/display/music/settings', static function (Request $request) use (
         'publicUrl'   => $app->url('/music'),
         'panelUrl'    => $app->url('/music/panel'),
         'canEdit'     => $app->auth->can('Music.Global.Edit'),
-        'probes'      => [],
+
+        /*
+         * Die Timer-Karte gibt es nur, wenn das Timer-Plugin laeuft -
+         * ohne es wuerde dort etwas eingestellt, das niemand postet.
+         */
+        'hasTimers'   => $app->plugins->isEnabled('timers'),
+        'timer'       => [
+            'enabled'  => Music::timerEnabled($app),
+            'interval' => Music::timerInterval($app),
+            'lines'    => Music::timerLines($app),
+            'on'       => Music::timerMessageOn($app),
+            'off'      => Music::timerMessageOff($app),
+        ],
+
         'csrf'        => $app->auth->csrfToken(),
         'notice'      => $request->get('notice'),
         'error'       => $request->get('error'),
     ]));
 }, ['auth' => true, 'permission' => 'Music.Global.View']);
 
-$router->post('/display/music/settings', static function (Request $request) use ($app, $plugin, $zurueckEinstellungen): Response {
+$router->post('/display/music/settings', static function (Request $request) use ($app, $zurueckEinstellungen): Response {
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return $zurueckEinstellungen($app, null, translate('common.error.form_expired'));
     }
@@ -484,6 +529,26 @@ $router->post('/display/music/settings', static function (Request $request) use 
             $app->settings->set('offset_x', Music::offset((int) $request->input('offset_x')), Music::scope());
             $app->settings->set('offset_y', Music::offset((int) $request->input('offset_y')), Music::scope());
             $app->settings->set('theme', Music::normalizeTheme((string) $request->input('theme')), Music::scope());
+
+            $app->settings->set('timer_enabled', $request->input('timer_enabled') !== '', Music::scope());
+            $app->settings->set('timer_interval', Music::timerIntervalOf((int) $request->input('timer_interval')), Music::scope());
+            $app->settings->set('timer_lines', max(0, (int) $request->input('timer_lines')), Music::scope());
+
+            /*
+             * Gekuerzt auf die Laenge, die auch das Timer-Plugin
+             * zulaesst: was laenger ist, wuerde Twitch abschneiden -
+             * und zwar mitten im Satz.
+             */
+            $app->settings->set(
+                'timer_message_on',
+                Music::cut(trim((string) $request->input('timer_message_on')), Music::TIMER_MAX_MESSAGE),
+                Music::scope()
+            );
+            $app->settings->set(
+                'timer_message_off',
+                Music::cut(trim((string) $request->input('timer_message_off')), Music::TIMER_MAX_MESSAGE),
+                Music::scope()
+            );
             Music::setRules($app, (string) $request->input('rules'));
 
             return $zurueckEinstellungen($app, translate('music.saved'));
@@ -519,68 +584,6 @@ $router->post('/display/music/settings', static function (Request $request) use 
 
             return $zurueckEinstellungen($app, translate('music.disconnected'));
 
-        /*
-         * Die Suche ist der Teil, der an Spotify scheitern kann, ohne
-         * dass man es sieht: eine leere Trefferliste sieht aus wie
-         * "nichts gefunden". Hier steht, was Spotify wirklich sagt -
-         * zu mehreren Fassungen derselben Anfrage, damit man sieht,
-         * WORAN es liegt und nicht nur DASS es klemmt.
-         */
-        case 'check_search':
-            if (!Music::isConnected($app)) {
-                return $zurueckEinstellungen($app, null, translate('music.check.not_connected'));
-            }
-
-            $spotify = new Spotify($app);
-            $markt = $spotify->market();
-            $wort = 'digimon';
-
-            $fassungen = [
-                'wie jetzt'     => Spotify::searchPath('track', $wort, $markt),
-                'ohne Markt'    => '/search?' . http_build_query(['type' => 'track', 'q' => $wort]),
-                'mit limit=20'  => '/search?' . http_build_query(['type' => 'track', 'market' => $markt, 'limit' => 20, 'q' => $wort]),
-                'mit limit=25'  => '/search?' . http_build_query(['type' => 'track', 'market' => $markt, 'limit' => 25, 'q' => $wort]),
-                'Konto (/me)'   => '/me',
-            ];
-
-            $ergebnisse = [];
-
-            foreach ($fassungen as $name => $pfad) {
-                $antwort = $spotify->probe($pfad);
-
-                $ergebnisse[] = [
-                    'label'   => $name,
-                    'path'    => $pfad,
-                    'status'  => $antwort['status'],
-                    'message' => $antwort['message'],
-                ];
-            }
-
-            return Response::html($app->view->from($plugin->directory . '/views')->render('settings', [
-                'title'       => translate('music.settings'),
-                'active'      => 'display/music',
-                'enabled'     => Music::enabled($app),
-                'cooldown'    => Music::cooldown($app),
-                'rules'       => implode("\n", Music::rules($app)),
-                'width'       => Music::width($app),
-                'height'      => Music::height($app),
-                'offsetX'     => Music::offsetX($app),
-                'offsetY'     => Music::offsetY($app),
-                'theme'       => Music::theme($app),
-                'clientId'    => Music::clientId($app),
-                'hasSecret'   => $app->settings->hasSecret('client_secret', Music::scope()),
-                'hasCreds'    => Music::hasCredentials($app),
-                'connected'   => Music::isConnected($app),
-                'account'     => Music::accountName($app),
-                'redirectUri' => Music::redirectUri($app),
-                'publicUrl'   => $app->url('/music'),
-                'panelUrl'    => $app->url('/music/panel'),
-                'canEdit'     => $app->auth->can('Music.Global.Edit'),
-                'probes'      => $ergebnisse,
-                'csrf'        => $app->auth->csrfToken(),
-                'notice'      => '',
-                'error'       => '',
-            ]));
     }
 
     return $zurueckEinstellungen($app, null, translate('common.error.unknown_action'));

@@ -103,6 +103,73 @@ final class Timers
     }
 
     /**
+     * Timer, die andere Plugins anmelden.
+     *
+     * Der Haken 'timers.external' wird bei JEDER Chatzeile und in
+     * jedem Takt gefragt - die Antwort muss also billig sein. Wer
+     * etwas nachschlagen muss, tut das in 'resolve' und nicht hier.
+     *
+     * Ein solcher Timer hat keine Nachrichtenliste, sondern ein
+     * 'resolve': eine Funktion, die den Text liefert, wenn der Timer
+     * dran ist - oder eine leere Zeichenkette, wenn gerade doch nichts
+     * zu sagen ist. Das ist der Unterschied zu einem Timer aus der
+     * Liste: der sagt immer dasselbe, dieser haengt von der Lage ab.
+     *
+     * Sie stehen NICHT in der Oberflaeche des Timers und lassen sich
+     * dort nicht bearbeiten. Sie gehoeren dem Plugin, das sie
+     * anmeldet, und werden auch dort eingestellt.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public static function external(App $app): array
+    {
+        $roh = $app->hooks->filter('timers.external', []);
+
+        if (!is_array($roh)) {
+            return [];
+        }
+
+        $sauber = [];
+
+        foreach ($roh as $eintrag) {
+            if (!is_array($eintrag) || !isset($eintrag['resolve']) || !is_callable($eintrag['resolve'])) {
+                continue;
+            }
+
+            $id = trim((string) ($eintrag['id'] ?? ''));
+
+            if ($id === '') {
+                continue;
+            }
+
+            $sauber[] = [
+                /*
+                 * Der Kennzeichen-Punkt haelt fremde Timer von den
+                 * eigenen auseinander: der Laufzeitstand liegt fuer
+                 * beide in derselben Ablage, und eine Kennung, die es
+                 * zweimal gibt, waere ein Timer, der sich selbst
+                 * zurueckstellt.
+                 */
+                'id'               => 'x:' . $id,
+                'title'            => self::cut(trim((string) ($eintrag['title'] ?? $id)), 80),
+                'interval_minutes' => max(
+                    self::INTERVAL_MIN,
+                    min(self::INTERVAL_MAX, (int) ($eintrag['interval_minutes'] ?? self::INTERVAL_MIN))
+                ),
+                'min_lines'        => max(0, (int) ($eintrag['min_lines'] ?? 0)),
+                'title_keywords'   => '',
+                'game'             => '',
+                'messages'         => [],
+                'enabled'          => !empty($eintrag['enabled']),
+                'allow_as_command' => false,
+                'resolve'          => $eintrag['resolve'],
+            ];
+        }
+
+        return $sauber;
+    }
+
+    /**
      * @return array<string, mixed>|null
      */
     public static function find(App $app, string $id): ?array

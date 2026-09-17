@@ -395,34 +395,6 @@ final class Spotify
         return Music::market($this->app);
     }
 
-    /**
-     * Einen Aufruf machen und NUR sagen, was dabei herauskam.
-     *
-     * Fuer die Pruefung in den Einstellungen: dort soll stehen, was
-     * Spotify zu einer Anfrage sagt, ohne dass dafuer jemand ins Log
-     * sehen muss. Ohne Auswertung der Daten - es geht um den Status.
-     *
-     * @return array{status: int, message: string}
-     */
-    public function probe(string $pfad): array
-    {
-        $token = $this->accessToken();
-
-        if ($token === '') {
-            return ['status' => 0, 'message' => translate('music.check.no_token')];
-        }
-
-        $antwort = Http::request('GET', self::API . $pfad, [
-            'Authorization' => 'Bearer ' . $token,
-            'Content-Type'  => 'application/json',
-        ]);
-
-        return [
-            'status'  => $antwort->status,
-            'message' => trim((string) ($antwort->json['error']['message'] ?? '')),
-        ];
-    }
-
     public function searchTracks(string $begriff, int $limit = 25): array|false
     {
         $begriff = trim($begriff);
