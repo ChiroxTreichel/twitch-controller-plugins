@@ -12,9 +12,23 @@ denselben sieben Reitern unter *Tools → Subathon*:
 | Einstellungen | Startzeit, Obergrenze, Auslöser, was ein Abo/Bit/Cent bringt |
 | Overlay | die sechs Farben der Anzeige |
 | Nachrichten | die Laufschrift, eine je Zeile, mit Platzhaltern |
-| Manuelles Buchen | Abo, Geschenk-Abos, Bits, Spende, Minuten von Hand |
+| Manuelles Buchen | Abo, Geschenk-Abos, Bits, Spende, Minuten von Hand — **ausgeblendet** |
 | Happy Hour | Stunden, in denen Spenden mehr bringen |
-| Info | Verlauf und Nachweise |
+| Verlauf | wer wann wie viel Zeit gebracht hat |
+
+**Manuelles Buchen** ist aus. Abos, Bits und Spenden buchen sich von
+selbst; von Hand braucht man es nur, wenn etwas auf einem Weg ankommt,
+den dieses System nicht sieht — eine Überweisung, ein Geschenk im Chat.
+Einschalten lässt es sich in den *Einstellungen*; der Schalter steht
+dort und nicht im Reiter selbst, sonst käme man nach dem Ausschalten
+nicht mehr an ihn heran. Ausgeblendet heißt aus: auch ein altes
+Formular bucht dann nichts mehr.
+
+Der **Verlauf** hieß im Programm „Info" und trug die Nachweise mit
+sich. Die stehen jetzt hier im Paket; der Reiter zeigt nur noch den
+Verlauf, und zwar als Tabelle — Wann, Wer, Was, Menge, Zeit. Ein Satz
+je Zeile liest sich einzeln gut und in hundert Zeilen gar nicht. Ein
+Strich in der Spalte *Zeit* heißt: es kam an, während nichts lief.
 
 ## Was Zeit bringt
 

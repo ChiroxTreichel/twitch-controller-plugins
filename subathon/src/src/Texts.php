@@ -50,6 +50,59 @@ final class Texts
         return translate('subathon.happy.type.0');
     }
 
+    /**
+     * Die Art einer Buchung als Wort - fuer die Spalte "Was".
+     *
+     * Auch hier ausgeschrieben: zusammengesetzte Schluessel sieht
+     * bin/lang.php nicht.
+     */
+    public static function kind(string $art): string
+    {
+        switch ($art) {
+            case 'sub':
+                return translate('subathon.kind.sub');
+
+            case 'gift':
+                return translate('subathon.kind.gift');
+
+            case 'bits':
+                return translate('subathon.kind.bits');
+
+            case 'donation':
+                return translate('subathon.kind.donation');
+        }
+
+        return translate('subathon.kind.manual');
+    }
+
+    /**
+     * Die Menge mit ihrer Einheit.
+     *
+     * Dieselbe Zahl heisst je nach Art etwas anderes: bei Bits sind
+     * es Bits, bei einer Spende Euro, bei einem Abo die Stufe. Ohne
+     * Einheit stuenden in der Spalte Zahlen, die nichts miteinander
+     * zu tun haben.
+     */
+    public static function amount(string $art, string $menge): string
+    {
+        if ($menge === '') {
+            return '';
+        }
+
+        switch ($art) {
+            case 'bits':
+                return $menge . ' Bits';
+
+            case 'donation':
+                return number_format((float) $menge, 2, ',', '.') . ' €';
+
+            case 'manual':
+                return $menge . ' min';
+        }
+
+        return $menge;
+    }
+
     /** Dasselbe fuer den Zustand. */
     public static function status(string $status): string
     {

@@ -335,9 +335,17 @@ $zurueck = static function (App $app, ?string $notice = null, ?string $error = n
 
 $router->get('/tools/subathon', static function (Request $request) use ($app, $plugin): Response {
     $reiter = (string) $request->get('tab');
-    $reiter = in_array($reiter, ['overview', 'settings', 'overlay', 'messages', 'manual', 'happy', 'info'], true)
+    $reiter = in_array($reiter, ['overview', 'settings', 'overlay', 'messages', 'manual', 'happy', 'history'], true)
         ? $reiter
         : 'overview';
+
+    /*
+     * Ein Lesezeichen auf einen Reiter, den es gerade nicht gibt,
+     * fuehrt auf die Uebersicht - nicht auf eine leere Seite.
+     */
+    if ($reiter === 'manual' && !Subathon::showManual($app)) {
+        $reiter = 'overview';
+    }
 
     $jetzt = time();
     $start = Subathon::start($app);
@@ -371,11 +379,12 @@ $router->get('/tools/subathon', static function (Request $request) use ($app, $p
         'colors'   => Subathon::colors($app),
         'messages' => Subathon::messages($app),
         'happy'    => HappyHour::all($app),
-        'history'  => $reiter === 'info' ? Log::recent($app, 200) : [],
+        'history'  => $reiter === 'history' ? Log::recent($app, 200) : [],
         'preview'  => Texts::values($app),
 
         'canEdit'  => $app->auth->can('Subathon.Global.Edit'),
         'canBook'  => $app->auth->can('Subathon.Global.Book'),
+        'showManual' => Subathon::showManual($app),
         'csrf'     => $app->auth->csrfToken(),
         'notice'   => $request->get('notice'),
         'error'    => $request->get('error'),
@@ -472,6 +481,7 @@ $router->post('/tools/subathon', static function (Request $request) use ($app, $
                 'seconds_per_sub' => $minuten * 60,
                 'bits_per_sub'    => max(1, (int) $request->input('bits_per_sub')),
                 'cent_per_sub'    => max(1, (int) $request->input('cent_per_sub')),
+                'show_manual'     => $request->input('show_manual') !== '',
             ], Subathon::scope());
 
             $melden($app);
@@ -522,6 +532,15 @@ $router->post('/tools/subathon', static function (Request $request) use ($app, $
         case 'book':
             if (!$darfBuchen) {
                 return $zurueck($app, null, translate('common.error.no_permission'));
+            }
+
+            /*
+             * Ausgeblendet heisst aus. Ein Formular aus einem alten
+             * Reiter soll nicht noch buchen koennen, nachdem jemand
+             * ihn weggeschaltet hat.
+             */
+            if (!Subathon::showManual($app)) {
+                return $zurueck($app, null, translate('subathon.manual_off'));
             }
 
             $wer = trim((string) $request->input('who'));
@@ -613,7 +632,7 @@ $router->post('/tools/subathon', static function (Request $request) use ($app, $
 
             Log::clear($app);
 
-            return $zurueck($app, translate('subathon.log_cleared'), null, 'info');
+            return $zurueck($app, translate('subathon.log_cleared'), null, 'history');
     }
 
     return $zurueck($app, null, translate('common.error.unknown_action'), $reiter);

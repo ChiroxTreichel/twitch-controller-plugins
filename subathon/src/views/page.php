@@ -35,6 +35,7 @@
  * @var array<string, string> $preview
  * @var bool $canEdit
  * @var bool $canBook
+ * @var bool $showManual
  * @var string $csrf
  * @var string $notice
  * @var string $error
@@ -65,16 +66,27 @@ $zeit = static fn (int $stempel): string => $stempel <= 0 ? '—' : date('d.m.Y 
     <div class="note note-error"><?= $e($error) ?></div>
 <?php endif ?>
 
+<?php
+/*
+ * "Manuelles Buchen" steht nur da, wenn es eingeschaltet ist - siehe
+ * die Einstellungen. Die anderen sechs immer.
+ */
+$reiterListe = [
+    'overview' => translate('subathon.tab.overview'),
+    'settings' => translate('subathon.tab.settings'),
+    'overlay'  => translate('subathon.tab.overlay'),
+    'messages' => translate('subathon.tab.messages'),
+];
+
+if ($showManual) {
+    $reiterListe['manual'] = translate('subathon.tab.manual');
+}
+
+$reiterListe['happy'] = translate('subathon.tab.happy');
+$reiterListe['history'] = translate('subathon.tab.history');
+?>
 <div class="tabs">
-    <?php foreach ([
-        'overview' => translate('subathon.tab.overview'),
-        'settings' => translate('subathon.tab.settings'),
-        'overlay'  => translate('subathon.tab.overlay'),
-        'messages' => translate('subathon.tab.messages'),
-        'manual'   => translate('subathon.tab.manual'),
-        'happy'    => translate('subathon.tab.happy'),
-        'info'     => translate('subathon.tab.info'),
-    ] as $name => $beschriftung): ?>
+    <?php foreach ($reiterListe as $name => $beschriftung): ?>
         <a class="tab<?= $tab === $name ? ' is-active' : '' ?>" href="<?= $e($reiterUrl($name)) ?>">
             <?= $e($beschriftung) ?>
         </a>
@@ -250,6 +262,21 @@ $zeit = static fn (int $stempel): string => $stempel <= 0 ? '—' : date('d.m.Y 
                 </tbody>
             </table>
 
+            <?php /*
+                Der Reiter "Manuelles Buchen" - aus, solange ihn
+                niemand braucht. Der Schalter steht hier und nicht
+                dort: einen Reiter schaltet man nicht in ihm selbst
+                ein, sonst kaeme man nach dem Ausschalten nicht mehr
+                an den Schalter.
+            */ ?>
+            <label class="row" style="gap:8px;margin-top:14px;">
+                <input type="checkbox" name="show_manual" value="1"
+                       <?= $showManual ? 'checked' : '' ?> <?= $canEdit ? '' : 'disabled' ?>>
+                <span><?= $e(translate('subathon.field.show_manual')) ?></span>
+            </label>
+
+            <p class="hint"><?= $e(translate('subathon.show_manual_hint')) ?></p>
+
             <?php if ($canEdit): ?>
                 <div class="row" style="margin-top:14px;">
                     <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
@@ -345,7 +372,7 @@ $zeit = static fn (int $stempel): string => $stempel <= 0 ? '—' : date('d.m.Y 
 <?php endif ?>
 
 <?php /* ================= Manuelles Buchen ================= */ ?>
-<?php if ($tab === 'manual'): ?>
+<?php if ($tab === 'manual' && $showManual): ?>
     <div class="card">
         <div class="card-head">
             <h2><?= $e(translate('subathon.tab.manual')) ?></h2>
@@ -481,8 +508,8 @@ $zeit = static fn (int $stempel): string => $stempel <= 0 ? '—' : date('d.m.Y 
     </div>
 <?php endif ?>
 
-<?php /* ================= Info ================= */ ?>
-<?php if ($tab === 'info'): ?>
+<?php /* ================= Verlauf ================= */ ?>
+<?php if ($tab === 'history'): ?>
     <div class="card">
         <div class="card-head">
             <h2><?= $e(translate('subathon.history')) ?></h2>
@@ -501,56 +528,48 @@ $zeit = static fn (int $stempel): string => $stempel <= 0 ? '—' : date('d.m.Y 
 
         <?php if ($history === []): ?>
             <p class="hint"><?= $e(translate('subathon.history_empty')) ?></p>
-        <?php endif ?>
-
-        <table>
-            <tbody>
-                <?php foreach ($history as $eintrag): ?>
-                    <?php
-                    $dauer = Log::duration((int) $eintrag['seconds']);
-                    $wer = (string) $eintrag['who'];
-                    $menge = (string) $eintrag['amount'];
-
-                    /*
-                     * Dieselben Saetze wie im Programm - "X spendete
-                     * 5,00 € für 20 Minuten". Was nichts gebracht hat,
-                     * weil gerade nicht lief, steht auch da: sonst
-                     * sucht man es spaeter vergeblich.
-                     */
-                    $text = match ((string) $eintrag['kind']) {
-                        'donation' => translate('subathon.log.donation', ['who' => $wer, 'amount' => $menge, 'time' => $dauer]),
-                        'bits'     => translate('subathon.log.bits', ['who' => $wer, 'amount' => $menge, 'time' => $dauer]),
-                        'sub'      => translate('subathon.log.sub', ['who' => $wer, 'time' => $dauer]),
-                        'gift'     => translate('subathon.log.gift', ['who' => $wer, 'time' => $dauer]),
-                        default    => translate('subathon.log.manual', ['who' => $wer, 'time' => $dauer]),
-                    };
-                    ?>
+        <?php else: ?>
+            <?php /*
+                Eine Spalte je Frage - Zeitpunkt, wer, was, wie viel,
+                wie viel Zeit. Das Programm schrieb daraus einen Satz
+                ("X spendete 5,00 € für 20 Minuten"); der liest sich
+                einzeln gut und in hundert Zeilen gar nicht.
+            */ ?>
+            <table>
+                <thead>
                     <tr>
-                        <td class="hint mono" style="white-space:nowrap;">
-                            <?= $e(date('d.m. H:i', strtotime((string) $eintrag['created_at']))) ?>
-                        </td>
-                        <td><?= $e($text) ?></td>
+                        <th><?= $e(translate('subathon.log.when')) ?></th>
+                        <th><?= $e(translate('subathon.log.who')) ?></th>
+                        <th><?= $e(translate('subathon.log.what')) ?></th>
+                        <th><?= $e(translate('subathon.log.how_much')) ?></th>
+                        <th><?= $e(translate('subathon.log.time')) ?></th>
                     </tr>
-                <?php endforeach ?>
-            </tbody>
-        </table>
-    </div>
-
-    <?php /*
-        Die Nachweise aus dem Programm - dort standen sie im selben
-        Reiter wie der Verlauf, und dort stehen sie hier auch.
-    */ ?>
-    <div class="card">
-        <div class="card-head">
-            <h2><?= $e(translate('subathon.about')) ?></h2>
-        </div>
-
-        <p><?= $e(translate('subathon.about.developed')) ?>
-            <a href="mailto:chiroxt@outlook.de">chiroxt@outlook.de</a></p>
-
-        <p><?= $e(translate('subathon.about.made_for')) ?>
-            <a href="https://twitch.tv/talutahsplayground" target="_blank" rel="noopener">TalutahsPlayground</a>
-            <?= $e(translate('subathon.about.and')) ?>
-            <a href="https://twitch.tv/tomokivt" target="_blank" rel="noopener">TomokiVT</a></p>
+                </thead>
+                <tbody>
+                    <?php foreach ($history as $eintrag): ?>
+                        <?php $sekunden = (int) $eintrag['seconds']; ?>
+                        <tr>
+                            <td class="hint mono" style="white-space:nowrap;">
+                                <?= $e(date('d.m. H:i', strtotime((string) $eintrag['created_at']))) ?>
+                            </td>
+                            <td><?= $e((string) $eintrag['who']) ?></td>
+                            <td><?= $e(Texts::kind((string) $eintrag['kind'])) ?></td>
+                            <td class="mono">
+                                <?= $e(Texts::amount((string) $eintrag['kind'], (string) $eintrag['amount'])) ?>
+                            </td>
+                            <?php /*
+                                0 Sekunden heisst: es kam an, waehrend
+                                nicht lief. Das steht hier als Strich
+                                und nicht als "0 Sekunden" - man soll
+                                es sehen, ohne es zu lesen.
+                            */ ?>
+                            <td class="mono" style="white-space:nowrap;">
+                                <?= $sekunden > 0 ? $e(Log::duration($sekunden)) : '<span class="hint">—</span>' ?>
+                            </td>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+        <?php endif ?>
     </div>
 <?php endif ?>

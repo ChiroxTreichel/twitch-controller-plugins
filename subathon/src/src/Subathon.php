@@ -111,6 +111,23 @@ final class Subathon
     }
 
     /**
+     * Soll der Reiter "Manuelles Buchen" da sein?
+     *
+     * Aus, solange niemand ihn anschaltet. Abos, Bits und Spenden
+     * buchen sich von selbst; von Hand braucht man ihn nur, wenn
+     * etwas auf einem Weg ankommt, den dieses System nicht sieht -
+     * eine Ueberweisung, ein Geschenk im Chat.
+     *
+     * Ein Reiter, den man nie braucht, ist auch einer, in den man
+     * sich vertippt: fuenf Knoepfe, die Zeit verschenken, direkt
+     * neben den Einstellungen.
+     */
+    public static function showManual(App $app): bool
+    {
+        return $app->settings->bool('show_manual', false, self::scope());
+    }
+
+    /**
      * Die Nachrichten der Laufschrift, eine je Zeile.
      *
      * @return list<string>
