@@ -543,7 +543,13 @@
                 var titel = (daten && daten.tracks) || [];
 
                 if (!titel.length) {
-                    treffer.appendChild(leerText(texte.searchEmpty));
+                    /*
+                     * Der Server sagt, ob nichts da war oder ob
+                     * Spotify abgewiesen hat. Das ist ein
+                     * Unterschied: beim einen tippt man anders, beim
+                     * anderen sieht man ins Log.
+                     */
+                    treffer.appendChild(leerText((daten && daten.error) || texte.searchEmpty));
 
                     return;
                 }

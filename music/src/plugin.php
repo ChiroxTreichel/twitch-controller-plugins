@@ -279,11 +279,15 @@ $router->get('/display/music', static function (Request $request) use ($app, $pl
     $suche = trim($request->get('q'));
 
     $treffer = [];
+    $sucheHatGeklappt = true;
 
     if ($suche !== '' && Music::isConnected($app) && in_array($reiter, ['track', 'artist'], true)) {
-        $treffer = $reiter === 'artist'
+        $antwort = $reiter === 'artist'
             ? $spotify->searchArtists($suche, 12)
             : $spotify->searchTracks($suche, 12);
+
+        $sucheHatGeklappt = $antwort !== false;
+        $treffer = $antwort === false ? [] : $antwort;
     }
 
     /*
@@ -311,6 +315,7 @@ $router->get('/display/music', static function (Request $request) use ($app, $pl
         'wishes'    => $reiter === 'wishes' ? Wishes::recent($app, 50) : [],
         'query'     => $suche,
         'results'   => $treffer,
+        'searchOk'  => $sucheHatGeklappt,
         'canEdit'   => $app->auth->can('Music.Bans.Manage'),
         'canToggle' => $app->auth->can('Music.Global.Edit'),
         'csrf'      => $app->auth->csrfToken(),
@@ -787,9 +792,21 @@ $router->get('/music/search', static function (Request $request) use ($app): Res
     }
 
     $spotify = new Spotify($app);
+    $antwort = $spotify->searchTracks($begriff, 25);
+
+    /*
+     * Abgewiesen ist nicht dasselbe wie nichts gefunden. Der Grund
+     * steht im Log (Spotify GET /search -> Code); auf der Seite steht
+     * "Fehler bei der Suche" und nicht "keine Ergebnisse" - sonst
+     * tippt jemand eine Viertelstunde lang andere Woerter.
+     */
+    if ($antwort === false) {
+        return Response::json(['tracks' => [], 'error' => translate('music.public.search_failed')], 502);
+    }
+
     $treffer = [];
 
-    foreach ($spotify->searchTracks($begriff, 25) as $titel) {
+    foreach ($antwort as $titel) {
         if (!is_array($titel)) {
             continue;
         }

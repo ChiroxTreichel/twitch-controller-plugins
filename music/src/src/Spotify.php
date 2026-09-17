@@ -331,7 +331,7 @@ final class Spotify
      *
      * @return list<array<string, mixed>>
      */
-    public function searchTracks(string $begriff, int $limit = 25): array
+    public function searchTracks(string $begriff, int $limit = 25): array|false
     {
         $begriff = trim($begriff);
 
@@ -345,6 +345,15 @@ final class Spotify
             'limit' => max(1, min(50, $limit)),
         ]));
 
+        /*
+         * false heisst "Spotify hat abgewiesen" - das steht im Log und
+         * darf oben nicht wie "nichts gefunden" aussehen. Wer nichts
+         * findet, tippt anders; wer abgewiesen wird, sieht nach.
+         */
+        if ($daten === false) {
+            return false;
+        }
+
         return is_array($daten) ? array_values((array) ($daten['tracks']['items'] ?? [])) : [];
     }
 
@@ -353,7 +362,7 @@ final class Spotify
      *
      * @return list<array<string, mixed>>
      */
-    public function searchArtists(string $begriff, int $limit = 25): array
+    public function searchArtists(string $begriff, int $limit = 25): array|false
     {
         $begriff = trim($begriff);
 
@@ -366,6 +375,10 @@ final class Spotify
             'type'  => 'artist',
             'limit' => max(1, min(50, $limit)),
         ]));
+
+        if ($daten === false) {
+            return false;
+        }
 
         return is_array($daten) ? array_values((array) ($daten['artists']['items'] ?? [])) : [];
     }

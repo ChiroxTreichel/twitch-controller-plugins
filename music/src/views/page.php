@@ -27,6 +27,7 @@
  * @var array<string, int> $counts
  * @var string $query
  * @var list<array<string, mixed>> $results
+ * @var bool $searchOk
  * @var bool $canEdit
  * @var bool $canToggle
  * @var string $csrf
@@ -139,7 +140,9 @@ $reiterUrl = static function (string $art) use ($url, $query): string {
             </form>
 
             <?php if ($query !== '' && $results === []): ?>
-                <p class="hint" style="margin-top:10px;"><?= $e(translate('music.ban.no_results')) ?></p>
+                <p class="hint" style="margin-top:10px;">
+                    <?= $e(translate($searchOk ? 'music.ban.no_results' : 'music.ban.search_failed')) ?>
+                </p>
             <?php endif ?>
 
             <?php foreach ($results as $treffer): ?>
