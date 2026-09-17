@@ -53,10 +53,16 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
             <form method="post" action="<?= $e($target) ?>">
                 <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                 <input type="hidden" name="action" value="toggle">
-                <button class="btn btn-small<?= $config['enabled'] ? '' : ' btn-ghost' ?>" type="submit">
-                    <?= $e($config['enabled']
-                        ? translate('throne.alert.on')
-                        : translate('throne.alert.off')) ?>
+                <?php /*
+                    Derselbe Kippschalter wie bei Alerts - Twitch und
+                    auf der Alerts-Seite selbst. Vorher stand hier ein
+                    Knopf mit "An" - und der ist zweideutig: heisst das
+                    "es ist an" oder "hier einschalten"?
+                */ ?>
+                <button class="switch<?= $config['enabled'] ? ' is-on' : '' ?>" type="submit"
+                        title="<?= $e(translate('throne.alert.toggle_hint')) ?>"
+                        aria-label="<?= $e(translate('throne.alert.toggle_hint')) ?>">
+                    <span class="switch-track"><span class="switch-knob"></span></span>
                 </button>
             </form>
         <?php else: ?>

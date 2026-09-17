@@ -366,6 +366,7 @@ $hooks->on('alerts.tabs', static function (array $tabs) use ($app, $plugin): arr
                 'canTest'         => permission('SlTipGoals.Global.Edit'),
                 'defaultDuration' => Alerts::DEFAULT_DURATION,
                 'maxText'         => TipAlert::MAX_TEXT,
+                'maxTiers'        => TipAlert::MAX_TIERS,
                 'csrf'            => $app->auth->csrfToken(),
             ], null),
     ];
@@ -421,12 +422,25 @@ $router->post('/display/alerts/tips-streamlabs', static function (Request $reque
 
             $config = TipAlert::config($app);
 
+            /*
+             * Die Stufe zum eingetippten Betrag - dieselbe, die eine
+             * echte Spende dieser Hoehe ausloesen wuerde.
+             *
+             * Sonst zeigte der Test immer die unterste, und wer eine
+             * Stufe fuer 50 Euro einrichtet, koennte sie nie ansehen,
+             * ohne 50 Euro zu spenden.
+             */
+            $stufe = TipAlert::tierFor(
+                $config['tiers'],
+                TipAlert::amountFrom((string) ($werte['amount'] ?? ''))
+            );
+
             $ok = Alerts::send($app, [
                 'kind'     => 'tip',
-                'text'     => $config['text'],
-                'video'    => $config['video'],
-                'audio'    => $config['audio'],
-                'duration' => $config['duration'],
+                'text'     => $stufe['text'],
+                'video'    => $stufe['video'],
+                'audio'    => $stufe['audio'],
+                'duration' => $stufe['duration'],
                 'values'   => $werte,
             ]);
 
@@ -435,12 +449,30 @@ $router->post('/display/alerts/tips-streamlabs', static function (Request $reque
                 : $zurueck(null, translate('sl_tip.alert.test_failed'));
 
         case 'save':
-            TipAlert::save($app, [
-                'text'     => $request->input('text'),
-                'video'    => $request->input('video'),
-                'audio'    => $request->input('audio'),
-                'duration' => $request->input('duration'),
-            ]);
+            /*
+             * Die Stufen kommen als Feld an: tiers[0][min_amount],
+             * tiers[0][text] und so fort. $request->input() liefert
+             * nur Zeichenketten - ein verschachteltes Feld muss aus
+             * post kommen.
+             */
+            $stufen = $request->post['tiers'] ?? [];
+            $stufen = is_array($stufen) ? array_values($stufen) : [];
+
+            /*
+             * Hinzufuegen und Entfernen laufen ueber dasselbe
+             * Formular: so bleibt stehen, was daneben schon eingetippt
+             * ist. Gespeichert wird dabei mit - das ist der Preis
+             * dafuer, dass es ohne JavaScript funktioniert.
+             */
+            $weg = $request->input('remove_tier');
+
+            if ($weg !== '' && is_numeric($weg)) {
+                $stufen = TipAlert::withoutTier($stufen, (int) $weg);
+            } elseif ($request->input('add_tier') !== '') {
+                $stufen = TipAlert::withNewTier($stufen);
+            }
+
+            TipAlert::save($app, ['tiers' => $stufen]);
 
             return $zurueck(translate('sl_tip.alert.saved'));
     }
