@@ -460,13 +460,14 @@ $router->get('/display/music/settings', static function (Request $request) use (
         'publicUrl'   => $app->url('/music'),
         'panelUrl'    => $app->url('/music/panel'),
         'canEdit'     => $app->auth->can('Music.Global.Edit'),
+        'probes'      => [],
         'csrf'        => $app->auth->csrfToken(),
         'notice'      => $request->get('notice'),
         'error'       => $request->get('error'),
     ]));
 }, ['auth' => true, 'permission' => 'Music.Global.View']);
 
-$router->post('/display/music/settings', static function (Request $request) use ($app, $zurueckEinstellungen): Response {
+$router->post('/display/music/settings', static function (Request $request) use ($app, $plugin, $zurueckEinstellungen): Response {
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return $zurueckEinstellungen($app, null, translate('common.error.form_expired'));
     }
@@ -517,6 +518,69 @@ $router->post('/display/music/settings', static function (Request $request) use 
             Music::disconnect($app);
 
             return $zurueckEinstellungen($app, translate('music.disconnected'));
+
+        /*
+         * Die Suche ist der Teil, der an Spotify scheitern kann, ohne
+         * dass man es sieht: eine leere Trefferliste sieht aus wie
+         * "nichts gefunden". Hier steht, was Spotify wirklich sagt -
+         * zu mehreren Fassungen derselben Anfrage, damit man sieht,
+         * WORAN es liegt und nicht nur DASS es klemmt.
+         */
+        case 'check_search':
+            if (!Music::isConnected($app)) {
+                return $zurueckEinstellungen($app, null, translate('music.check.not_connected'));
+            }
+
+            $spotify = new Spotify($app);
+            $markt = $spotify->market();
+            $wort = 'digimon';
+
+            $fassungen = [
+                'wie jetzt'     => Spotify::searchPath('track', $wort, $markt),
+                'ohne Markt'    => '/search?' . http_build_query(['type' => 'track', 'q' => $wort]),
+                'mit limit=20'  => '/search?' . http_build_query(['type' => 'track', 'market' => $markt, 'limit' => 20, 'q' => $wort]),
+                'mit limit=25'  => '/search?' . http_build_query(['type' => 'track', 'market' => $markt, 'limit' => 25, 'q' => $wort]),
+                'Konto (/me)'   => '/me',
+            ];
+
+            $ergebnisse = [];
+
+            foreach ($fassungen as $name => $pfad) {
+                $antwort = $spotify->probe($pfad);
+
+                $ergebnisse[] = [
+                    'label'   => $name,
+                    'path'    => $pfad,
+                    'status'  => $antwort['status'],
+                    'message' => $antwort['message'],
+                ];
+            }
+
+            return Response::html($app->view->from($plugin->directory . '/views')->render('settings', [
+                'title'       => translate('music.settings'),
+                'active'      => 'display/music',
+                'enabled'     => Music::enabled($app),
+                'cooldown'    => Music::cooldown($app),
+                'rules'       => implode("\n", Music::rules($app)),
+                'width'       => Music::width($app),
+                'height'      => Music::height($app),
+                'offsetX'     => Music::offsetX($app),
+                'offsetY'     => Music::offsetY($app),
+                'theme'       => Music::theme($app),
+                'clientId'    => Music::clientId($app),
+                'hasSecret'   => $app->settings->hasSecret('client_secret', Music::scope()),
+                'hasCreds'    => Music::hasCredentials($app),
+                'connected'   => Music::isConnected($app),
+                'account'     => Music::accountName($app),
+                'redirectUri' => Music::redirectUri($app),
+                'publicUrl'   => $app->url('/music'),
+                'panelUrl'    => $app->url('/music/panel'),
+                'canEdit'     => $app->auth->can('Music.Global.Edit'),
+                'probes'      => $ergebnisse,
+                'csrf'        => $app->auth->csrfToken(),
+                'notice'      => '',
+                'error'       => '',
+            ]));
     }
 
     return $zurueckEinstellungen($app, null, translate('common.error.unknown_action'));

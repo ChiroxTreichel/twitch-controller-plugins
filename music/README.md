@@ -48,17 +48,25 @@ hängt es am Rechtesystem: der Besucher auf `/music` ist kein
 angemeldeter Benutzer, aber wenn es zu seiner Twitch-Kennung einen
 Benutzer hier drin gibt, gelten dessen Rechte.
 
-## Suche und Markt
+## Die Suche
 
-Spotify verlangt bei der Suche einen **Markt** — ohne ihn antwortet es
-mit `400 Invalid limit`, einer Meldung, die woandershin zeigt als der
-Fehler liegt. Das alte System hatte dafür ein festes `market=DE` im
-Code; hier kommt das Land aus dem **verbundenen Konto** (`/me` →
-`country`) und wird beim Verbinden mitgespeichert. Wer aus Österreich
-streamt, bekommt sonst Titel angeboten, die er nicht abspielen kann.
+Sie geht **ohne `limit`** an Spotify. Mit einem Wert — auch mit einem
+aus dem erlaubten Bereich 1–50 — antwortet Spotify mit
+`400 Invalid limit`; woran es das festmacht, sagt es nicht. Also gilt
+Spotifys Vorgabe (20 Treffer), und gekürzt wird hier. Zwanzig Treffer
+sieht sich ohnehin niemand ganz an.
 
-Steht dort nichts — etwa weil die Verbindung älter ist als diese
-Einstellung —, gilt `DE`. Beim nächsten *Neu anmelden* steht das
+Der **Markt** geht mit: er sorgt dafür, dass nur vorgeschlagen wird,
+was sich hier auch abspielen lässt. Das Land kommt aus dem
+**verbundenen Konto** (`/me` → `country`) und wird beim Verbinden
+mitgespeichert — wer aus Österreich streamt, bekommt sonst Titel
+angeboten, die er nicht abspielen kann. Steht dort nichts, gilt `DE`.
+
+Wenn die Suche einmal nichts findet, obwohl es etwas zu finden gäbe:
+*Einstellungen → Suche prüfen*. Der Knopf schickt dieselbe Anfrage in
+mehreren Fassungen an Spotify und zeigt, was jeweils zurückkommt —
+Status und Spotifys eigener Text. Eine leere Trefferliste sieht sonst
+aus wie „nichts gefunden", auch wenn Spotify abgewiesen hat. Beim nächsten *Neu anmelden* steht das
 richtige Land drin.
 
 ## Die Bannliste

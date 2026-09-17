@@ -367,6 +367,62 @@ final class Spotify
      *
      * @return list<array<string, mixed>>
      */
+    /**
+     * Die Adresse einer Suche.
+     *
+     * OHNE "limit". Spotify weist jede Suche mit 400 "Invalid limit"
+     * ab, auch bei einem Wert im erlaubten Bereich - was es dort nicht
+     * mag, sagt es nicht. Also nehmen wir seine Vorgabe (20) und
+     * kuerzen selbst; zwanzig Treffer sieht sich ohnehin niemand ganz
+     * an.
+     *
+     * Der Markt bleibt drin: er sorgt dafuer, dass nur vorgeschlagen
+     * wird, was sich hier auch abspielen laesst - und das alte System
+     * schickte ihn ebenfalls mit.
+     */
+    public static function searchPath(string $art, string $begriff, string $markt): string
+    {
+        return '/search?' . http_build_query([
+            'type'   => $art,
+            'market' => $markt,
+            'q'      => $begriff,
+        ]);
+    }
+
+    /** Der Markt dieser Installation - eine Stelle, nicht drei. */
+    public function market(): string
+    {
+        return Music::market($this->app);
+    }
+
+    /**
+     * Einen Aufruf machen und NUR sagen, was dabei herauskam.
+     *
+     * Fuer die Pruefung in den Einstellungen: dort soll stehen, was
+     * Spotify zu einer Anfrage sagt, ohne dass dafuer jemand ins Log
+     * sehen muss. Ohne Auswertung der Daten - es geht um den Status.
+     *
+     * @return array{status: int, message: string}
+     */
+    public function probe(string $pfad): array
+    {
+        $token = $this->accessToken();
+
+        if ($token === '') {
+            return ['status' => 0, 'message' => translate('music.check.no_token')];
+        }
+
+        $antwort = Http::request('GET', self::API . $pfad, [
+            'Authorization' => 'Bearer ' . $token,
+            'Content-Type'  => 'application/json',
+        ]);
+
+        return [
+            'status'  => $antwort->status,
+            'message' => trim((string) ($antwort->json['error']['message'] ?? '')),
+        ];
+    }
+
     public function searchTracks(string $begriff, int $limit = 25): array|false
     {
         $begriff = trim($begriff);
@@ -375,16 +431,7 @@ final class Spotify
             return [];
         }
 
-        /*
-         * Aufbau wie im alten System (type, market, limit, q). Der
-         * Markt muss mit: ohne ihn antwortet Spotify mit 400.
-         */
-        $daten = $this->get('/search?' . http_build_query([
-            'type'   => 'track',
-            'market' => Music::market($this->app),
-            'limit'  => max(1, min(50, $limit)),
-            'q'      => $begriff,
-        ]));
+        $daten = $this->get(self::searchPath('track', $begriff, $this->market()));
 
         /*
          * false heisst "Spotify hat abgewiesen" - das steht im Log und
@@ -395,7 +442,9 @@ final class Spotify
             return false;
         }
 
-        return is_array($daten) ? array_values((array) ($daten['tracks']['items'] ?? [])) : [];
+        return is_array($daten)
+            ? array_slice(array_values((array) ($daten['tracks']['items'] ?? [])), 0, max(1, $limit))
+            : [];
     }
 
     /**
@@ -411,18 +460,15 @@ final class Spotify
             return [];
         }
 
-        $daten = $this->get('/search?' . http_build_query([
-            'type'   => 'artist',
-            'market' => Music::market($this->app),
-            'limit'  => max(1, min(50, $limit)),
-            'q'      => $begriff,
-        ]));
+        $daten = $this->get(self::searchPath('artist', $begriff, $this->market()));
 
         if ($daten === false) {
             return false;
         }
 
-        return is_array($daten) ? array_values((array) ($daten['artists']['items'] ?? [])) : [];
+        return is_array($daten)
+            ? array_slice(array_values((array) ($daten['artists']['items'] ?? [])), 0, max(1, $limit))
+            : [];
     }
 
     /** @return array<string, mixed>|null */

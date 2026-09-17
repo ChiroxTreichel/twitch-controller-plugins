@@ -22,6 +22,7 @@
  * @var int $offsetX
  * @var int $offsetY
  * @var string $theme
+ * @var list<array{label: string, path: string, status: int, message: string}> $probes
  * @var string $clientId
  * @var bool $hasSecret
  * @var bool $hasCreds
@@ -144,6 +145,54 @@
 </div>
 
 <?php /* ---------------------------------------------------------- */ ?>
+<?php /*
+    Die Suche ist der Teil, der an Spotify scheitern kann, ohne dass man
+    es sieht: eine leere Trefferliste sieht aus wie "nichts gefunden".
+    Hier steht, was Spotify wirklich antwortet - zu mehreren Fassungen
+    derselben Anfrage, damit man sieht, WORAN es liegt.
+
+    Eigenes Formular und nicht im grossen: ein Formular in einem
+    Formular gibt es in HTML nicht.
+*/ ?>
+<div class="card">
+    <div class="card-head">
+        <h2><?= $e(translate('music.check')) ?></h2>
+    </div>
+
+    <p class="hint"><?= $e(translate('music.check_hint')) ?></p>
+
+    <?php if ($probes !== []): ?>
+        <table style="margin-bottom:14px;">
+            <thead>
+                <tr>
+                    <th><?= $e(translate('music.check.variant')) ?></th>
+                    <th><?= $e(translate('music.check.status')) ?></th>
+                    <th><?= $e(translate('music.check.answer')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+                <?php foreach ($probes as $probe): ?>
+                    <tr>
+                        <td><?= $e($probe['label']) ?></td>
+                        <td><?= (int) $probe['status'] ?></td>
+                        <td class="mono"><?= $e($probe['message']) ?></td>
+                    </tr>
+                <?php endforeach ?>
+            </tbody>
+        </table>
+    <?php endif ?>
+
+    <?php if ($canEdit): ?>
+        <form method="post" action="<?= $e($url('/display/music/settings')) ?>">
+            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+            <input type="hidden" name="action" value="check_search">
+            <button class="btn btn-ghost" type="submit" <?= $connected ? '' : 'disabled' ?>>
+                <?= $e(translate('music.check_go')) ?>
+            </button>
+        </form>
+    <?php endif ?>
+</div>
+
 <form method="post" action="<?= $e($url('/display/music/settings')) ?>">
     <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
     <input type="hidden" name="action" value="save">
