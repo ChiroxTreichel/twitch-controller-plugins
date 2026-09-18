@@ -3,6 +3,26 @@
 Ein Stream, der länger wird: jedes Abo, jede Handvoll Bits und jede
 Spende schiebt das Ende nach hinten — bis zu einer Obergrenze.
 
+## Hauptschalter
+
+Am Menüpunkt *Tools → Subathon* sitzt ein Schalter, wie bei Timer und
+Kanalpunkten. **Aus** heißt:
+
+* Abos, Bits und Spenden werden **nicht gutgeschrieben** — sie kommen
+  an, zählen aber nicht.
+* Der Platz im Overlay wird gar nicht erst angemeldet, die Anzeige ist
+  also weg (ohne die Browserquelle neu zu laden).
+* Der Takt meldet nichts mehr.
+
+Die Seite bleibt bedienbar: nachsehen und einstellen geht weiter, es
+zählt nur nichts.
+
+**Das ist nicht „Pausieren".** Die Uhr läuft weiter — wer anhalten
+will, nimmt den Knopf auf der Übersicht. Wer den Hauptschalter mitten
+im Lauf umlegt, verliert die Gutschriften dieser Zeit.
+
+## Die Reiter
+
 Übernommen aus dem Windows-Programm (`legacy/subathon-tool`), mit
 denselben sieben Reitern unter *Tools → Subathon*:
 

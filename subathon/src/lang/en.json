@@ -74,6 +74,9 @@
     "subathon.nav.item": "Subathon",
     "subathon.need_name": "That needs a name.",
     "subathon.no_limit": "none",
+    "subathon.off": "off",
+    "subathon.off_hint": "The subathon is off: nothing is credited and the overlay shows nothing. Everything can still be configured.",
+    "subathon.on": "on",
     "subathon.overlay.done": "Online since",
     "subathon.overlay.possible": "Maximum extra time",
     "subathon.overlay.todo": "still online",
@@ -81,6 +84,7 @@
     "subathon.paused": "Paused. The clock stands still.",
     "subathon.perm.book": "Book time by hand",
     "subathon.perm.edit": "Configure, pause and reset the subathon",
+    "subathon.perm.toggle": "Turn the subathon on and off",
     "subathon.perm.view": "See the subathon",
     "subathon.price.tier1": "Tier 1 (€)",
     "subathon.price.tier2": "Tier 2 (€)",
@@ -109,5 +113,8 @@
     "subathon.tab.overlay": "Overlay",
     "subathon.tab.overview": "Overview",
     "subathon.tab.settings": "Settings",
-    "subathon.to_page": "To the subathon page"
+    "subathon.to_page": "To the subathon page",
+    "subathon.toggle_hint": "Is the subathon currently crediting subs and donations?",
+    "subathon.turned_off": "The subathon is off. Subs and donations are no longer credited and the overlay stays empty. The clock keeps running – use „Pause“ to stop it.",
+    "subathon.turned_on": "The subathon is on."
 }

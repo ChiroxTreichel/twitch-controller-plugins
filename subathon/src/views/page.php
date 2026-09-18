@@ -33,6 +33,8 @@
  * @var list<array{start_hour: int, type: int}> $happy
  * @var list<array<string, mixed>> $history
  * @var array<string, string> $preview
+ * @var bool $enabled
+ * @var bool $canToggle
  * @var bool $canEdit
  * @var bool $canBook
  * @var bool $locked
@@ -64,8 +66,36 @@ $zeit = static fn (int $stempel): string => $stempel <= 0 ? '—' : date('d.m.Y 
  */
 $darfEinstellen = $canEdit && !$locked;
 ?>
-<h1><?= $e(translate('subathon.name')) ?></h1>
+<div class="head-row">
+    <h1><?= $e(translate('subathon.name')) ?></h1>
+
+    <?php /*
+        Der Hauptschalter. Aus heisst: nichts wird gutgeschrieben und
+        im Overlay steht nichts - die Uhr laeuft trotzdem weiter.
+        Zum Anhalten gibt es "Pausieren" auf der Uebersicht.
+    */ ?>
+    <?php if ($canToggle): ?>
+        <form method="post" action="<?= $e($url('/tools/subathon/toggle')) ?>">
+            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+            <input type="hidden" name="action" value="toggle">
+            <button class="switch<?= $enabled ? ' is-on' : '' ?>" type="submit"
+                    title="<?= $e(translate('subathon.toggle_hint')) ?>"
+                    aria-label="<?= $e(translate('subathon.toggle_hint')) ?>">
+                <span class="switch-track"><span class="switch-knob"></span></span>
+            </button>
+        </form>
+    <?php else: ?>
+        <span class="badge <?= $enabled ? 'badge-ok' : 'badge-off' ?>">
+            <?= $e($enabled ? translate('subathon.on') : translate('subathon.off')) ?>
+        </span>
+    <?php endif ?>
+</div>
+
 <p class="lead"><?= $e(translate('subathon.lead')) ?></p>
+
+<?php if (!$enabled): ?>
+    <div class="note note-warn"><?= $e(translate('subathon.off_hint')) ?></div>
+<?php endif ?>
 
 <?php if ($notice !== ''): ?>
     <div class="note note-ok"><?= $e($notice) ?></div>

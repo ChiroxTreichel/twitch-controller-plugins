@@ -52,6 +52,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
              * Obergrenze verstellen duerfen.
              */
             'Subathon.Global.Book' => translate('subathon.perm.book'),
+            'Subathon.Global.Toggle' => translate('subathon.perm.toggle'),
         ],
     ];
 
@@ -61,7 +62,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 // -------------------------------------------------------------------
 //  Das Menue
 // -------------------------------------------------------------------
-$hooks->on('admin.nav', static function (array $nav): array {
+$hooks->on('admin.nav', static function (array $nav) use ($app): array {
     // Eine eigene Gruppe: ein Subathon ist kein Anzeige-Plugin, er
     // ist das, worum der ganze Stream herum gebaut ist.
     $nav['tools']['label'] = translate('subathon.nav.group');
@@ -70,6 +71,13 @@ $hooks->on('admin.nav', static function (array $nav): array {
         'label'      => translate('subathon.nav.item'),
         'href'       => '/tools/subathon',
         'permission' => 'Subathon.Global.View',
+        'toggle'     => [
+            'on'         => Subathon::enabled($app),
+            'action'     => '/tools/subathon/toggle',
+            'value'      => 'toggle',
+            'permission' => 'Subathon.Global.Toggle',
+            'title'      => translate('subathon.toggle_hint'),
+        ],
     ];
 
     return $nav;
@@ -106,7 +114,17 @@ $hooks->on('admin.assets', static function (array $assets) use ($app): array {
 // -------------------------------------------------------------------
 //  Das Overlay
 // -------------------------------------------------------------------
-$hooks->on('overlay.slots', static function (array $slots): array {
+$hooks->on('overlay.slots', static function (array $slots) use ($app): array {
+    /*
+     * Aus heisst auch: kein Platz im Overlay. Ihn anzumelden und
+     * leer zu lassen waere ein Loch in der Anordnung, das niemand
+     * erklaeren kann - und die Browserquelle nimmt die Aenderung
+     * ohne Neuladen mit.
+     */
+    if (!Subathon::enabled($app)) {
+        return $slots;
+    }
+
     $slots[Subathon::SLUG] = [
         'label'  => translate('subathon.name'),
 
@@ -125,6 +143,10 @@ $hooks->on('overlay.slots', static function (array $slots): array {
 });
 
 $hooks->on('overlay.assets', static function (array $assets) use ($app): array {
+    if (!Subathon::enabled($app)) {
+        return $assets;
+    }
+
     $assets['css'][] = $app->asset('/plugin/subathon/assets/subathon.css');
 
     /*
@@ -238,6 +260,12 @@ $melden = static function (App $app) use ($zustand): void {
  * Tabelle, wenn dieser Haken laeuft.
  */
 $hooks->on('core.event.stored', static function (array $event) use ($app, $melden): void {
+    // Aus ist aus: die Ereignisse kommen an, werden aber nicht
+    // gutgeschrieben.
+    if (!Subathon::enabled($app)) {
+        return;
+    }
+
     $typ = (string) ($event['event_type'] ?? '');
     $wer = trim((string) ($event['actor_name'] ?? ''));
     $nutzlast = is_array($event['payload'] ?? null) ? $event['payload'] : [];
@@ -316,6 +344,10 @@ $hooks->on('core.event.stored', static function (array $event) use ($app, $melde
  * Sekundentakt, mit einem eigenen OAuth-Token in der config.json.
  */
 $hooks->on('tips.donation', static function (array $spende) use ($app, $melden): void {
+    if (!Subathon::enabled($app)) {
+        return;
+    }
+
     $betrag = (float) ($spende['amount'] ?? 0);
 
     if ($betrag <= 0) {
@@ -345,6 +377,10 @@ $hooks->on('tips.donation', static function (array $spende) use ($app, $melden):
  * sich der Zustand, ohne dass jemand etwas getan hat.
  */
 $hooks->on('cron.tick', static function () use ($app, $melden): void {
+    if (!Subathon::enabled($app)) {
+        return;
+    }
+
     $melden($app);
 });
 
@@ -410,6 +446,8 @@ $router->get('/tools/subathon', static function (Request $request) use ($app, $p
         'history'  => $reiter === 'history' ? Log::recent($app, 200) : [],
         'preview'  => Texts::values($app),
 
+        'enabled'  => Subathon::enabled($app),
+        'canToggle' => $app->auth->can('Subathon.Global.Toggle'),
         'canEdit'  => $app->auth->can('Subathon.Global.Edit'),
         'canBook'  => $app->auth->can('Subathon.Global.Book'),
         'locked'   => Subathon::isLocked(Subathon::statusOf($start, $ende, Subathon::isPaused($app), $jetzt)),
@@ -418,6 +456,34 @@ $router->get('/tools/subathon', static function (Request $request) use ($app, $p
         'notice'   => $request->get('notice'),
         'error'    => $request->get('error'),
     ]));
+}, ['auth' => true, 'permission' => 'Subathon.Global.View']);
+
+/*
+ * Der Hauptschalter.
+ *
+ * Bewusst NICHT durch isLocked() gesperrt: ihn umlegen zu koennen ist
+ * gerade dann wichtig, wenn etwas laeuft. Die Sperre gilt den Zahlen,
+ * nicht dem Schalter.
+ */
+$router->post('/tools/subathon/toggle', static function (Request $request) use ($app, $zurueck): Response {
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $zurueck($app, null, translate('common.error.form_expired'));
+    }
+
+    if ($request->input('action') !== 'toggle') {
+        return $zurueck($app, null, translate('common.error.unknown_action'));
+    }
+
+    if (!permission('Subathon.Global.Toggle')) {
+        return $zurueck($app, null, translate('common.error.no_permission'));
+    }
+
+    $an = !Subathon::enabled($app);
+    Subathon::setEnabled($app, $an);
+
+    return $zurueck($app, $an
+        ? translate('subathon.turned_on')
+        : translate('subathon.turned_off'));
 }, ['auth' => true, 'permission' => 'Subathon.Global.View']);
 
 $router->get('/tools/subathon/settings', static function (Request $request) use ($app, $plugin): Response {

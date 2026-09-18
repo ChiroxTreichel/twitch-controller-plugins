@@ -297,6 +297,28 @@ final class Subathon
     }
 
     /**
+     * Laeuft das Plugin ueberhaupt?
+     *
+     * Aus heisst: nichts wird gebucht, nichts gemeldet, nichts
+     * angezeigt. Die Seite bleibt bedienbar - man soll nachsehen und
+     * einstellen koennen, ohne dass dabei etwas zaehlt.
+     *
+     * Das ist NICHT "Pausieren". Pausieren haelt die Uhr an und holt
+     * die Zeit hinterher wieder auf; der Hauptschalter tut das nicht.
+     * Wer ihn mitten im Lauf umlegt, verliert die Abos und Spenden
+     * dieser Zeit - sie kommen an, werden aber nicht gutgeschrieben.
+     */
+    public static function enabled(App $app): bool
+    {
+        return $app->settings->bool('enabled', true, self::scope());
+    }
+
+    public static function setEnabled(App $app, bool $an): void
+    {
+        $app->settings->set('enabled', $an, self::scope());
+    }
+
+    /**
      * Sind die Einstellungen zu?
      *
      * Sobald er laeuft - und pausiert ist gelaufen. Wer die Startzeit

@@ -74,6 +74,9 @@
     "subathon.nav.item": "Subathon",
     "subathon.need_name": "Ohne Namen geht das nicht.",
     "subathon.no_limit": "keine",
+    "subathon.off": "aus",
+    "subathon.off_hint": "Der Subathon ist ausgeschaltet: nichts wird gutgeschrieben, und im Overlay steht nichts. Einstellen lässt sich trotzdem alles.",
+    "subathon.on": "an",
     "subathon.overlay.done": "Online seit",
     "subathon.overlay.possible": "Maximale Extrazeit",
     "subathon.overlay.todo": "noch Online",
@@ -81,6 +84,7 @@
     "subathon.paused": "Pausiert. Die Zeit steht.",
     "subathon.perm.book": "Zeit von Hand buchen",
     "subathon.perm.edit": "Subathon einstellen, pausieren und zurücksetzen",
+    "subathon.perm.toggle": "Subathon ein- und ausschalten",
     "subathon.perm.view": "Subathon sehen",
     "subathon.price.tier1": "Stufe 1 (€)",
     "subathon.price.tier2": "Stufe 2 (€)",
@@ -109,5 +113,8 @@
     "subathon.tab.overlay": "Overlay",
     "subathon.tab.overview": "Übersicht",
     "subathon.tab.settings": "Einstellungen",
-    "subathon.to_page": "Zur Subathon-Seite"
+    "subathon.to_page": "Zur Subathon-Seite",
+    "subathon.toggle_hint": "Bucht der Subathon gerade Abos und Spenden?",
+    "subathon.turned_off": "Der Subathon ist ausgeschaltet. Abos und Spenden werden nicht mehr gutgeschrieben, und das Overlay bleibt leer. Die Uhr läuft weiter – zum Anhalten gibt es „Pausieren“.",
+    "subathon.turned_on": "Der Subathon ist eingeschaltet."
 }
