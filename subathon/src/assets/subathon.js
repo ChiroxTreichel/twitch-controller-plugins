@@ -157,13 +157,29 @@
      * Die drei Zahlen - dieselbe Rechnung wie im Programm
      * (OverlayServer.ServeCalc), nur hier statt dort.
      *
-     * null heisst "nichts anzuzeigen": kein Start, oder er liegt noch
-     * vor uns. Dann blendet sich die Leiste aus.
+     * null heisst "nichts anzuzeigen": kein Start, er liegt noch vor
+     * uns, oder er ist vorbei. Dann blendet sich die Leiste aus.
      */
     function rechnen() {
         var n = jetzt();
 
         if (!zustand.start || n < zustand.start) {
+            return null;
+        }
+
+        /*
+         * Vorbei ist vorbei. Eine Leiste, die auf 0:00 stehen bleibt,
+         * steht sonst noch in der Quelle, wenn der Stream laengst
+         * weiter ist - und niemand denkt nach 48 Stunden daran, sie
+         * von Hand abzuschalten.
+         *
+         * Pausiert zaehlt nicht dazu: waehrend einer Pause waechst
+         * das Ende mit, nur weiss das hier niemand. Der Server
+         * schickt es ohne die laufende Pause, also stuende die Uhr
+         * sonst irgendwann auf 0 und die Anzeige waere weg, obwohl
+         * gar nichts vorbei ist.
+         */
+        if (!zustand.paused && zustand.end > 0 && n >= zustand.end) {
             return null;
         }
 
