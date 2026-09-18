@@ -2,11 +2,14 @@
  * Kanalpunkte
  *
  * Wenig eigenes: die Seite lebt von den Bausteinen des Kerns (.card,
- * .case, .row, .field). Hier steht nur, was es dort noch nicht gibt.
+ * .row, .field, .confirm). Hier steht nur, was es dort noch nicht
+ * gibt - das Kachelgitter, der breite Dialog und die farbige Trennung
+ * von An- und Aus-Bedingungen.
  */
 
-/* Der Ladeknopf sitzt rechts neben seiner Erklaerung. */
-.cp-load {
+/* --- Kopfleiste ---------------------------------------------------- */
+
+.cp-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -14,37 +17,140 @@
     flex-wrap: wrap;
 }
 
-.cp-load p {
+.cp-bar-text p {
     margin: 4px 0 0;
 }
 
+.cp-bar-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- Das Gitter ---------------------------------------------------- */
+
 /*
- * Die Kosten im Kopf der Klappzeile. Das Punktesymbol steht davor,
- * damit die Zahl nicht wie ein Preis in Euro aussieht.
+ * So viele Kacheln je Zeile, wie hineinpassen. Kein festes Raster:
+ * bei 45 Zeichen Name braucht eine Kachel ihre Breite, und auf einem
+ * schmalen Fenster steht sie eben allein.
  */
-.cp-cost {
-    margin-left: 8px;
-    opacity: 0.75;
+.cp-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-top: 16px;
+}
+
+.cp-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+
+    /*
+     * NICHT overflow: hidden - der Dialog haengt als absolut
+     * gesetzter Kasten an der Kachel und wuerde sonst abgeschnitten.
+     */
+}
+
+/* Der Streifen traegt die Farbe der Belohnung, wie bei Twitch. */
+.cp-tile-color {
+    height: 4px;
+    margin: -14px -14px 4px;
+    border-radius: var(--radius) var(--radius) 0 0;
+    background: var(--cp-tile, var(--accent));
+}
+
+/* Ausgeschaltet: die ganze Kachel tritt zurueck, nicht nur ein Wort. */
+.cp-tile.is-off {
+    opacity: 0.62;
+}
+
+.cp-tile-name {
+    margin: 0;
+    font-size: 1rem;
+    line-height: 1.35;
+
+    /* Lange Namen ohne Leerzeichen sollen die Kachel nicht sprengen. */
+    overflow-wrap: anywhere;
+}
+
+.cp-tile-cost {
+    margin: 0;
+    color: var(--muted);
     font-variant-numeric: tabular-nums;
 }
 
-.cp-cost::before {
+/* Das Punktesymbol davor - damit die Zahl nicht wie Euro aussieht. */
+.cp-tile-cost::before {
     content: "\25CE\00A0";
 }
 
-.cp-off {
-    opacity: 0.6;
+.cp-tile-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin: 0;
 }
 
-.cp-sub {
-    margin: 18px 0 4px;
-    font-size: 1rem;
+.cp-tile-badges:empty {
+    display: none;
 }
 
-.cp-actions {
-    margin-top: 14px;
+.cp-tile-why {
+    margin: 0;
+
+    /* Schiebt die Knopfreihe ans untere Ende, damit die Kacheln einer
+       Zeile unten buendig sind. */
+    flex: 1 1 auto;
+}
+
+.cp-tile-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+}
+
+/* --- Der Dialog ---------------------------------------------------- */
+
+/*
+ * Gebaut auf .confirm aus dem Kern: damit gelten Escape, Klick
+ * daneben und "immer nur einer offen" ohne eine Zeile eigenes
+ * JavaScript. Nur breiter und hoeher als eine Rueckfrage.
+ */
+.cp-dialog > .confirm-panel {
+    width: min(620px, 92vw);
+    max-width: none;
+
+    /* Der Dialog traegt das ganze Formular von Twitch. Ohne die
+       Grenze waere er auf einem kleinen Bildschirm laenger als das
+       Fenster, und der Speichern-Knopf unerreichbar. */
+    max-height: 72vh;
+    overflow-y: auto;
+}
+
+.cp-dialog-head {
+    margin: 0 0 12px;
+    font-size: 1.05rem;
+    overflow-wrap: anywhere;
+}
+
+.cp-dialog-actions {
+    margin-top: 16px;
     align-items: center;
     gap: 10px;
+
+    /* Beim Scrollen im Dialog sollen die Knoepfe stehen bleiben. */
+    position: sticky;
+    bottom: -14px;
+    padding: 10px 0;
+    background: var(--panel);
 }
 
 /*
@@ -55,4 +161,94 @@
     min-width: 64px;
     padding: 4px;
     height: 38px;
+}
+
+/* --- An und Aus ---------------------------------------------------- */
+
+/*
+ * Die beiden Bloecke muessen sich auf den ersten Blick unterscheiden.
+ * Wer im Dialog scrollt, soll nicht erst die Ueberschrift lesen
+ * muessen, um zu wissen, ob er gerade etwas einschaltet oder
+ * ausschliesst.
+ *
+ * Farbe allein genuegt dafuer nicht - rotgruenblind ist etwa jeder
+ * zwoelfte Mann. Darum zusaetzlich das Zeichen vor der Ueberschrift.
+ */
+.cp-cond {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    border-left-width: 4px;
+}
+
+.cp-cond-on {
+    border-left-color: var(--ok);
+    background: color-mix(in srgb, var(--ok) 7%, transparent);
+}
+
+.cp-cond-off {
+    border-left-color: var(--error);
+    background: color-mix(in srgb, var(--error) 7%, transparent);
+}
+
+.cp-cond-head {
+    margin: 0 0 2px;
+    font-size: 0.95rem;
+}
+
+.cp-cond-head::before {
+    display: inline-block;
+    width: 1.3em;
+    font-weight: 700;
+}
+
+.cp-cond-on .cp-cond-head {
+    color: var(--ok);
+}
+
+.cp-cond-on .cp-cond-head::before {
+    content: "+";
+}
+
+.cp-cond-off .cp-cond-head {
+    color: var(--error);
+}
+
+.cp-cond-off .cp-cond-head::before {
+    /* Ein echtes Minus, kein Bindestrich. */
+    content: "\2212";
+}
+
+/* --- Die Zeilen der Aus-Listen -------------------------------------- */
+
+.cp-list {
+    margin-top: 10px;
+}
+
+.cp-entry {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 6px;
+}
+
+.cp-entry .input {
+    flex: 1 1 auto;
+}
+
+/* Das Kreuz soll nicht so schwer wiegen wie ein Knopf mit Wort. */
+.cp-entry-off {
+    flex: 0 0 auto;
+    padding: 0 10px;
+    line-height: 1.6;
+    color: var(--muted);
+}
+
+.cp-entry-off:hover {
+    color: var(--error);
+}
+
+.cp-add {
+    margin-top: 8px;
 }

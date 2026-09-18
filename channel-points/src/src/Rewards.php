@@ -239,12 +239,20 @@ final class Rewards
             // schalten - siehe Klassenkommentar.
             'manageable'    => !empty($eingabe['manageable']),
 
-            // Die Bedingungen. Alle vier sind Listen, mit Komma
-            // getrennt.
+            /*
+             * Die Bedingungen.
+             *
+             * Die beiden An-Felder sind je EIN Feld mit Komma - man
+             * traegt dort in der Regel eine Sache ein.
+             *
+             * Die beiden Aus-Felder sind Listen: Ausnahmen sammeln
+             * sich, und eine Liste aus einzelnen Feldern laesst auch
+             * Namen zu, in denen selbst ein Komma steht.
+             */
             'title_on'      => self::cut(trim((string) ($eingabe['title_on'] ?? '')), 200),
             'game_on'       => self::cut(trim((string) ($eingabe['game_on'] ?? '')), 200),
-            'title_off'     => self::cut(trim((string) ($eingabe['title_off'] ?? '')), 200),
-            'game_off'      => self::cut(trim((string) ($eingabe['game_off'] ?? '')), 200),
+            'title_off'     => self::entries($eingabe['title_off'] ?? null),
+            'game_off'      => self::entries($eingabe['game_off'] ?? null),
         ];
     }
 
@@ -315,6 +323,47 @@ final class Rewards
     public static function isRemote(string $id): bool
     {
         return $id !== '' && !str_starts_with($id, 'local:');
+    }
+
+    /** Mehr Ausnahmen als das traegt niemand mehr von Hand ein. */
+    public const MAX_ENTRIES = 30;
+
+    /**
+     * Eine Liste aus dem Formular - oder aus einer alten Fassung.
+     *
+     * Aus dem Formular kommt ein Feld je Zeile, also ein Array. Aus
+     * einer frueheren Fassung dieses Plugins kommt eine Zeichenkette
+     * mit Kommas; die wird einmalig zerlegt, damit beim Aktualisieren
+     * niemand seine Ausnahmen neu tippt.
+     *
+     * Leere Zeilen fallen weg: die Oberflaeche zeigt immer eine
+     * leere Zeile zum Tippen an, und die soll sich nicht ansammeln.
+     *
+     * @return list<string>
+     */
+    public static function entries(mixed $roh): array
+    {
+        $zeilen = is_array($roh)
+            ? $roh
+            : explode(',', (string) $roh);
+
+        $liste = [];
+
+        foreach ($zeilen as $zeile) {
+            $zeile = trim((string) $zeile);
+
+            if ($zeile === '') {
+                continue;
+            }
+
+            $liste[] = self::cut($zeile, 200);
+
+            if (count($liste) >= self::MAX_ENTRIES) {
+                break;
+            }
+        }
+
+        return $liste;
     }
 
     /** Kuerzen - mit Rueckfall, falls mbstring fehlt. */
@@ -433,8 +482,8 @@ final class Rewards
             // Was Twitch nicht kennt, bleibt unseres.
             'title_on'      => (string) ($bisher['title_on'] ?? ''),
             'game_on'       => (string) ($bisher['game_on'] ?? ''),
-            'title_off'     => (string) ($bisher['title_off'] ?? ''),
-            'game_off'      => (string) ($bisher['game_off'] ?? ''),
+            'title_off'     => $bisher['title_off'] ?? [],
+            'game_off'      => $bisher['game_off'] ?? [],
         ]);
     }
 

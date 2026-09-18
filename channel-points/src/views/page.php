@@ -3,17 +3,20 @@
 declare(strict_types=1);
 
 /**
- * Die Kanalpunkt-Seite: eine Belohnung je Klappfeld, unten eine zum
- * Anlegen.
+ * Die Kanalpunkt-Seite: ein Kachelgitter, und jede Kachel oeffnet
+ * ihren Dialog.
  *
- * Der Aufbau folgt dem Dialog von Twitch - Name, Beschreibung,
- * Texteingabe, Kosten, Farbe, Warteschlange, Abklingzeit und
- * Begrenzungen. Was dort das Symbol ist, fehlt hier: die
+ * Die Kachel zeigt, was man beim Ueberfliegen braucht - Farbe, Name,
+ * Kosten, und ob sie gerade an ist. Alles andere steckt im Dialog:
+ * der Aufbau von Twitch (Name, Beschreibung, Texteingabe, Kosten,
+ * Farbe, Warteschlange, Abklingzeit und Begrenzungen) und darunter
+ * die Bedingungen. Was dort das Symbol ist, fehlt hier - die
  * Schnittstelle kennt kein Feld dafuer.
  *
- * Darunter, und das ist der eigentliche Grund fuer dieses Plugin, die
- * Bedingungen: bei welchem Titel und welcher Kategorie die Belohnung
- * an sein soll und bei welchen aus.
+ * Der Dialog ist ein <details> mit der Klasse "confirm": damit erbt
+ * er, was der Kern fuer Rueckfragen schon kann - Escape, Klick
+ * daneben, immer nur einer offen. Und ohne JavaScript klappt er
+ * trotzdem auf und zu.
  *
  * @var callable $e
  * @var callable $url
@@ -42,17 +45,79 @@ $einheiten = [
 ];
 
 /**
- * Die Felder einer Belohnung.
+ * Eine Zeile einer Aus-Liste.
  *
- * Einmal fuer jede vorhandene und einmal fuer die neue - derselbe
- * Block, damit beim Anlegen nichts fehlt, was beim Aendern da ist.
+ * Auch die Vorlage im <template> geht hier durch - so gibt es die
+ * Zeile nur einmal, und eine per JavaScript angehaengte sieht aus wie
+ * eine vom Server gelieferte.
+ */
+$ausZeile = static function (string $feld, string $wert, bool $offen) use ($e): void {
+    ?>
+    <div class="cp-entry" data-off-row>
+        <input class="input" type="text" name="<?= $e($feld) ?>[]" maxlength="200"
+               value="<?= $e($wert) ?>" <?= $offen ? '' : 'disabled' ?>>
+        <button class="btn btn-ghost btn-small cp-entry-off" type="button" data-remove-off
+                title="<?= $e(translate('channel_points.remove_entry')) ?>"
+                aria-label="<?= $e(translate('channel_points.remove_entry')) ?>">&times;</button>
+    </div>
+    <?php
+};
+
+/**
+ * Eine ganze Aus-Liste samt Vorlage und "+"-Knopf.
+ *
+ * Am Ende steht immer eine leere Zeile. Das ist der Rueckfall fuer
+ * den Fall, dass das Skript fehlt: dann laesst sich wenigstens eine
+ * weitere Ausnahme je Speichern eintragen. Mit Skript haengt "+" so
+ * viele an, wie man mag.
+ */
+$ausListe = static function (
+    string $feld,
+    array $werte,
+    string $beschriftung,
+    string $knopf,
+    bool $offen
+) use ($e, $ausZeile): void {
+    ?>
+    <div class="field cp-list" data-off-list>
+        <span class="hint"><?= $e($beschriftung) ?></span>
+
+        <?php foreach ($werte as $wert): ?>
+            <?php $ausZeile($feld, (string) $wert, $offen) ?>
+        <?php endforeach ?>
+
+        <?php $ausZeile($feld, '', $offen) ?>
+
+        <?php /*
+            Die neue Zeile kommt aus dieser Vorlage und wird nicht im
+            Skript zusammengesetzt: sonst gaebe es die Zeile zweimal,
+            hier und dort, und beide liefen mit der Zeit auseinander.
+        */ ?>
+        <template data-off-template><?php $ausZeile($feld, '', $offen) ?></template>
+
+        <?php if ($offen): ?>
+            <button class="btn btn-ghost btn-small cp-add" type="button" data-add-off>
+                + <?= $e($knopf) ?>
+            </button>
+        <?php endif ?>
+    </div>
+    <?php
+};
+
+/**
+ * Der ganze Inhalt eines Dialogs: die Felder von Twitch, dann die
+ * Bedingungen.
  *
  * $offen sagt, ob die Twitch-Felder bedienbar sind. Bei einer fremden
  * Belohnung sind sie es nicht: Twitch nimmt die Aenderung ohnehin
  * nicht an, und ein Feld, das sich tippen laesst und nichts bewirkt,
  * ist schlimmer als ein graues.
  */
-$felder = static function (array $b, bool $offen) use ($e, $einheiten, $limits): void {
+$formular = static function (
+    array $b,
+    bool $offen,
+    bool $darfAendern
+) use ($e, $einheiten, $limits, $ausListe): void {
     ?>
     <div class="row">
         <label class="field grow">
@@ -132,7 +197,9 @@ $felder = static function (array $b, bool $offen) use ($e, $einheiten, $limits):
                 <?php endforeach ?>
             </select>
         </label>
+    </div>
 
+    <div class="row">
         <label class="field">
             <span class="hint"><?= $e(translate('channel_points.field.per_stream')) ?></span>
             <input class="input" type="number" name="per_stream" min="0" step="1"
@@ -147,51 +214,55 @@ $felder = static function (array $b, bool $offen) use ($e, $einheiten, $limits):
     </div>
 
     <p class="hint"><?= $e(translate('channel_points.limits_hint')) ?></p>
-    <?php
-};
 
-/**
- * Die vier Bedingungsfelder.
- *
- * Die bleiben auch bei einer fremden Belohnung bedienbar - sie
- * gehoeren uns, nicht Twitch. Nur schalten laesst sich damit dann
- * nichts, und genau das steht darueber.
- */
-$bedingungen = static function (array $b, bool $darfAendern) use ($e): void {
-    ?>
-    <h3 class="cp-sub"><?= $e(translate('channel_points.conditions')) ?></h3>
-    <p class="hint"><?= $e(translate('channel_points.conditions_hint')) ?></p>
+    <?php /*
+        Ab hier gehoert nichts mehr Twitch. Die beiden Bloecke sind
+        deshalb farbig abgesetzt - gruen schaltet ein, rot schaltet
+        aus. Wer im Dialog scrollt, soll nicht erst die Ueberschrift
+        lesen muessen, um zu wissen, wo er gerade ist.
+    */ ?>
+    <div class="cp-cond cp-cond-on">
+        <h4 class="cp-cond-head"><?= $e(translate('channel_points.cond.on')) ?></h4>
+        <p class="hint"><?= $e(translate('channel_points.cond.on_hint')) ?></p>
 
-    <div class="row">
-        <label class="field grow">
-            <span class="hint"><?= $e(translate('channel_points.field.title_on')) ?></span>
-            <input class="input" type="text" name="title_on" maxlength="200"
-                   placeholder="<?= $e(translate('channel_points.placeholder.title')) ?>"
-                   value="<?= $e((string) $b['title_on']) ?>" <?= $darfAendern ? '' : 'disabled' ?>>
-        </label>
+        <div class="row">
+            <label class="field grow">
+                <span class="hint"><?= $e(translate('channel_points.field.title_on')) ?></span>
+                <input class="input" type="text" name="title_on" maxlength="200"
+                       placeholder="<?= $e(translate('channel_points.placeholder.title')) ?>"
+                       value="<?= $e((string) $b['title_on']) ?>" <?= $darfAendern ? '' : 'disabled' ?>>
+            </label>
 
-        <label class="field grow">
-            <span class="hint"><?= $e(translate('channel_points.field.game_on')) ?></span>
-            <input class="input" type="text" name="game_on" maxlength="200"
-                   placeholder="<?= $e(translate('channel_points.placeholder.game')) ?>"
-                   value="<?= $e((string) $b['game_on']) ?>" <?= $darfAendern ? '' : 'disabled' ?>>
-        </label>
+            <label class="field grow">
+                <span class="hint"><?= $e(translate('channel_points.field.game_on')) ?></span>
+                <input class="input" type="text" name="game_on" maxlength="200"
+                       placeholder="<?= $e(translate('channel_points.placeholder.game')) ?>"
+                       value="<?= $e((string) $b['game_on']) ?>" <?= $darfAendern ? '' : 'disabled' ?>>
+            </label>
+        </div>
     </div>
 
-    <div class="row">
-        <label class="field grow">
-            <span class="hint"><?= $e(translate('channel_points.field.title_off')) ?></span>
-            <input class="input" type="text" name="title_off" maxlength="200"
-                   placeholder="<?= $e(translate('channel_points.placeholder.title')) ?>"
-                   value="<?= $e((string) $b['title_off']) ?>" <?= $darfAendern ? '' : 'disabled' ?>>
-        </label>
+    <div class="cp-cond cp-cond-off">
+        <h4 class="cp-cond-head"><?= $e(translate('channel_points.cond.off')) ?></h4>
+        <p class="hint"><?= $e(translate('channel_points.cond.off_hint')) ?></p>
 
-        <label class="field grow">
-            <span class="hint"><?= $e(translate('channel_points.field.game_off')) ?></span>
-            <input class="input" type="text" name="game_off" maxlength="200"
-                   placeholder="<?= $e(translate('channel_points.placeholder.game')) ?>"
-                   value="<?= $e((string) $b['game_off']) ?>" <?= $darfAendern ? '' : 'disabled' ?>>
-        </label>
+        <?php
+        $ausListe(
+            'title_off',
+            is_array($b['title_off']) ? $b['title_off'] : [],
+            translate('channel_points.field.title_off'),
+            translate('channel_points.add_title_off'),
+            $darfAendern
+        );
+
+        $ausListe(
+            'game_off',
+            is_array($b['game_off']) ? $b['game_off'] : [],
+            translate('channel_points.field.game_off'),
+            translate('channel_points.add_game_off'),
+            $darfAendern
+        );
+        ?>
     </div>
     <?php
 };
@@ -252,37 +323,95 @@ $bedingungen = static function (array $b, bool $darfAendern) use ($e): void {
 <?php endif ?>
 
 <?php if ($darfAendern): ?>
-    <div class="card cp-load">
-        <div>
+    <div class="card cp-bar">
+        <div class="cp-bar-text">
             <strong><?= $e(translate('channel_points.import')) ?></strong>
             <p class="hint"><?= $e(translate('channel_points.import_hint')) ?></p>
         </div>
 
-        <form method="post" action="<?= $e($ziel) ?>">
-            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-            <input type="hidden" name="action" value="import">
-            <button class="btn" type="submit"><?= $e(translate('channel_points.import_button')) ?></button>
-        </form>
+        <div class="cp-bar-buttons">
+            <form method="post" action="<?= $e($ziel) ?>">
+                <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                <input type="hidden" name="action" value="import">
+                <button class="btn" type="submit"><?= $e(translate('channel_points.import_button')) ?></button>
+            </form>
+
+            <?php /*
+                Anlegen im selben Dialog wie Aendern - derselbe Block
+                Felder, damit beim Anlegen nichts fehlt, was beim
+                Aendern da ist.
+            */ ?>
+            <details class="confirm cp-dialog confirm-right">
+                <summary class="btn">+ <?= $e(translate('channel_points.new_button')) ?></summary>
+
+                <div class="confirm-panel">
+                    <h3 class="cp-dialog-head"><?= $e(translate('channel_points.new')) ?></h3>
+                    <p class="hint"><?= $e(translate('channel_points.new_hint')) ?></p>
+
+                    <form method="post" action="<?= $e($ziel) ?>">
+                        <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                        <input type="hidden" name="action" value="create">
+                        <input type="hidden" name="id" value="">
+
+                        <?php $formular([
+                            'title'         => '',
+                            'prompt'        => '',
+                            'cost'          => 100,
+                            'user_input'    => false,
+                            'color'         => '',
+                            'skip_queue'    => false,
+                            'is_enabled'    => true,
+                            'limits'        => false,
+                            'cooldown'      => 0,
+                            'cooldown_unit' => 'minutes',
+                            'per_stream'    => 0,
+                            'per_user'      => 0,
+                            'title_on'      => '',
+                            'game_on'       => '',
+                            'title_off'     => [],
+                            'game_off'      => [],
+                        ], true, true) ?>
+
+                        <div class="row cp-dialog-actions">
+                            <button class="btn" type="submit">
+                                <?= $e(translate('channel_points.create_button')) ?>
+                            </button>
+                            <button class="btn btn-ghost" type="button" data-confirm-cancel>
+                                <?= $e(translate('common.cancel')) ?>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </details>
+        </div>
     </div>
 <?php endif ?>
 
-<div class="card">
-    <?php if ($rewards === []): ?>
+<?php if ($rewards === []): ?>
+    <div class="card">
         <p class="hint"><?= $e(translate('channel_points.empty')) ?></p>
-    <?php endif ?>
+    </div>
+<?php endif ?>
 
+<div class="cp-grid">
     <?php foreach ($rewards as $zeile): ?>
         <?php
         $b = $zeile['reward'];
         $id = (string) $b['id'];
         $eigen = !empty($b['manageable']);
         $nurHier = !$zeile['remote'];
+        $farbe = $b['color'] === '' ? '#9146FF' : (string) $b['color'];
         ?>
-        <details class="case">
-            <summary>
-                <?= $e((string) $b['title']) ?>
-                <span class="cp-cost"><?= $e(number_format((int) $b['cost'], 0, ',', '.')) ?></span>
+        <article class="cp-tile<?= empty($b['is_enabled']) ? ' is-off' : '' ?>"
+                 style="--cp-tile: <?= $e($farbe) ?>;">
+            <?php /* Der Streifen traegt die Farbe der Belohnung - wie bei Twitch. */ ?>
+            <div class="cp-tile-color" aria-hidden="true"></div>
 
+            <h3 class="cp-tile-name"><?= $e((string) $b['title']) ?></h3>
+
+            <p class="cp-tile-cost"><?= $e(number_format((int) $b['cost'], 0, ',', '.')) ?></p>
+
+            <p class="cp-tile-badges">
                 <?php if ($nurHier): ?>
                     <span class="badge badge-warn"><?= $e(translate('channel_points.badge.local')) ?></span>
                 <?php elseif (!$eigen): ?>
@@ -294,112 +423,88 @@ $bedingungen = static function (array $b, bool $darfAendern) use ($e): void {
                 <?php endif ?>
 
                 <?php if (empty($b['is_enabled'])): ?>
-                    <span class="cp-off">&middot; <?= $e(translate('channel_points.inactive')) ?></span>
+                    <span class="badge badge-off"><?= $e(translate('channel_points.inactive')) ?></span>
                 <?php endif ?>
-            </summary>
+            </p>
 
-            <div class="case-body">
-                <p class="hint"><?= $e($zeile['why']) ?></p>
+            <p class="hint cp-tile-why"><?= $e($zeile['why']) ?></p>
 
-                <?php if (!$eigen && !$nurHier): ?>
-                    <div class="note note-warn"><?= $e(translate('channel_points.foreign_hint')) ?></div>
-                <?php endif ?>
+            <?php if ($darfAendern): ?>
+                <div class="cp-tile-actions">
+                    <details class="confirm cp-dialog">
+                        <summary class="btn btn-small"><?= $e(translate('channel_points.edit_button')) ?></summary>
 
-                <?php if ($nurHier): ?>
-                    <div class="note note-warn"><?= $e(translate('channel_points.local_hint')) ?></div>
-                <?php endif ?>
+                        <div class="confirm-panel">
+                            <h3 class="cp-dialog-head"><?= $e((string) $b['title']) ?></h3>
 
-                <form method="post" action="<?= $e($ziel) ?>">
-                    <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-                    <input type="hidden" name="action" value="save">
-                    <input type="hidden" name="id" value="<?= $e($id) ?>">
+                            <?php if (!$eigen && !$nurHier): ?>
+                                <div class="note note-warn"><?= $e(translate('channel_points.foreign_hint')) ?></div>
+                            <?php endif ?>
 
-                    <?php $felder($b, $darfAendern && $eigen) ?>
-                    <?php $bedingungen($b, $darfAendern) ?>
+                            <?php if ($nurHier): ?>
+                                <div class="note note-warn"><?= $e(translate('channel_points.local_hint')) ?></div>
+                            <?php endif ?>
 
-                    <?php if ($darfAendern): ?>
-                        <div class="row cp-actions">
-                            <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
-                        </div>
-                    <?php endif ?>
-                </form>
-
-                <?php if ($darfAendern): ?>
-                    <div class="row cp-actions">
-                        <?php if ($nurHier): ?>
                             <form method="post" action="<?= $e($ziel) ?>">
                                 <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-                                <input type="hidden" name="action" value="push">
+                                <input type="hidden" name="action" value="save">
                                 <input type="hidden" name="id" value="<?= $e($id) ?>">
-                                <button class="btn" type="submit">
-                                    <?= $e(translate('channel_points.push_button')) ?>
-                                </button>
-                            </form>
-                        <?php elseif (!$eigen): ?>
-                            <?= $view->render('_confirm', [
-                                'label'    => translate('channel_points.adopt_button'),
-                                'question' => translate('channel_points.adopt_question'),
-                                'note'     => translate('channel_points.adopt_note'),
-                                'confirm'  => translate('channel_points.adopt_confirm'),
-                                'action'   => $ziel,
-                                'fields'   => ['csrf' => $csrf, 'action' => 'adopt', 'id' => $id],
-                                'danger'   => true,
-                            ], null) ?>
-                        <?php endif ?>
 
+                                <?php $formular($b, $eigen, true) ?>
+
+                                <div class="row cp-dialog-actions">
+                                    <button class="btn" type="submit">
+                                        <?= $e(translate('common.save')) ?>
+                                    </button>
+                                    <button class="btn btn-ghost" type="button" data-confirm-cancel>
+                                        <?= $e(translate('common.cancel')) ?>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </details>
+
+                    <?php if ($nurHier): ?>
+                        <form method="post" action="<?= $e($ziel) ?>">
+                            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                            <input type="hidden" name="action" value="push">
+                            <input type="hidden" name="id" value="<?= $e($id) ?>">
+                            <button class="btn btn-small" type="submit">
+                                <?= $e(translate('channel_points.push_button')) ?>
+                            </button>
+                        </form>
+                    <?php elseif (!$eigen): ?>
+                        <?php /*
+                            Kein Loeschen durch uns: Twitch laesst das
+                            bei einer fremden Belohnung ohnehin nicht
+                            zu. Der Knopf sagt nur, dass es von Hand
+                            schon geschehen ist - danach legen wir sie
+                            neu an, diesmal als eigene.
+                        */ ?>
                         <?= $view->render('_confirm', [
-                            'label'    => translate('common.remove'),
-                            'question' => $eigen && !$nurHier
-                                ? translate('channel_points.delete_question')
-                                : translate('channel_points.remove_question'),
-                            'confirm'  => translate('channel_points.delete_confirm'),
+                            'label'    => translate('channel_points.recreate_button'),
+                            'question' => translate('channel_points.recreate_question'),
+                            'note'     => translate('channel_points.recreate_note'),
+                            'confirm'  => translate('channel_points.recreate_confirm'),
                             'action'   => $ziel,
-                            'fields'   => ['csrf' => $csrf, 'action' => 'delete', 'id' => $id],
-                            'danger'   => true,
-                            'right'    => true,
+                            'fields'   => ['csrf' => $csrf, 'action' => 'recreate', 'id' => $id],
+                            'danger'   => false,
                         ], null) ?>
-                    </div>
-                <?php endif ?>
-            </div>
-        </details>
+                    <?php endif ?>
+
+                    <?= $view->render('_confirm', [
+                        'label'    => translate('common.remove'),
+                        'question' => $eigen && !$nurHier
+                            ? translate('channel_points.delete_question')
+                            : translate('channel_points.remove_question'),
+                        'confirm'  => translate('channel_points.delete_confirm'),
+                        'action'   => $ziel,
+                        'fields'   => ['csrf' => $csrf, 'action' => 'delete', 'id' => $id],
+                        'danger'   => true,
+                        'right'    => true,
+                    ], null) ?>
+                </div>
+            <?php endif ?>
+        </article>
     <?php endforeach ?>
 </div>
-
-<?php if ($darfAendern): ?>
-    <div class="card">
-        <h2><?= $e(translate('channel_points.new')) ?></h2>
-        <p class="hint"><?= $e(translate('channel_points.new_hint')) ?></p>
-
-        <form method="post" action="<?= $e($ziel) ?>">
-            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-            <input type="hidden" name="action" value="create">
-            <input type="hidden" name="id" value="">
-
-            <?php $felder([
-                'title'         => '',
-                'prompt'        => '',
-                'cost'          => 100,
-                'user_input'    => false,
-                'color'         => '',
-                'skip_queue'    => false,
-                'is_enabled'    => true,
-                'limits'        => false,
-                'cooldown'      => 0,
-                'cooldown_unit' => 'minutes',
-                'per_stream'    => 0,
-                'per_user'      => 0,
-            ], true) ?>
-
-            <?php $bedingungen([
-                'title_on'  => '',
-                'game_on'   => '',
-                'title_off' => '',
-                'game_off'  => '',
-            ], true) ?>
-
-            <div class="row cp-actions">
-                <button class="btn" type="submit"><?= $e(translate('channel_points.create_button')) ?></button>
-            </div>
-        </form>
-    </div>
-<?php endif ?>

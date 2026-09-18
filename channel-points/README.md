@@ -11,14 +11,20 @@ Eine Belohnung „Boss-Kampf übernehmen" gehört nicht in einen
 Just-Chatting-Stream. Beim Umschalten der Kategorie denkt daran nur
 niemand – und dann steht sie eine Stunde lang einlösbar im Bild.
 
-Je Belohnung lassen sich vier Listen pflegen, alle mit Komma getrennt:
+Die Belohnungen stehen als Kachelgitter; **Bearbeiten** und **Neue
+Belohnung** öffnen jeweils einen Dialog auf derselben Seite.
 
-| Feld | Bedeutung |
-| --- | --- |
-| An, wenn der Titel enthält | Teilwort, Groß-/Kleinschreibung egal |
-| An, wenn die Kategorie ist | genau dieser Name |
-| Aus, wenn der Titel enthält | Teilwort |
-| Aus, wenn die Kategorie ist | genau dieser Name |
+Darin, farbig getrennt, zwei Blöcke:
+
+| Block | Feld | Bedeutung |
+| --- | --- | --- |
+| **+ An, wenn …** (grün) | Titel enthält | Teilwort, Groß-/Kleinschreibung egal, mehrere mit Komma |
+| | Kategorie ist | genau dieser Name, mehrere mit Komma |
+| **− Aus, wenn …** (rot) | Titel enthält | eine Ausnahme je Zeile, „+“ hängt eine an |
+| | Kategorie ist | eine Ausnahme je Zeile, „+“ hängt eine an |
+
+Die Aus-Seite ist eine Zeilenliste, weil sich Ausnahmen sammeln – und
+weil ein Name dann selbst ein Komma enthalten darf.
 
 Zwei Regeln:
 
@@ -26,7 +32,7 @@ Zwei Regeln:
 * **Kein Feld gefüllt heißt: nicht anfassen.** Sonst legte die bloße
   Installation jede Belohnung im Kanal um.
 
-Sind Titel- und Kategoriefeld einer Zeile beide gefüllt, müssen beide
+Sind Titel- und Kategoriefeld der An-Seite beide gefüllt, müssen beide
 passen – wie bei den Timern.
 
 Ohne laufenden Stream wird nichts geschaltet: Titel und Kategorie
@@ -41,12 +47,23 @@ Lesen darf dieses System alle Belohnungen des Kanals. **Ändern und
 Schalten nur die, die es selbst angelegt hat.** Was im Creator-Dashboard
 entstanden ist, gehört dort hin – ein Schaltversuch darauf ergibt 403.
 
-Solche Belohnungen stehen in der Liste als **fremd**. Ihre Felder sind
-grau, nur die Bedingungen lassen sich eintragen (Wirkung haben sie
-dann allerdings nicht). Der Knopf **Übernehmen** löscht die Belohnung
-bei Twitch und legt sie identisch neu an – danach ist sie schaltbar.
-Dabei gehen **Symbol und Einlöse-Historie verloren**; einen sanfteren
-Weg bietet Twitch nicht.
+Solche Belohnungen stehen im Gitter als **fremd**. Ihre Felder sind
+grau, nur die Bedingungen lassen sich schon eintragen – Wirkung haben
+sie, sobald die Belohnung von hier aus angelegt ist.
+
+Der Weg dorthin geht über deine Hand, nicht über dieses System:
+
+1. Belohnung im Creator-Dashboard löschen.
+2. Hier auf **Wurde aus Twitch gelöscht** drücken.
+
+Dann wird sie mit denselben Werten und Bedingungen neu angelegt –
+diesmal als eigene, also schaltbar. **Dieses System löscht nichts**,
+und zwar nicht aus Vorsicht, sondern weil Twitch es bei einer fremden
+Belohnung gar nicht zuließe. Steht sie beim Drücken noch im Dashboard,
+lehnt Twitch wegen des doppelten Namens ab und sagt das auch.
+
+Symbol und Einlöse-Historie sind mit deinem Löschen weg – die lassen
+sich über die Schnittstelle nicht mitnehmen.
 
 Ein **Symbol** lässt sich über die Schnittstelle ohnehin weder setzen
 noch ändern – es gibt kein Feld dafür. Selbst angelegte Belohnungen
@@ -64,9 +81,8 @@ steht, bleibt.
 ## Nur hier vorhanden
 
 Schlägt das Anlegen bei Twitch fehl, geht die Eingabe nicht verloren:
-die Belohnung bleibt mit einer lokalen Kennung in der Liste und lässt
-sich mit **Bei Twitch anlegen** nachholen. Dasselbe greift, wenn ein
-Übernehmen zwischen Löschen und Neuanlegen steckenbleibt.
+die Belohnung bleibt mit einer lokalen Kennung im Gitter und lässt
+sich mit **Bei Twitch anlegen** nachholen.
 
 ## Freigabe
 

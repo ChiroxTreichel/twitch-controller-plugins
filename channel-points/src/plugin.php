@@ -97,6 +97,11 @@ $hooks->on('admin.nav', static function (array $nav) use ($app): array {
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/channel-points/assets/channel-points.css');
 
+    // "+" und "x" bei den Aus-Bedingungen im Browser. Eine Zugabe:
+    // ohne das Skript bleibt am Ende jeder Liste eine leere Zeile
+    // stehen, und es geht auch so - nur langsamer.
+    $assets['js'][] = $app->asset('/plugin/channel-points/assets/channel-points.js');
+
     return $assets;
 });
 
@@ -241,8 +246,10 @@ $ausFormular = static function (Request $request): array {
         'is_enabled'    => $request->input('is_enabled') !== '',
         'title_on'      => (string) $request->input('title_on'),
         'game_on'       => (string) $request->input('game_on'),
-        'title_off'     => (string) $request->input('title_off'),
-        'game_off'      => (string) $request->input('game_off'),
+        // Je ein Feld pro Zeile - leere fallen in Rewards::entries()
+        // weg, und genau eine leere zeigt die Oberflaeche immer an.
+        'title_off'     => is_array($request->post['title_off'] ?? null) ? $request->post['title_off'] : [],
+        'game_off'      => is_array($request->post['game_off'] ?? null) ? $request->post['game_off'] : [],
     ];
 };
 
@@ -277,9 +284,9 @@ $router->post('/stream/points', static function (Request $request) use ($app, $z
     }
 
     // ---------------------------------------------------------------
-    //  Uebernehmen und Nachholen
+    //  Neu anlegen und Nachholen
     // ---------------------------------------------------------------
-    if ($aktion === 'adopt' || $aktion === 'push') {
+    if ($aktion === 'recreate' || $aktion === 'push') {
         $belohnung = Rewards::find($app, $id);
 
         if ($belohnung === null) {
@@ -287,7 +294,7 @@ $router->post('/stream/points', static function (Request $request) use ($app, $z
         }
 
         $sync = new Sync($app);
-        $ok = $aktion === 'adopt' ? $sync->adopt($id) : $sync->push($id);
+        $ok = $aktion === 'recreate' ? $sync->recreate($id) : $sync->push($id);
 
         if (!$ok) {
             return $zurueck(null, $sync->error());
@@ -295,8 +302,8 @@ $router->post('/stream/points', static function (Request $request) use ($app, $z
 
         $name = ['title' => (string) $belohnung['title']];
 
-        return $zurueck($aktion === 'adopt'
-            ? translate('channel_points.adopted', $name)
+        return $zurueck($aktion === 'recreate'
+            ? translate('channel_points.recreated', $name)
             : translate('channel_points.pushed', $name));
     }
 

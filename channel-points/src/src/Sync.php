@@ -11,17 +11,23 @@ use TwitchController\Core\App;
  *
  * Drei Wege:
  *
- *   import()  holt, was im Kanal existiert - der Knopf
- *             "Kanalpunktbelohnungen laden"
- *   push()    legt eine hier vorhandene, aber bei Twitch fehlende
- *             Belohnung an
- *   adopt()   macht eine fremde Belohnung zu einer eigenen, indem sie
- *             geloescht und neu angelegt wird
+ *   import()    holt, was im Kanal existiert - der Knopf
+ *               "Kanalpunktbelohnungen laden"
+ *   push()      legt eine hier vorhandene, aber bei Twitch fehlende
+ *               Belohnung an
+ *   recreate()  legt eine fremde Belohnung neu an, nachdem der
+ *               Benutzer sie im Dashboard von Hand geloescht hat
  *
- * adopt() ist der einzige Weg, eine im Creator-Dashboard angelegte
- * Belohnung jemals schalten zu koennen - und er kostet ihr Symbol und
- * ihre Einloese-Historie. Twitch bietet nichts Sanfteres an: die
- * Client-ID des Erstellers laesst sich nicht nachtraeglich aendern.
+ * recreate() ist der einzige Weg, eine im Creator-Dashboard angelegte
+ * Belohnung jemals schalten zu koennen: die Client-ID des Erstellers
+ * laesst sich nicht nachtraeglich aendern, also muss die Belohnung
+ * einmal von uns angelegt werden.
+ *
+ * Geloescht wird dabei NICHT von hier. Twitch liesse es bei einer
+ * fremden Belohnung ohnehin nicht zu, und selbst wenn - eine
+ * Reihenfolge "erst loeschen, dann anlegen" hat ein Fenster, in dem
+ * die Belohnung nirgends mehr steht. Der Benutzer loescht sie im
+ * Dashboard und sagt hinterher Bescheid.
  */
 final class Sync
 {
@@ -47,9 +53,8 @@ final class Sync
      * Twitch nicht, und ein Laden, das sie wegwirft, waere eine Falle.
      *
      * Was bei Twitch nicht mehr existiert, faellt raus. Was hier nur
-     * lokal steht (noch nie angelegt oder beim Uebernehmen
-     * steckengeblieben), bleibt: das ist Arbeit, die sonst verloren
-     * ginge.
+     * lokal steht - weil das Anlegen fehlschlug - bleibt: das ist
+     * Arbeit, die sonst verloren ginge.
      *
      * @return array{added: int, updated: int, removed: int}|null
      */
@@ -169,23 +174,20 @@ final class Sync
     }
 
     // -----------------------------------------------------------------
-    //  Uebernehmen
+    //  Neu anlegen
     // -----------------------------------------------------------------
-
     /**
-     * Eine fremde Belohnung zu einer eigenen machen.
+     * Eine fremde Belohnung als eigene neu anlegen.
      *
-     * Loeschen, dann neu anlegen - in dieser Reihenfolge, weil Twitch
-     * den Namen je Kanal nur einmal erlaubt. Andersherum waere es
-     * sicherer, geht aber nicht.
+     * Voraussetzung: sie ist bei Twitch von Hand geloescht worden.
+     * Das kann dieses System nicht nachpruefen - aber es muss auch
+     * nicht: steht sie noch, lehnt Twitch wegen des doppelten Namens
+     * ab, und die Meldung sagt genau das.
      *
-     * Deshalb der Notausgang: schlaegt das Anlegen fehl, ist die
-     * Belohnung bei Twitch weg, aber NICHT hier. Sie bleibt als
-     * lokaler Eintrag stehen und laesst sich mit "Bei Twitch anlegen"
-     * nachholen. Ohne das waere ein Netzfehler zwischen zwei Aufrufen
-     * gleichbedeutend mit Datenverlust.
+     * Die Bedingungen wandern mit. Sie sind das, was hier ueberhaupt
+     * gepflegt wurde.
      */
-    public function adopt(string $id): bool
+    public function recreate(string $id): bool
     {
         $belohnung = Rewards::find($this->app, $id);
 
@@ -202,36 +204,10 @@ final class Sync
         }
 
         $api = new RewardApi($this->app);
-
-        if (!$api->delete($id)) {
-            $this->fehler = $api->error();
-
-            return false;
-        }
-
-        $this->app->log(sprintf(
-            'Kanalpunkte: "%s" bei Twitch geloescht, um sie zu uebernehmen.',
-            (string) $belohnung['title']
-        ));
-
         $antwort = $api->create($belohnung);
 
         if ($antwort === null) {
-            // Der Notausgang. Die Belohnung ist bei Twitch weg - hier
-            // bleibt sie, mit einer lokalen Kennung.
-            $belohnung['id'] = Rewards::localId();
-            $belohnung['manageable'] = false;
-
-            Rewards::forget($this->app, $id);
-            Rewards::put($this->app, $belohnung);
-
-            $this->app->log(sprintf(
-                'Kanalpunkte: "%s" konnte nach dem Loeschen NICHT neu angelegt werden: %s',
-                (string) $belohnung['title'],
-                $api->error()
-            ));
-
-            $this->fehler = translate('channel_points.error.adopt_stuck', [
+            $this->fehler = translate('channel_points.error.recreate_failed', [
                 'reason' => $api->error(),
             ]);
 
@@ -246,8 +222,16 @@ final class Sync
             return false;
         }
 
+        // Erst jetzt den alten Eintrag weg: bis hierher konnte noch
+        // etwas schiefgehen, und dann waere er das Einzige gewesen,
+        // was die Bedingungen noch hatte.
         Rewards::forget($this->app, $id);
         Rewards::put($this->app, $neu);
+
+        $this->app->log(sprintf(
+            'Kanalpunkte: "%s" als eigene Belohnung neu angelegt.',
+            (string) $belohnung['title']
+        ));
 
         return true;
     }

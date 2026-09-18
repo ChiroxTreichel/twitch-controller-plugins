@@ -39,7 +39,7 @@ final class Conditions
     public static function automatic(array $belohnung): bool
     {
         foreach (['title_on', 'game_on', 'title_off', 'game_off'] as $feld) {
-            if (trim((string) ($belohnung[$feld] ?? '')) !== '') {
+            if (self::items($belohnung[$feld] ?? null) !== []) {
                 return true;
             }
         }
@@ -48,16 +48,25 @@ final class Conditions
     }
 
     /**
-     * Eine Komma-Liste in einzelne, aufgeraeumte Eintraege zerlegen.
+     * Die einzelnen Eintraege einer Bedingung.
+     *
+     * Zwei Formen kommen an: die An-Felder sind EINE Zeichenkette mit
+     * Kommas, die Aus-Felder eine Liste aus je einem Feld. Beides
+     * wird hier gleich behandelt, damit die Treffer-Funktionen nur
+     * eine Form kennen muessen.
      *
      * @return list<string>
      */
-    public static function items(string $liste): array
+    public static function items(mixed $liste): array
     {
+        $zeilen = is_array($liste)
+            ? $liste
+            : explode(',', (string) $liste);
+
         $teile = [];
 
-        foreach (explode(',', $liste) as $eintrag) {
-            $eintrag = trim($eintrag);
+        foreach ($zeilen as $eintrag) {
+            $eintrag = trim((string) $eintrag);
 
             if ($eintrag !== '') {
                 $teile[] = $eintrag;
@@ -74,7 +83,7 @@ final class Conditions
      * beantwortet nur die Frage nach dem Treffer; was leere Felder
      * bedeuten, entscheidet decide().
      */
-    public static function titleHits(string $stichwoerter, string $streamTitel): bool
+    public static function titleHits(mixed $stichwoerter, string $streamTitel): bool
     {
         $titel = self::lower($streamTitel);
 
@@ -92,7 +101,7 @@ final class Conditions
      *
      * Gross- und Kleinschreibung ist egal, sonst nichts.
      */
-    public static function gameHits(string $liste, string $aktuell): bool
+    public static function gameHits(mixed $liste, string $aktuell): bool
     {
         $aktuell = trim($aktuell);
 
@@ -133,8 +142,8 @@ final class Conditions
         $spiel = (string) $stream['game'];
 
         // Die Sperrliste zuerst: sie schlaegt alles andere.
-        if (self::titleHits((string) ($belohnung['title_off'] ?? ''), $titel)
-            || self::gameHits((string) ($belohnung['game_off'] ?? ''), $spiel)
+        if (self::titleHits($belohnung['title_off'] ?? null, $titel)
+            || self::gameHits($belohnung['game_off'] ?? null, $spiel)
         ) {
             return false;
         }
