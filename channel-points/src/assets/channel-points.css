@@ -1,0 +1,58 @@
+/*
+ * Kanalpunkte
+ *
+ * Wenig eigenes: die Seite lebt von den Bausteinen des Kerns (.card,
+ * .case, .row, .field). Hier steht nur, was es dort noch nicht gibt.
+ */
+
+/* Der Ladeknopf sitzt rechts neben seiner Erklaerung. */
+.cp-load {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.cp-load p {
+    margin: 4px 0 0;
+}
+
+/*
+ * Die Kosten im Kopf der Klappzeile. Das Punktesymbol steht davor,
+ * damit die Zahl nicht wie ein Preis in Euro aussieht.
+ */
+.cp-cost {
+    margin-left: 8px;
+    opacity: 0.75;
+    font-variant-numeric: tabular-nums;
+}
+
+.cp-cost::before {
+    content: "\25CE\00A0";
+}
+
+.cp-off {
+    opacity: 0.6;
+}
+
+.cp-sub {
+    margin: 18px 0 4px;
+    font-size: 1rem;
+}
+
+.cp-actions {
+    margin-top: 14px;
+    align-items: center;
+    gap: 10px;
+}
+
+/*
+ * Ein Farbwaehler ist von Haus aus so hoch wie ein Textfeld, aber
+ * unbequem schmal. Etwas breiter, sonst trifft man ihn nicht.
+ */
+.cp-color {
+    min-width: 64px;
+    padding: 4px;
+    height: 38px;
+}
