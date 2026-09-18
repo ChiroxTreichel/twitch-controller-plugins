@@ -20,6 +20,11 @@ Im Dialog steckt alles, was diese eine Belohnung betrifft: die Felder,
 die Bedingungen, und ganz unten abgesetzt **Entfernen** und
 **Wurde bei Twitch gelöscht, jetzt neu erstellen**.
 
+Über dem Gitter und über der Mitgliederliste einer Gruppe steht je ein
+**Suchfeld**. Es filtert im Browser, ohne Neuladen – und es sucht nur:
+eine ausgeblendete Zeile bleibt angehakt. Ohne JavaScript erscheint es
+gar nicht erst.
+
 Darin, farbig getrennt, zwei Blöcke:
 
 | Block | Feld | Bedeutung |

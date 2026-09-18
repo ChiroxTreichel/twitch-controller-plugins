@@ -109,9 +109,94 @@
         });
     }
 
+    // -----------------------------------------------------------------
+    //  Suchen
+    // -----------------------------------------------------------------
+    /*
+     * Zwei Filter, eine Mechanik:
+     *
+     *   [data-filter-scope]   der Bereich, in dem gefiltert wird
+     *   [data-filter]         das Eingabefeld darin
+     *   [data-filter-item]    was sich aus- und einblenden laesst
+     *   [data-filter-empty]   der Satz, wenn nichts uebrig bleibt
+     *
+     * Der Filter SUCHT, er waehlt nicht ab: eine ausgeblendete Zeile
+     * bleibt angehakt. Wer tippt, um etwas zu finden, will nicht
+     * nebenbei seine Auswahl verlieren - und beim Abschicken gingen
+     * sonst stillschweigend Mitglieder verloren.
+     */
+    function filtern(feld) {
+        var bereich = feld.closest('[data-filter-scope]');
+
+        if (!bereich) {
+            return;
+        }
+
+        var suche = feld.value.trim().toLowerCase();
+        var zeilen = bereich.querySelectorAll('[data-filter-item]');
+        var uebrig = 0;
+
+        Array.prototype.forEach.call(zeilen, function (zeile) {
+            var passt = suche === ''
+                || (zeile.textContent || '').toLowerCase().indexOf(suche) !== -1;
+
+            zeile.hidden = !passt;
+
+            if (passt) {
+                uebrig++;
+            }
+        });
+
+        var leer = bereich.querySelector('[data-filter-empty]');
+
+        if (leer) {
+            leer.hidden = uebrig !== 0;
+        }
+    }
+
+    function filterAnhaengen() {
+        Array.prototype.forEach.call(
+            document.querySelectorAll('[data-filter]'),
+            function (feld) {
+                if (feld.dataset.filterBereit === '1') {
+                    return;
+                }
+
+                feld.dataset.filterBereit = '1';
+
+                /*
+                 * Erst jetzt sichtbar. In der Vorlage steht es als
+                 * hidden: ohne dieses Skript taete es nichts, und ein
+                 * Feld, in das man tippt und bei dem nichts geschieht,
+                 * ist schlimmer als gar keines.
+                 */
+                feld.hidden = false;
+
+                feld.addEventListener('input', function () {
+                    filtern(feld);
+                });
+
+                /*
+                 * Enter im Suchfeld soll nicht das Formular
+                 * abschicken - man sucht, man speichert nicht.
+                 */
+                feld.addEventListener('keydown', function (ereignis) {
+                    if (ereignis.key === 'Enter') {
+                        ereignis.preventDefault();
+                    }
+                });
+            }
+        );
+    }
+
     if (document.readyState === 'loading') {
         document.addEventListener('DOMContentLoaded', start, { once: true });
+        document.addEventListener('DOMContentLoaded', filterAnhaengen, { once: true });
     } else {
         start();
+        filterAnhaengen();
     }
+
+    // Nach einem Formular ohne Seitenwechsel haengen die Felder neu.
+    document.addEventListener('overlay:swapped', filterAnhaengen);
 }());

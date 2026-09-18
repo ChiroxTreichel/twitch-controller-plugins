@@ -267,6 +267,33 @@
     display: none;
 }
 
+/* --- Suchen --------------------------------------------------------- */
+
+/*
+ * Das Feld ueber dem Gitter. Es steht fuer sich, damit die Kacheln
+ * darunter nicht springen, wenn der Hinweis "Nichts gefunden"
+ * erscheint.
+ */
+.cp-search {
+    margin-top: 16px;
+}
+
+.cp-search .cp-filter {
+    max-width: 320px;
+}
+
+.cp-filter {
+    margin-top: 6px;
+}
+
+/*
+ * Was der Filter versteckt, ist weg - nicht nur blass. Eine halb
+ * sichtbare Zeile laedt ein, sie anzuklicken.
+ */
+[data-filter-item][hidden] {
+    display: none !important;
+}
+
 /*
  * Die Mitglieder einer Gruppe.
  *

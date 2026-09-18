@@ -282,6 +282,22 @@ $bedingungen = static function (array $b, bool $darfAendern) use ($e, $ausListe)
     <?php
 };
 /**
+ * Ein Suchfeld, das im Browser filtert.
+ *
+ * Es steht als hidden in der Vorlage: ohne das Skript taete es
+ * nichts, und ein Feld, in das man tippt und bei dem nichts
+ * geschieht, ist schlimmer als gar keines. channel-points.js nimmt
+ * das Attribut weg, sobald es den Filter angehaengt hat.
+ */
+$filterfeld = static function (string $platzhalter) use ($e): void {
+    ?>
+    <input class="input cp-filter" type="search" data-filter hidden
+           placeholder="<?= $e($platzhalter) ?>"
+           aria-label="<?= $e($platzhalter) ?>">
+    <?php
+};
+
+/**
  * Die Felder einer Gruppe: Name, Mitglieder, Bedingungen.
  *
  * Die Mitglieder sind Schalter und keine Mehrfachauswahl: eine
@@ -289,7 +305,7 @@ $bedingungen = static function (array $b, bool $darfAendern) use ($e, $ausListe)
  * Steuerungstaste, und wer das nicht weiss, loescht mit dem zweiten
  * Klick seine erste Wahl.
  */
-$gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$bedingungen): void {
+$gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$bedingungen, $filterfeld): void {
     $mitglieder = array_map('strval', is_array($g['members'] ?? null) ? $g['members'] : []);
     ?>
     <label class="field">
@@ -298,17 +314,19 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
                value="<?= $e((string) $g['name']) ?>" <?= $darfAendern ? '' : 'disabled' ?>>
     </label>
 
-    <div class="field">
+    <div class="field" data-filter-scope>
         <span class="hint"><?= $e(translate('channel_points.group.field.members')) ?></span>
 
         <?php if ($rewards === []): ?>
             <p class="hint"><?= $e(translate('channel_points.group.no_rewards')) ?></p>
+        <?php else: ?>
+            <?php $filterfeld(translate('channel_points.filter.members')) ?>
         <?php endif ?>
 
         <div class="cp-members">
             <?php foreach ($rewards as $zeile): ?>
                 <?php $rid = (string) $zeile['reward']['id']; ?>
-                <label class="switch-field">
+                <label class="switch-field" data-filter-item>
                     <input type="checkbox" name="members[]" value="<?= $e($rid) ?>"
                            <?= in_array($rid, $mitglieder, true) ? 'checked' : '' ?>
                            <?= $darfAendern ? '' : 'disabled' ?>>
@@ -316,6 +334,15 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
                     <span><?= $e((string) $zeile['reward']['title']) ?></span>
                 </label>
             <?php endforeach ?>
+
+            <?php /*
+                Eine ausgeblendete Zeile bleibt angehakt - der Filter
+                sucht, er waehlt nicht ab. Wer tippt, um etwas zu
+                finden, will nicht nebenbei seine Auswahl verlieren.
+            */ ?>
+            <p class="hint" data-filter-empty hidden>
+                <?= $e(translate('channel_points.filter.nothing')) ?>
+            </p>
         </div>
     </div>
 
@@ -387,6 +414,8 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
 
 <?php if ($tab === 'rewards'): ?>
 
+<div data-filter-scope>
+
 <?php if ($darfAendern): ?>
     <div class="card cp-bar">
         <div class="cp-bar-text">
@@ -456,6 +485,13 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
     <div class="card">
         <p class="hint"><?= $e(translate('channel_points.empty')) ?></p>
     </div>
+<?php else: ?>
+    <div class="cp-search">
+        <?php $filterfeld(translate('channel_points.filter.rewards')) ?>
+        <p class="hint" data-filter-empty hidden>
+            <?= $e(translate('channel_points.filter.nothing')) ?>
+        </p>
+    </div>
 <?php endif ?>
 
 <div class="cp-grid">
@@ -467,7 +503,7 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
         $nurHier = !$zeile['remote'];
         $farbe = $b['color'] === '' ? '#9146FF' : (string) $b['color'];
         ?>
-        <article class="cp-tile<?= empty($b['is_enabled']) ? ' is-off' : '' ?>"
+        <article class="cp-tile<?= empty($b['is_enabled']) ? ' is-off' : '' ?>" data-filter-item
                  style="--cp-tile: <?= $e($farbe) ?>;">
             <?php /* Der Streifen traegt die Farbe der Belohnung - wie bei Twitch. */ ?>
             <div class="cp-tile-color" aria-hidden="true"></div>
@@ -636,6 +672,8 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
     <?php endforeach ?>
 </div>
 
+</div><?php /* data-filter-scope */ ?>
+
 <?php else: ?>
 
 <?php /* ================= Gruppen ================= */ ?>
@@ -717,21 +755,21 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
                 <?php endif ?>
             </p>
 
+            <?php /*
+                Die Mitglieder stehen NICHT hier.
+                
+                Bei einundzwanzig Belohnungen wird aus der Kachel eine
+                Wand aus Namen, und die Zahl daneben sagt dasselbe in
+                zwei Worten. Wer wissen will, welche es sind, macht
+                den Dialog auf - dort stehen sie als Schalter.
+
+                Was bleibt, ist der eine Fall, in dem die Zahl nicht
+                genuegt: keine Mitglieder heisst, die Gruppe tut
+                nichts, und das sieht man ihr sonst nicht an.
+            */ ?>
             <p class="hint cp-tile-why">
                 <?php if ($anzahl === 0): ?>
                     <?= $e(translate('channel_points.group.no_members')) ?>
-                <?php else: ?>
-                    <?= $e(implode(', ', array_map(
-                        static fn (array $z): string => (string) $z['reward']['title'],
-                        array_values(array_filter(
-                            $rewards,
-                            static fn (array $z): bool => in_array(
-                                (string) $z['reward']['id'],
-                                array_map('strval', $gruppe['members']),
-                                true
-                            )
-                        ))
-                    ))) ?>
                 <?php endif ?>
             </p>
 
