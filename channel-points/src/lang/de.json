@@ -78,7 +78,7 @@
     "channel_points.limits_hint": "0 heißt „keine Begrenzung“. Die Abklingzeit darf höchstens sieben Tage betragen. Ohne den Schalter darüber gilt keine der drei Zahlen – stehen bleiben sie trotzdem.",
     "channel_points.local_hint": "Diese Belohnung steht nur hier – bei Twitch gibt es sie nicht. Das passiert, wenn das Anlegen fehlgeschlagen ist. Mit „Bei Twitch anlegen“ lässt es sich nachholen.",
     "channel_points.name": "Kanalpunkte",
-    "channel_points.nav.stream": "Stream",
+    "channel_points.nav.chat": "Chat",
     "channel_points.new": "Neue Belohnung",
     "channel_points.new_button": "Neue Belohnung",
     "channel_points.new_hint": "Wird sofort bei Twitch angelegt – und ist damit eine, die dieses System schalten darf. Ein eigenes Symbol lässt sich über die Schnittstelle nicht setzen, sie bekommt das Vorgabe-Symbol.",

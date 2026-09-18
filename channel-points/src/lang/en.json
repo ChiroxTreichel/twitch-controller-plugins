@@ -78,7 +78,7 @@
     "channel_points.limits_hint": "0 means no limit. The cooldown may not exceed seven days. Without the switch above none of the three numbers apply – they are kept anyway.",
     "channel_points.local_hint": "This reward exists here only – not at Twitch. That happens when creating it failed. „Create at Twitch“ catches up.",
     "channel_points.name": "Channel points",
-    "channel_points.nav.stream": "Stream",
+    "channel_points.nav.chat": "Chat",
     "channel_points.new": "New reward",
     "channel_points.new_button": "New reward",
     "channel_points.new_hint": "Created at Twitch right away – and therefore one this system may switch. A custom icon cannot be set through the API, it gets the default one.",

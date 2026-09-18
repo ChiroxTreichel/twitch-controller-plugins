@@ -74,18 +74,24 @@ $hooks->on('core.twitch.scope_labels', static function (array $labels): array {
 //  Menue
 // -------------------------------------------------------------------
 $hooks->on('admin.nav', static function (array $nav) use ($app): array {
-    // Eintraege ANHAENGEN, nicht die Gruppe setzen: Streaminfo haengt
-    // in dieselbe Gruppe, und wer sie ueberschreibt, laesst je nach
-    // Ladereihenfolge den anderen Menuepunkt verschwinden.
-    $nav['stream']['label'] = translate('channel_points.nav.stream');
-    $nav['stream']['order'] = 15;
-    $nav['stream']['items'][] = [
+    /*
+     * In die Gruppe "Chat": eine Kanalpunkt-Belohnung wird im Chat
+     * eingeloest und steht dort neben Timern, Chatbefehlen und dem
+     * Loeschbot.
+     *
+     * Eintraege ANHAENGEN, nicht die Gruppe setzen: dort haengen
+     * mehrere Plugins hinein, und wer sie ueberschreibt, laesst je
+     * nach Ladereihenfolge die anderen Menuepunkte verschwinden.
+     */
+    $nav['chat']['label'] = translate('channel_points.nav.chat');
+    $nav['chat']['order'] = 20;
+    $nav['chat']['items'][] = [
         'label'      => translate('channel_points.name'),
-        'href'       => '/stream/points',
+        'href'       => '/chat/points',
         'permission' => 'ChannelPoints.Global.View',
         'toggle'     => [
             'on'         => Rewards::enabled($app),
-            'action'     => '/stream/points/toggle',
+            'action'     => '/chat/points/toggle',
             'value'      => 'toggle',
             'permission' => 'ChannelPoints.Global.Toggle',
             'title'      => translate('channel_points.toggle_hint'),
@@ -175,7 +181,7 @@ $seite = static function (Request $request, array $params = []) use ($app, $plug
         'tab'      => $reiter($request, $params),
         'groups'   => $gruppen,
         'title'    => translate('channel_points.name'),
-        'active'   => 'stream/points',
+        'active'   => 'chat/points',
         'enabled'  => Rewards::enabled($app),
         'allowed'  => $api->allowed(),
 
@@ -196,12 +202,12 @@ $seite = static function (Request $request, array $params = []) use ($app, $plug
     ]));
 };
 
-$router->get('/stream/points', $seite, [
+$router->get('/chat/points', $seite, [
     'auth'       => true,
     'permission' => 'ChannelPoints.Global.View',
 ]);
 
-$router->get('/stream/points/{tab}', $seite, [
+$router->get('/chat/points/{tab}', $seite, [
     'auth'       => true,
     'permission' => 'ChannelPoints.Global.View',
 ]);
@@ -220,14 +226,14 @@ $zurueck = static function (?string $notice = null, ?string $error = null, strin
 
     // Zurueck auf den Reiter, von dem die Eingabe kam - sonst sucht
     // man nach dem Speichern seine Gruppe wieder.
-    $ziel = $tab === 'groups' ? '/stream/points/groups' : '/stream/points';
+    $ziel = $tab === 'groups' ? '/chat/points/groups' : '/chat/points';
 
     return Response::redirect(
         $app->url($ziel) . ($query === [] ? '' : '?' . http_build_query($query))
     );
 };
 
-$router->post('/stream/points/toggle', static function (Request $request) use ($app, $zurueck): Response {
+$router->post('/chat/points/toggle', static function (Request $request) use ($app, $zurueck): Response {
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return $zurueck(null, translate('common.error.form_expired'));
     }
@@ -277,7 +283,7 @@ $ausFormular = static function (Request $request): array {
     ];
 };
 
-$router->post('/stream/points', static function (Request $request) use ($app, $zurueck, $ausFormular): Response {
+$router->post('/chat/points', static function (Request $request) use ($app, $zurueck, $ausFormular): Response {
     if (!$app->auth->checkCsrf($request->input('csrf'))) {
         return $zurueck(null, translate('common.error.form_expired'));
     }

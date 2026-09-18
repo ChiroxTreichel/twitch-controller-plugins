@@ -37,7 +37,7 @@ declare(strict_types=1);
  */
 
 $darfAendern = $canEdit;
-$ziel = $url('/stream/points');
+$ziel = $url('/chat/points');
 
 $einheiten = [
     'seconds' => translate('channel_points.unit.seconds'),
@@ -354,7 +354,7 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
     <h1><?= $e(translate('channel_points.name')) ?></h1>
 
     <?php if ($canToggle): ?>
-        <form method="post" action="<?= $e($url('/stream/points/toggle')) ?>">
+        <form method="post" action="<?= $e($url('/chat/points/toggle')) ?>">
             <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
             <input type="hidden" name="action" value="toggle">
             <button class="switch<?= $enabled ? ' is-on' : '' ?>" type="submit"
@@ -407,9 +407,9 @@ $gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$b
 
 <div class="tabs">
     <a class="tab<?= $tab === 'rewards' ? ' is-active' : '' ?>"
-       href="<?= $e($url('/stream/points')) ?>"><?= $e(translate('channel_points.name')) ?></a>
+       href="<?= $e($url('/chat/points')) ?>"><?= $e(translate('channel_points.name')) ?></a>
     <a class="tab<?= $tab === 'groups' ? ' is-active' : '' ?>"
-       href="<?= $e($url('/stream/points/groups')) ?>"><?= $e(translate('channel_points.groups')) ?></a>
+       href="<?= $e($url('/chat/points/groups')) ?>"><?= $e(translate('channel_points.groups')) ?></a>
 </div>
 
 <?php if ($tab === 'rewards'): ?>

@@ -3,7 +3,7 @@
 Kanalpunkt-Belohnungen anlegen, ändern – und je nach Stream-Titel und
 Kategorie automatisch ein- und ausschalten.
 
-`Stream → Kanalpunkte`
+`Chat → Kanalpunkte`
 
 ## Wozu
 
@@ -51,7 +51,7 @@ stehen dann auf dem Stand des letzten Streams.
 
 ## Gruppen
 
-`Stream → Kanalpunkte → Gruppen`
+`Chat → Kanalpunkte → Gruppen`
 
 Eine Gruppe fasst mehrere Belohnungen zusammen und trägt dieselben
 vier Bedingungsfelder. Sie **ersetzt** die Bedingungen der einzelnen
