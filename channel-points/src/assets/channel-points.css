@@ -163,6 +163,33 @@
     height: 38px;
 }
 
+/*
+ * Der Stift statt des Wortes "Bearbeiten". Quadratisch, damit er
+ * neben den anderen Knoepfen nicht wie ein angeschnittener aussieht.
+ */
+.cp-pen {
+    padding: 0;
+    width: 34px;
+    text-align: center;
+    font-size: 1.05rem;
+    line-height: 32px;
+}
+
+/*
+ * Entfernen und das Neuanlegen stehen unten im Dialog, abgesetzt vom
+ * Formular: was hier passiert, laesst sich nicht mit "Abbrechen"
+ * zuruecknehmen.
+ */
+.cp-danger {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    padding-top: 14px;
+    border-top: 1px solid var(--line);
+}
+
 /* --- An und Aus ---------------------------------------------------- */
 
 /*

@@ -186,6 +186,16 @@ final class Conditions
      */
     public static function reason(array $belohnung, array $stream): string
     {
+        /*
+         * Erst die Frage, ob es sie bei Twitch ueberhaupt gibt. Eine
+         * nur hier stehende Belohnung traegt zwar auch manageable =
+         * false, ist aber nicht fremd - sie wurde von hier angelegt
+         * und ist nur nie angekommen.
+         */
+        if (!Rewards::isRemote((string) ($belohnung['id'] ?? ''))) {
+            return translate('channel_points.why.local');
+        }
+
         if (empty($belohnung['manageable'])) {
             return translate('channel_points.why.foreign');
         }

@@ -11,8 +11,14 @@ Eine Belohnung „Boss-Kampf übernehmen" gehört nicht in einen
 Just-Chatting-Stream. Beim Umschalten der Kategorie denkt daran nur
 niemand – und dann steht sie eine Stunde lang einlösbar im Bild.
 
-Die Belohnungen stehen als Kachelgitter; **Bearbeiten** und **Neue
-Belohnung** öffnen jeweils einen Dialog auf derselben Seite.
+Die Belohnungen stehen als Kachelgitter. Auf der Kachel selbst nur
+das Nötige: Farbe, Name, Kosten, Plaketten – und ein **Stift**, der
+den Dialog öffnet. Warum eine fremde Belohnung nicht schaltbar ist,
+steht als Hinweistext an der Plakette „fremd", nicht als eigene Zeile.
+
+Im Dialog steckt alles, was diese eine Belohnung betrifft: die Felder,
+die Bedingungen, und ganz unten abgesetzt **Entfernen** und
+**Wurde aus Twitch gelöscht**.
 
 Darin, farbig getrennt, zwei Blöcke:
 

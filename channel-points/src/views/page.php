@@ -411,11 +411,22 @@ $formular = static function (
 
             <p class="cp-tile-cost"><?= $e(number_format((int) $b['cost'], 0, ',', '.')) ?></p>
 
+            <?php /*
+                Der Grund haengt an der Plakette, die ihn erklaert -
+                "fremd" und "nur hier" sagen kurz, was los ist, und
+                der Satz dazu steht im title. Unter der Kachel waere
+                er eine Zeile, die auf jeder zweiten Kachel dasselbe
+                sagt.
+            */ ?>
             <p class="cp-tile-badges">
                 <?php if ($nurHier): ?>
-                    <span class="badge badge-warn"><?= $e(translate('channel_points.badge.local')) ?></span>
+                    <span class="badge badge-warn" title="<?= $e($zeile['why']) ?>">
+                        <?= $e(translate('channel_points.badge.local')) ?>
+                    </span>
                 <?php elseif (!$eigen): ?>
-                    <span class="badge badge-off"><?= $e(translate('channel_points.badge.foreign')) ?></span>
+                    <span class="badge badge-off" title="<?= $e($zeile['why']) ?>">
+                        <?= $e(translate('channel_points.badge.foreign')) ?>
+                    </span>
                 <?php endif ?>
 
                 <?php if ($zeile['auto']): ?>
@@ -427,12 +438,28 @@ $formular = static function (
                 <?php endif ?>
             </p>
 
-            <p class="hint cp-tile-why"><?= $e($zeile['why']) ?></p>
+            <?php /*
+                Bleibt nur die Zeile fuer die Faelle, die keine
+                Plakette haben: eine eigene Belohnung, bei der die
+                Bedingungen gerade greifen oder eben nicht.
+            */ ?>
+            <?php if ($eigen): ?>
+                <p class="hint cp-tile-why"><?= $e($zeile['why']) ?></p>
+            <?php else: ?>
+                <p class="cp-tile-why"></p>
+            <?php endif ?>
 
             <?php if ($darfAendern): ?>
                 <div class="cp-tile-actions">
                     <details class="confirm cp-dialog">
-                        <summary class="btn btn-small"><?= $e(translate('channel_points.edit_button')) ?></summary>
+                        <?php /*
+                            Nur der Stift. Das Wort stand auf jeder
+                            Kachel dasselbe und trug nichts bei - der
+                            Name der Belohnung steht darueber.
+                        */ ?>
+                        <summary class="btn btn-small cp-pen"
+                                 title="<?= $e(translate('channel_points.edit_button')) ?>"
+                                 aria-label="<?= $e(translate('channel_points.edit_button')) ?>">&#9998;</summary>
 
                         <div class="confirm-panel">
                             <h3 class="cp-dialog-head"><?= $e((string) $b['title']) ?></h3>
@@ -461,48 +488,65 @@ $formular = static function (
                                     </button>
                                 </div>
                             </form>
+
+                            <?php /*
+                                Hinter dem Speichern-Formular, nicht
+                                darin: eine Rueckfrage bringt ihr
+                                eigenes Formular mit, und eines im
+                                anderen ist kein gueltiges HTML - der
+                                Browser wirft das innere weg. Die
+                                Rueckfrage schickte dann nichts ab.
+
+                                (Und der Pruefer liest hier mit: ein
+                                ausgeschriebenes Form-Tag im Kommentar
+                                zaehlt er als geoeffnetes Formular.)
+                            */ ?>
+                            <div class="cp-danger">
+                                <?php if ($nurHier): ?>
+                                    <form method="post" action="<?= $e($ziel) ?>">
+                                        <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                                        <input type="hidden" name="action" value="push">
+                                        <input type="hidden" name="id" value="<?= $e($id) ?>">
+                                        <button class="btn btn-small" type="submit">
+                                            <?= $e(translate('channel_points.push_button')) ?>
+                                        </button>
+                                    </form>
+                                <?php elseif (!$eigen): ?>
+                                    <?php /*
+                                        Kein Loeschen durch uns: Twitch
+                                        laesst das bei einer fremden
+                                        Belohnung ohnehin nicht zu. Der
+                                        Knopf sagt nur, dass es von
+                                        Hand schon geschehen ist -
+                                        danach legen wir sie neu an,
+                                        diesmal als eigene.
+                                    */ ?>
+                                    <?= $view->render('_confirm', [
+                                        'label'    => translate('channel_points.recreate_button'),
+                                        'question' => translate('channel_points.recreate_question'),
+                                        'note'     => translate('channel_points.recreate_note'),
+                                        'confirm'  => translate('channel_points.recreate_confirm'),
+                                        'action'   => $ziel,
+                                        'fields'   => ['csrf' => $csrf, 'action' => 'recreate', 'id' => $id],
+                                        'danger'   => false,
+                                    ], null) ?>
+                                <?php endif ?>
+
+                                <?= $view->render('_confirm', [
+                                    'label'    => translate('common.remove'),
+                                    'question' => $eigen && !$nurHier
+                                        ? translate('channel_points.delete_question')
+                                        : translate('channel_points.remove_question'),
+                                    'confirm'  => translate('channel_points.delete_confirm'),
+                                    'action'   => $ziel,
+                                    'fields'   => ['csrf' => $csrf, 'action' => 'delete', 'id' => $id],
+                                    'danger'   => true,
+                                    'right'    => true,
+                                ], null) ?>
+                            </div>
                         </div>
                     </details>
 
-                    <?php if ($nurHier): ?>
-                        <form method="post" action="<?= $e($ziel) ?>">
-                            <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
-                            <input type="hidden" name="action" value="push">
-                            <input type="hidden" name="id" value="<?= $e($id) ?>">
-                            <button class="btn btn-small" type="submit">
-                                <?= $e(translate('channel_points.push_button')) ?>
-                            </button>
-                        </form>
-                    <?php elseif (!$eigen): ?>
-                        <?php /*
-                            Kein Loeschen durch uns: Twitch laesst das
-                            bei einer fremden Belohnung ohnehin nicht
-                            zu. Der Knopf sagt nur, dass es von Hand
-                            schon geschehen ist - danach legen wir sie
-                            neu an, diesmal als eigene.
-                        */ ?>
-                        <?= $view->render('_confirm', [
-                            'label'    => translate('channel_points.recreate_button'),
-                            'question' => translate('channel_points.recreate_question'),
-                            'note'     => translate('channel_points.recreate_note'),
-                            'confirm'  => translate('channel_points.recreate_confirm'),
-                            'action'   => $ziel,
-                            'fields'   => ['csrf' => $csrf, 'action' => 'recreate', 'id' => $id],
-                            'danger'   => false,
-                        ], null) ?>
-                    <?php endif ?>
-
-                    <?= $view->render('_confirm', [
-                        'label'    => translate('common.remove'),
-                        'question' => $eigen && !$nurHier
-                            ? translate('channel_points.delete_question')
-                            : translate('channel_points.remove_question'),
-                        'confirm'  => translate('channel_points.delete_confirm'),
-                        'action'   => $ziel,
-                        'fields'   => ['csrf' => $csrf, 'action' => 'delete', 'id' => $id],
-                        'danger'   => true,
-                        'right'    => true,
-                    ], null) ?>
                 </div>
             <?php endif ?>
         </article>

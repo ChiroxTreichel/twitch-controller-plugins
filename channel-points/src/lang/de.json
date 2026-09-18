@@ -89,6 +89,7 @@
     "channel_points.unit.minutes": "Minuten",
     "channel_points.unit.seconds": "Sekunden",
     "channel_points.why.foreign": "Diese Belohnung wurde nicht von diesem System angelegt – sie lässt sich nicht schalten.",
+    "channel_points.why.local": "Diese Belohnung gibt es bei Twitch nicht – erst dort anlegen, dann lässt sie sich schalten.",
     "channel_points.why.manual": "Keine Bedingungen eingetragen – diese Belohnung wird nicht automatisch geschaltet.",
     "channel_points.why.off": "Passt nicht zum laufenden Stream – sie gehört ausgeschaltet.",
     "channel_points.why.offline": "Es läuft kein Stream. Der Stand bleibt, wie er ist.",

@@ -89,6 +89,7 @@
     "channel_points.unit.minutes": "minutes",
     "channel_points.unit.seconds": "seconds",
     "channel_points.why.foreign": "This reward was not created by this system – it cannot be switched.",
+    "channel_points.why.local": "This reward does not exist at Twitch – create it there first, then it can be switched.",
     "channel_points.why.manual": "No conditions entered – this reward is not switched automatically.",
     "channel_points.why.off": "Does not match the running stream – it belongs off.",
     "channel_points.why.offline": "No stream is running. Everything stays as it is.",
