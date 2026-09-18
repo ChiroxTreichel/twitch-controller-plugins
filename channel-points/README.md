@@ -1,4 +1,4 @@
-# Kanalpunkte
+# Chat - Kanalpunkte
 
 Kanalpunkt-Belohnungen anlegen, ändern – und je nach Stream-Titel und
 Kategorie automatisch ein- und ausschalten.
