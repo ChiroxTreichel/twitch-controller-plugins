@@ -18,7 +18,7 @@ steht als Hinweistext an der Plakette „fremd", nicht als eigene Zeile.
 
 Im Dialog steckt alles, was diese eine Belohnung betrifft: die Felder,
 die Bedingungen, und ganz unten abgesetzt **Entfernen** und
-**Wurde aus Twitch gelöscht**.
+**Wurde bei Twitch gelöscht, jetzt neu erstellen**.
 
 Darin, farbig getrennt, zwei Blöcke:
 
@@ -60,7 +60,7 @@ sie, sobald die Belohnung von hier aus angelegt ist.
 Der Weg dorthin geht über deine Hand, nicht über dieses System:
 
 1. Belohnung im Creator-Dashboard löschen.
-2. Hier auf **Wurde aus Twitch gelöscht** drücken.
+2. Hier auf **Wurde bei Twitch gelöscht, jetzt neu erstellen** drücken.
 
 Dann wird sie mit denselben Werten und Bedingungen neu angelegt –
 diesmal als eigene, also schaltbar. **Dieses System löscht nichts**,

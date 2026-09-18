@@ -1,7 +1,7 @@
 {
   "slug": "channel-points",
   "name": "Stream - Kanalpunkte",
-  "version": "1.2.2",
+  "version": "1.3.0",
   "description": "Kanalpunkt-Belohnungen anlegen, ändern und je nach Stream-Titel und Kategorie automatisch ein- und ausschalten. Mit Listen für „an bei“ und „aus bei“ und einem Knopf, der die vorhandenen Belohnungen von Twitch lädt.",
   "author": "Twitch-Controller",
   "requires": {

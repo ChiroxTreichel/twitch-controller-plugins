@@ -329,6 +329,30 @@ final class Rewards
     public const MAX_ENTRIES = 30;
 
     /**
+     * Was fuer die Sortierung gleich zaehlt.
+     *
+     * "Ärger" gehoert zu "A" und nicht hinter "Z". Die saubere Loesung
+     * dafuer waere ein Collator aus intl - nur ist intl keine
+     * Pflicht-Erweiterung, und ein Plugin, das auf einer Installation
+     * ohne sie die Reihenfolge verliert, ist schlechter als eine
+     * Tabelle mit zwoelf Zeilen.
+     *
+     * Gross- und Kleinschreibung steht mit drin, weil strtolower()
+     * bei UTF-8 nur die ASCII-Haelfte trifft - ein "Ä" bliebe sonst
+     * stehen.
+     */
+    private const SORT_MAP = [
+        'ä' => 'a', 'Ä' => 'a', 'ö' => 'o', 'Ö' => 'o', 'ü' => 'u', 'Ü' => 'u',
+        'ß' => 'ss',
+        'á' => 'a', 'à' => 'a', 'â' => 'a', 'å' => 'a', 'Á' => 'a', 'À' => 'a',
+        'é' => 'e', 'è' => 'e', 'ê' => 'e', 'ë' => 'e', 'É' => 'e', 'È' => 'e',
+        'í' => 'i', 'ì' => 'i', 'î' => 'i', 'ï' => 'i',
+        'ó' => 'o', 'ò' => 'o', 'ô' => 'o', 'õ' => 'o', 'ø' => 'o',
+        'ú' => 'u', 'ù' => 'u', 'û' => 'u',
+        'ñ' => 'n', 'ç' => 'c',
+    ];
+
+    /**
      * Eine Liste aus dem Formular - oder aus einer alten Fassung.
      *
      * Aus dem Formular kommt ein Feld je Zeile, also ein Array. Aus
@@ -364,6 +388,51 @@ final class Rewards
         }
 
         return $liste;
+    }
+
+    /**
+     * Wonach eine Belohnung einsortiert wird.
+     *
+     * Umlaute umgeschrieben, danach klein - siehe SORT_MAP.
+     */
+    public static function sortKey(string $titel): string
+    {
+        $titel = strtr(trim($titel), self::SORT_MAP);
+
+        return function_exists('mb_strtolower')
+            ? mb_strtolower($titel)
+            : strtolower($titel);
+    }
+
+    /**
+     * Die Belohnungen alphabetisch.
+     *
+     * Beim Anzeigen, nicht beim Speichern: gespeichert bleibt die
+     * Reihenfolge von Twitch.
+     *
+     * strnatcasecmp und nicht strcasecmp, damit "Note 2" vor
+     * "Note 10" steht und nicht dahinter.
+     *
+     * Bei gleichem Schluessel entscheidet der ungeaenderte Titel.
+     * Ohne das stuenden "Ärger" und "Arger" in wechselnder
+     * Reihenfolge - je nachdem, wie sie gerade aus der Datenbank
+     * kamen, und das sieht nach einem Fehler aus.
+     *
+     * @param list<array<string, mixed>> $liste
+     * @return list<array<string, mixed>>
+     */
+    public static function sorted(array $liste): array
+    {
+        usort($liste, static function (array $a, array $b): int {
+            $links = (string) ($a['title'] ?? '');
+            $rechts = (string) ($b['title'] ?? '');
+
+            $ergebnis = strnatcasecmp(self::sortKey($links), self::sortKey($rechts));
+
+            return $ergebnis !== 0 ? $ergebnis : strcmp($links, $rechts);
+        });
+
+        return array_values($liste);
     }
 
     /** Kuerzen - mit Rueckfall, falls mbstring fehlt. */

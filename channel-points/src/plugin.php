@@ -148,7 +148,10 @@ $seite = static function (Request $request) use ($app, $plugin): Response {
     $api = new RewardApi($app);
 
     $zeilen = [];
-    foreach (Rewards::all($app) as $belohnung) {
+
+    // Alphabetisch - beim Anzeigen. Gespeichert bleibt die
+    // Reihenfolge, in der Twitch sie liefert.
+    foreach (Rewards::sorted(Rewards::all($app)) as $belohnung) {
         $zeilen[] = [
             'reward' => $belohnung,
             'remote' => Rewards::isRemote((string) $belohnung['id']),
