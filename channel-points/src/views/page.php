@@ -341,7 +341,7 @@ $formular = static function (
                 Felder, damit beim Anlegen nichts fehlt, was beim
                 Aendern da ist.
             */ ?>
-            <details class="confirm cp-dialog confirm-right">
+            <details class="confirm cp-dialog">
                 <summary class="btn">+ <?= $e(translate('channel_points.new_button')) ?></summary>
 
                 <div class="confirm-panel">

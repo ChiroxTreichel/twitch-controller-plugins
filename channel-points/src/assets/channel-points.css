@@ -124,15 +124,51 @@
  * daneben und "immer nur einer offen" ohne eine Zeile eigenes
  * JavaScript. Nur breiter und hoeher als eine Rueckfrage.
  */
-.cp-dialog > .confirm-panel {
+/*
+ * In der Mitte des Fensters, nicht unter dem Knopf.
+ *
+ * Eine Rueckfrage mit zwei Zeilen darf am Knopf haengen - die liest
+ * man dort, wo man geklickt hat. Ein Formular mit zwanzig Feldern
+ * nicht: es hing unter seiner Kachel, lief unten aus dem Bild und
+ * legte sich mit eigenem Rollbalken quer ueber die Nachbarn.
+ *
+ * Die Auswahl ist absichtlich dreiteilig (.confirm.cp-dialog >):
+ * der Kern setzt fuer .confirm-right und .confirm-flip ebenfalls
+ * links/rechts, und zwar mit derselben Staerke. Mit weniger Klassen
+ * wuerde das hier verlieren.
+ */
+.confirm.cp-dialog > .confirm-panel {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    transform: translate(-50%, -50%);
+    z-index: 60;
+
     width: min(620px, 92vw);
     max-width: none;
 
-    /* Der Dialog traegt das ganze Formular von Twitch. Ohne die
-       Grenze waere er auf einem kleinen Bildschirm laenger als das
-       Fenster, und der Speichern-Knopf unerreichbar. */
-    max-height: 72vh;
+    /* Ohne die Grenze waere er auf einem kleinen Bildschirm laenger
+       als das Fenster, und der Speichern-Knopf unerreichbar. */
+    max-height: 86vh;
     overflow-y: auto;
+}
+
+/*
+ * Der Hintergrund tritt zurueck, solange der Dialog offen ist.
+ *
+ * pointer-events: none ist wichtig: der Schleier faengt keine Klicks.
+ * So schliesst ein Klick daneben den Dialog weiterhin ueber die
+ * Logik des Kerns - und ohne JavaScript bleibt der Stift anklickbar,
+ * mit dem man ihn wieder zuklappt.
+ */
+.confirm.cp-dialog[open]::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 59;
+    background: rgba(0, 0, 0, 0.55);
+    pointer-events: none;
 }
 
 .cp-dialog-head {
@@ -164,15 +200,20 @@
 }
 
 /*
- * Der Stift statt des Wortes "Bearbeiten". Quadratisch, damit er
- * neben den anderen Knoepfen nicht wie ein angeschnittener aussieht.
+ * Der Stift statt des Wortes "Bearbeiten".
+ *
+ * justify-content und nicht text-align: .btn ist inline-flex, und
+ * dort richtet text-align nichts aus - das Zeichen sass links am
+ * Rand. Dazu eine feste Hoehe, sonst ist der Knopf ein Rechteck mit
+ * einem Zeichen darin statt eines Quadrats.
  */
 .cp-pen {
+    justify-content: center;
     padding: 0;
     width: 34px;
-    text-align: center;
+    height: 34px;
     font-size: 1.05rem;
-    line-height: 32px;
+    line-height: 1;
 }
 
 /*
@@ -188,6 +229,19 @@
     margin-top: 6px;
     padding-top: 14px;
     border-top: 1px solid var(--line);
+}
+
+/*
+ * Die Rueckfragen hier klappen nach OBEN auf.
+ *
+ * Sie stehen ganz unten im Dialog, und der Dialog rollt. Nach unten
+ * geoeffnet lag ihr Kasten ausserhalb des Dialogs und damit hinter
+ * dessen Rand - nachgemessen: 88 Pixel darunter und ganz unsichtbar.
+ * Man drueckte auf "Entfernen" und es passierte scheinbar nichts.
+ */
+.cp-danger .confirm-panel {
+    top: auto;
+    bottom: calc(100% + 6px);
 }
 
 /* --- An und Aus ---------------------------------------------------- */
