@@ -232,16 +232,27 @@
 }
 
 /*
- * Die Rueckfragen hier klappen nach OBEN auf.
+ * Die Rueckfragen hier klappen nach OBEN und nach RECHTS auf.
  *
- * Sie stehen ganz unten im Dialog, und der Dialog rollt. Nach unten
- * geoeffnet lag ihr Kasten ausserhalb des Dialogs und damit hinter
- * dessen Rand - nachgemessen: 88 Pixel darunter und ganz unsichtbar.
- * Man drueckte auf "Entfernen" und es passierte scheinbar nichts.
+ * Sie stehen ganz unten links im Dialog, und der Dialog rollt. Nach
+ * unten geoeffnet lag ihr Kasten 88 Pixel unter dessen Rand, nach
+ * links geoeffnet ragte er seitlich heraus - beides abgeschnitten
+ * und damit unsichtbar. Man drueckte auf "Entfernen" und es passierte
+ * scheinbar nichts.
+ *
+ * Abgeschnitten deshalb, weil overflow-y: auto am Dialog auch
+ * waagerecht klippt: sobald eine Achse nicht mehr "visible" ist,
+ * macht der Browser aus der anderen ebenfalls "auto".
+ *
+ * Drei Klassen in der Auswahl, damit sie gegen .confirm-right und
+ * .confirm-flip des Kerns ankommt - die sind gleich stark, und dieses
+ * Stylesheet wird spaeter geladen.
  */
-.cp-danger .confirm-panel {
+.cp-danger .confirm > .confirm-panel {
     top: auto;
     bottom: calc(100% + 6px);
+    left: 0;
+    right: auto;
 }
 
 /* --- An und Aus ---------------------------------------------------- */

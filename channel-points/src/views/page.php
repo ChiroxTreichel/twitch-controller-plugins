@@ -541,7 +541,6 @@ $formular = static function (
                                     'action'   => $ziel,
                                     'fields'   => ['csrf' => $csrf, 'action' => 'delete', 'id' => $id],
                                     'danger'   => true,
-                                    'right'    => true,
                                 ], null) ?>
                             </div>
                         </div>
