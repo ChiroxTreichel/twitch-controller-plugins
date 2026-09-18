@@ -255,6 +255,39 @@
     right: auto;
 }
 
+/*
+ * Ein Formular, das da ist, aber nichts zu sagen hat.
+ *
+ * Bei einer fremden Belohnung nimmt Twitch keine Aenderung an - die
+ * Felder zu zeigen hiesse, zum Tippen einzuladen und dann abzulehnen.
+ * Weglassen kann man sie aber auch nicht: sie gehen mit, wenn doch
+ * jemand abschickt, und beim Neuanlegen steht damit alles bereit.
+ */
+.cp-form.is-hidden {
+    display: none;
+}
+
+/*
+ * Die Mitglieder einer Gruppe.
+ *
+ * Schalter untereinander, mit eigener Hoehe: bei zwanzig Belohnungen
+ * waere der Dialog sonst eine Seite lang, und die Bedingungen
+ * darunter faende niemand mehr.
+ */
+.cp-members {
+    max-height: 220px;
+    overflow-y: auto;
+    padding: 8px 10px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--panel-2);
+}
+
+.cp-members .switch-field {
+    display: flex;
+    margin: 4px 0;
+}
+
 /* --- An und Aus ---------------------------------------------------- */
 
 /*

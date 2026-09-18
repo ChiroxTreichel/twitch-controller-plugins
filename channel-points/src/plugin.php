@@ -24,6 +24,7 @@ declare(strict_types=1);
 use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
 use TwitchController\Plugin\ChannelPoints\Conditions;
+use TwitchController\Plugin\ChannelPoints\Groups;
 use TwitchController\Plugin\ChannelPoints\RewardApi;
 use TwitchController\Plugin\ChannelPoints\Rewards;
 use TwitchController\Plugin\ChannelPoints\Runner;
@@ -143,9 +144,17 @@ $hooks->on('cron.tick', static function () use ($app): void {
 // -------------------------------------------------------------------
 //  Die Seite
 // -------------------------------------------------------------------
-$seite = static function (Request $request) use ($app, $plugin): Response {
+/** Die beiden Reiter. Alles andere fuehrt auf den ersten. */
+$reiter = static function (Request $request, array $params = []): string {
+    $wunsch = (string) ($params['tab'] ?? $request->get('tab'));
+
+    return $wunsch === 'groups' ? 'groups' : 'rewards';
+};
+
+$seite = static function (Request $request, array $params = []) use ($app, $plugin, $reiter): Response {
     $stream = (new Stream($app))->state();
     $api = new RewardApi($app);
+    $gruppen = Groups::all($app);
 
     $zeilen = [];
 
@@ -156,12 +165,15 @@ $seite = static function (Request $request) use ($app, $plugin): Response {
             'reward' => $belohnung,
             'remote' => Rewards::isRemote((string) $belohnung['id']),
             'auto'   => Conditions::automatic($belohnung),
-            'want'   => Conditions::decide($belohnung, $stream),
-            'why'    => Conditions::reason($belohnung, $stream),
+            'want'   => Conditions::decide($belohnung, $stream, $gruppen),
+            'why'    => Conditions::reason($belohnung, $stream, $gruppen),
+            'groups' => Groups::forReward($gruppen, (string) $belohnung['id']),
         ];
     }
 
     return Response::html($app->view->from($plugin->directory . '/views')->render('page', [
+        'tab'      => $reiter($request, $params),
+        'groups'   => $gruppen,
         'title'    => translate('channel_points.name'),
         'active'   => 'stream/points',
         'enabled'  => Rewards::enabled($app),
@@ -189,10 +201,15 @@ $router->get('/stream/points', $seite, [
     'permission' => 'ChannelPoints.Global.View',
 ]);
 
+$router->get('/stream/points/{tab}', $seite, [
+    'auth'       => true,
+    'permission' => 'ChannelPoints.Global.View',
+]);
+
 // -------------------------------------------------------------------
 //  Speichern
 // -------------------------------------------------------------------
-$zurueck = static function (?string $notice = null, ?string $error = null) use ($app): Response {
+$zurueck = static function (?string $notice = null, ?string $error = null, string $tab = 'rewards') use ($app): Response {
     $query = [];
     if ($notice !== null) {
         $query['notice'] = $notice;
@@ -201,8 +218,12 @@ $zurueck = static function (?string $notice = null, ?string $error = null) use (
         $query['error'] = $error;
     }
 
+    // Zurueck auf den Reiter, von dem die Eingabe kam - sonst sucht
+    // man nach dem Speichern seine Gruppe wieder.
+    $ziel = $tab === 'groups' ? '/stream/points/groups' : '/stream/points';
+
     return Response::redirect(
-        $app->url('/stream/points') . ($query === [] ? '' : '?' . http_build_query($query))
+        $app->url($ziel) . ($query === [] ? '' : '?' . http_build_query($query))
     );
 };
 
@@ -267,6 +288,81 @@ $router->post('/stream/points', static function (Request $request) use ($app, $z
 
     $aktion = (string) $request->input('action');
     $id = (string) $request->input('id');
+
+    // ---------------------------------------------------------------
+    //  Gruppen
+    // ---------------------------------------------------------------
+    if (str_starts_with($aktion, 'group_')) {
+        if ($aktion === 'group_delete') {
+            $gruppe = Groups::find($app, $id);
+
+            if ($gruppe === null) {
+                return $zurueck(null, translate('channel_points.error.unknown_group'), 'groups');
+            }
+
+            Groups::forget($app, $id);
+
+            return $zurueck(translate('channel_points.group.deleted', [
+                'name' => (string) $gruppe['name'],
+            ]), null, 'groups');
+        }
+
+        if ($aktion === 'group_toggle') {
+            $gruppe = Groups::find($app, $id);
+
+            if ($gruppe === null) {
+                return $zurueck(null, translate('channel_points.error.unknown_group'), 'groups');
+            }
+
+            /*
+             * Aus heisst: diese Regel zaehlt nicht mit. NICHT, dass
+             * die Belohnungen darin ausgehen - die richten sich dann
+             * nach ihren eigenen Bedingungen.
+             */
+            $gruppe['enabled'] = empty($gruppe['enabled']);
+            Groups::put($app, $gruppe);
+
+            // Literale Schluessel: ein translate($bedingung ? 'a' : 'b')
+            // findet bin/lang.php nicht, und dann faellt ein
+            // fehlender Text erst dem Benutzer auf.
+            $name = ['name' => (string) $gruppe['name']];
+
+            return $zurueck($gruppe['enabled']
+                ? translate('channel_points.group.turned_on', $name)
+                : translate('channel_points.group.turned_off', $name), null, 'groups');
+        }
+
+        if ($aktion !== 'group_save' && $aktion !== 'group_create') {
+            return $zurueck(null, translate('common.error.unknown_action'), 'groups');
+        }
+
+        $mitglieder = $request->post['members'] ?? [];
+
+        $eingabe = [
+            'id'        => $aktion === 'group_save' ? $id : '',
+            'name'      => (string) $request->input('name'),
+            'members'   => is_array($mitglieder) ? $mitglieder : [],
+            'enabled'   => $aktion === 'group_create' ? true : $request->input('enabled') !== '',
+            'title_on'  => (string) $request->input('title_on'),
+            'game_on'   => (string) $request->input('game_on'),
+            'title_off' => is_array($request->post['title_off'] ?? null) ? $request->post['title_off'] : [],
+            'game_off'  => is_array($request->post['game_off'] ?? null) ? $request->post['game_off'] : [],
+        ];
+
+        if (trim($eingabe['name']) === '') {
+            return $zurueck(null, translate('channel_points.error.group_name'), 'groups');
+        }
+
+        if (!Groups::put($app, $eingabe)) {
+            return $zurueck(null, translate('channel_points.error.too_many_groups'), 'groups');
+        }
+
+        $name = ['name' => trim($eingabe['name'])];
+
+        return $zurueck($aktion === 'group_create'
+            ? translate('channel_points.group.created', $name)
+            : translate('channel_points.group.saved', $name), null, 'groups');
+    }
 
     // ---------------------------------------------------------------
     //  Laden
@@ -337,6 +433,10 @@ $router->post('/stream/points', static function (Request $request) use ($app, $z
         $fremd = empty($belohnung['manageable']) && Rewards::isRemote($id);
 
         Rewards::forget($app, $id);
+
+        // Eine Kennung, die niemandem mehr gehoert, hat in keiner
+        // Mitgliederliste mehr etwas zu suchen.
+        Groups::dropMember($app, $id);
 
         $name = ['title' => (string) $belohnung['title']];
 

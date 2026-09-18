@@ -31,17 +31,36 @@ final class Runner
         }
 
         $alle = Rewards::all($this->app);
+        $gruppen = Groups::all($this->app);
 
         /*
          * Erst die billige Frage: gibt es ueberhaupt etwas zu tun?
          * Ohne das wuerde jede Installation, die nur Belohnungen
          * verwaltet und keine Bedingungen nutzt, alle fuenf Minuten
          * den Streamstatus abfragen - fuer nichts.
+         *
+         * Eine Bedingung kann auch an einer Gruppe haengen: dann hat
+         * die Belohnung selbst keine, wird aber trotzdem geschaltet.
          */
-        $mitBedingung = array_filter($alle, static fn (array $b): bool =>
-            !empty($b['manageable']) && Conditions::automatic($b));
+        $redetMit = static function (array $b) use ($gruppen): bool {
+            if (empty($b['manageable'])) {
+                return false;
+            }
 
-        if ($mitBedingung === []) {
+            if (Conditions::automatic($b)) {
+                return true;
+            }
+
+            foreach (Groups::forReward($gruppen, (string) $b['id']) as $gruppe) {
+                if (!empty($gruppe['enabled']) && Conditions::automatic($gruppe)) {
+                    return true;
+                }
+            }
+
+            return false;
+        };
+
+        if (array_filter($alle, $redetMit) === []) {
             return;
         }
 
@@ -60,7 +79,7 @@ final class Runner
         $geaendert = false;
 
         foreach ($alle as $stelle => $belohnung) {
-            $soll = Conditions::decide($belohnung, $stream);
+            $soll = Conditions::decide($belohnung, $stream, $gruppen);
 
             if ($soll === null || $soll === !empty($belohnung['is_enabled'])) {
                 continue;

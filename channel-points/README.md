@@ -44,6 +44,36 @@ passen – wie bei den Timern.
 Ohne laufenden Stream wird nichts geschaltet: Titel und Kategorie
 stehen dann auf dem Stand des letzten Streams.
 
+## Gruppen
+
+`Stream → Kanalpunkte → Gruppen`
+
+Eine Gruppe fasst mehrere Belohnungen zusammen und trägt dieselben
+vier Bedingungsfelder. Sie **ersetzt** die Bedingungen der einzelnen
+Belohnung **nicht** – sie kommt dazu:
+
+```
+Gruppe "Nur beim Zocken":  An, wenn Kategorie = Minecraft
+Belohnung "Boss-Kampf":    Aus, wenn Titel enthält "Tutorial"
+
+→ beides gilt, und ein Aus von irgendwo schaltet ab.
+```
+
+**Wer aus sagt, gewinnt.** Egal ob die Regel an der Belohnung oder an
+einer ihrer Gruppen hängt. Sagt niemand aus und wenigstens einer an,
+ist sie an. Sagt niemand etwas, bleibt sie unangetastet.
+
+Jede Gruppe hat einen **Schalter**. Aus heißt: *diese Regel zählt
+gerade nicht mit* – nicht, dass die Belohnungen darin ausgehen. Die
+richten sich dann nach ihren eigenen Bedingungen. So lässt sich eine
+Gruppe für einen Abend beiseitelegen, ohne sie zu löschen.
+
+Schaltet eine Gruppe eine Belohnung ab, steht ihr Name auf der Kachel
+der Belohnung. Sonst sucht man die Bedingung dort, wo keine steht.
+
+Bekommt eine Belohnung eine neue Kennung (beim Neuanlegen) oder wird
+sie entfernt, ziehen die Mitgliederlisten mit.
+
 ## Was Twitch nicht erlaubt
 
 > „The custom reward's broadcaster must have created the reward using

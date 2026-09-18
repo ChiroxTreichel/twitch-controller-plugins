@@ -26,7 +26,9 @@ declare(strict_types=1);
  * @var bool $canEdit
  * @var bool $canToggle
  * @var array{live: bool, started_at: int, title: string, game: string, checked_at: int} $stream
- * @var list<array{reward: array<string, mixed>, remote: bool, auto: bool, want: bool|null, why: string}> $rewards
+ * @var string $tab  'rewards' oder 'groups'
+ * @var list<array<string, mixed>> $groups  alle Gruppen, alphabetisch
+ * @var list<array{reward: array<string, mixed>, remote: bool, auto: bool, want: bool|null, why: string, groups: list<array<string, mixed>>}> $rewards
  *      why ist der fertige Satz, nicht sein Schluessel.
  * @var string $csrf
  * @var array{title: int, prompt: int, cooldown: int} $limits
@@ -117,7 +119,7 @@ $formular = static function (
     array $b,
     bool $offen,
     bool $darfAendern
-) use ($e, $einheiten, $limits, $ausListe): void {
+) use ($e, $einheiten, $limits, &$bedingungen): void {
     ?>
     <div class="row">
         <label class="field grow">
@@ -215,11 +217,24 @@ $formular = static function (
 
     <p class="hint"><?= $e(translate('channel_points.limits_hint')) ?></p>
 
+    <?php $bedingungen($b, $darfAendern) ?>
+    <?php
+};
+
+/**
+ * Die beiden Bedingungsbloecke.
+ *
+ * Eigene Funktion, weil eine Gruppe dieselben vier Felder traegt -
+ * nur ohne die Felder von Twitch davor. Zweimal geschrieben liefen
+ * sie mit der Zeit auseinander.
+ */
+$bedingungen = static function (array $b, bool $darfAendern) use ($e, $ausListe): void {
+    ?>
     <?php /*
-        Ab hier gehoert nichts mehr Twitch. Die beiden Bloecke sind
-        deshalb farbig abgesetzt - gruen schaltet ein, rot schaltet
-        aus. Wer im Dialog scrollt, soll nicht erst die Ueberschrift
-        lesen muessen, um zu wissen, wo er gerade ist.
+        Hier gehoert nichts Twitch. Die beiden Bloecke sind deshalb
+        farbig abgesetzt - gruen schaltet ein, rot schaltet aus. Wer
+        im Dialog scrollt, soll nicht erst die Ueberschrift lesen
+        muessen, um zu wissen, wo er gerade ist.
     */ ?>
     <div class="cp-cond cp-cond-on">
         <h4 class="cp-cond-head"><?= $e(translate('channel_points.cond.on')) ?></h4>
@@ -264,6 +279,47 @@ $formular = static function (
         );
         ?>
     </div>
+    <?php
+};
+/**
+ * Die Felder einer Gruppe: Name, Mitglieder, Bedingungen.
+ *
+ * Die Mitglieder sind Schalter und keine Mehrfachauswahl: eine
+ * <select multiple> bedient sich mit der Maus nur mit gedrueckter
+ * Steuerungstaste, und wer das nicht weiss, loescht mit dem zweiten
+ * Klick seine erste Wahl.
+ */
+$gruppenFelder = static function (array $g) use ($e, $rewards, $darfAendern, &$bedingungen): void {
+    $mitglieder = array_map('strval', is_array($g['members'] ?? null) ? $g['members'] : []);
+    ?>
+    <label class="field">
+        <span class="hint"><?= $e(translate('channel_points.group.field.name')) ?></span>
+        <input class="input" type="text" name="name" maxlength="60"
+               value="<?= $e((string) $g['name']) ?>" <?= $darfAendern ? '' : 'disabled' ?>>
+    </label>
+
+    <div class="field">
+        <span class="hint"><?= $e(translate('channel_points.group.field.members')) ?></span>
+
+        <?php if ($rewards === []): ?>
+            <p class="hint"><?= $e(translate('channel_points.group.no_rewards')) ?></p>
+        <?php endif ?>
+
+        <div class="cp-members">
+            <?php foreach ($rewards as $zeile): ?>
+                <?php $rid = (string) $zeile['reward']['id']; ?>
+                <label class="switch-field">
+                    <input type="checkbox" name="members[]" value="<?= $e($rid) ?>"
+                           <?= in_array($rid, $mitglieder, true) ? 'checked' : '' ?>
+                           <?= $darfAendern ? '' : 'disabled' ?>>
+                    <span class="switch-track"><span class="switch-knob"></span></span>
+                    <span><?= $e((string) $zeile['reward']['title']) ?></span>
+                </label>
+            <?php endforeach ?>
+        </div>
+    </div>
+
+    <?php $bedingungen($g, $darfAendern) ?>
     <?php
 };
 ?>
@@ -321,6 +377,15 @@ $formular = static function (
 <?php if ($error !== ''): ?>
     <div class="note note-error"><?= $e($error) ?></div>
 <?php endif ?>
+
+<div class="tabs">
+    <a class="tab<?= $tab === 'rewards' ? ' is-active' : '' ?>"
+       href="<?= $e($url('/stream/points')) ?>"><?= $e(translate('channel_points.name')) ?></a>
+    <a class="tab<?= $tab === 'groups' ? ' is-active' : '' ?>"
+       href="<?= $e($url('/stream/points/groups')) ?>"><?= $e(translate('channel_points.groups')) ?></a>
+</div>
+
+<?php if ($tab === 'rewards'): ?>
 
 <?php if ($darfAendern): ?>
     <div class="card cp-bar">
@@ -464,7 +529,25 @@ $formular = static function (
                         <div class="confirm-panel">
                             <h3 class="cp-dialog-head"><?= $e((string) $b['title']) ?></h3>
 
-                            <?php if (!$eigen && !$nurHier): ?>
+                            <?php
+                            /*
+                             * Bei einer fremden Belohnung steht nur
+                             * der Hinweis da - und darunter die zwei
+                             * Knoepfe, die hier ueberhaupt etwas
+                             * bewirken.
+                             *
+                             * Das Formular bleibt stehen, nur
+                             * unsichtbar: seine Felder gehen weiter
+                             * mit, wenn doch jemand abschickt, und
+                             * beim Neuanlegen steht damit alles
+                             * bereit. Ein weggelassenes Formular
+                             * haette einen halben Datensatz
+                             * geschickt.
+                             */
+                            $stumm = !$eigen && !$nurHier;
+                            ?>
+
+                            <?php if ($stumm): ?>
                                 <div class="note note-warn"><?= $e(translate('channel_points.foreign_hint')) ?></div>
                             <?php endif ?>
 
@@ -472,7 +555,8 @@ $formular = static function (
                                 <div class="note note-warn"><?= $e(translate('channel_points.local_hint')) ?></div>
                             <?php endif ?>
 
-                            <form method="post" action="<?= $e($ziel) ?>">
+                            <form class="cp-form<?= $stumm ? ' is-hidden' : '' ?>"
+                                  method="post" action="<?= $e($ziel) ?>">
                                 <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                                 <input type="hidden" name="action" value="save">
                                 <input type="hidden" name="id" value="<?= $e($id) ?>">
@@ -551,3 +635,170 @@ $formular = static function (
         </article>
     <?php endforeach ?>
 </div>
+
+<?php else: ?>
+
+<?php /* ================= Gruppen ================= */ ?>
+<?php /*
+    Eine Gruppe fasst Belohnungen zusammen und traegt dieselben vier
+    Bedingungsfelder. Sie ersetzt die einzelnen nicht, sie kommt dazu -
+    und wer AUS sagt, gewinnt.
+*/ ?>
+<div class="card cp-bar">
+    <div class="cp-bar-text">
+        <strong><?= $e(translate('channel_points.groups')) ?></strong>
+        <p class="hint"><?= $e(translate('channel_points.groups_hint')) ?></p>
+    </div>
+
+    <?php if ($darfAendern): ?>
+        <div class="cp-bar-buttons">
+            <details class="confirm cp-dialog">
+                <summary class="btn">+ <?= $e(translate('channel_points.group.new_button')) ?></summary>
+
+                <div class="confirm-panel">
+                    <h3 class="cp-dialog-head"><?= $e(translate('channel_points.group.new')) ?></h3>
+
+                    <form method="post" action="<?= $e($ziel) ?>">
+                        <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                        <input type="hidden" name="action" value="group_create">
+                        <input type="hidden" name="id" value="">
+
+                        <?php $gruppenFelder([
+                            'name'      => '',
+                            'members'   => [],
+                            'title_on'  => '',
+                            'game_on'   => '',
+                            'title_off' => [],
+                            'game_off'  => [],
+                        ]) ?>
+
+                        <div class="row cp-dialog-actions">
+                            <button class="btn" type="submit">
+                                <?= $e(translate('channel_points.group.create_button')) ?>
+                            </button>
+                            <button class="btn btn-ghost" type="button" data-confirm-cancel>
+                                <?= $e(translate('common.cancel')) ?>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </details>
+        </div>
+    <?php endif ?>
+</div>
+
+<?php if ($groups === []): ?>
+    <div class="card">
+        <p class="hint"><?= $e(translate('channel_points.group.empty')) ?></p>
+    </div>
+<?php endif ?>
+
+<div class="cp-grid">
+    <?php foreach ($groups as $gruppe): ?>
+        <?php
+        $gid = (string) $gruppe['id'];
+        $anzahl = count($gruppe['members']);
+        ?>
+        <article class="cp-tile<?= empty($gruppe['enabled']) ? ' is-off' : '' ?>">
+            <div class="cp-tile-color" aria-hidden="true"></div>
+
+            <h3 class="cp-tile-name"><?= $e((string) $gruppe['name']) ?></h3>
+
+            <p class="cp-tile-badges">
+                <span class="badge"><?= $e(translate('channel_points.group.members', [
+                    'count' => (string) $anzahl,
+                ])) ?></span>
+
+                <?php if (empty($gruppe['enabled'])): ?>
+                    <span class="badge badge-off"
+                          title="<?= $e(translate('channel_points.group.off_hint')) ?>">
+                        <?= $e(translate('channel_points.inactive')) ?>
+                    </span>
+                <?php endif ?>
+            </p>
+
+            <p class="hint cp-tile-why">
+                <?php if ($anzahl === 0): ?>
+                    <?= $e(translate('channel_points.group.no_members')) ?>
+                <?php else: ?>
+                    <?= $e(implode(', ', array_map(
+                        static fn (array $z): string => (string) $z['reward']['title'],
+                        array_values(array_filter(
+                            $rewards,
+                            static fn (array $z): bool => in_array(
+                                (string) $z['reward']['id'],
+                                array_map('strval', $gruppe['members']),
+                                true
+                            )
+                        ))
+                    ))) ?>
+                <?php endif ?>
+            </p>
+
+            <?php if ($darfAendern): ?>
+                <div class="cp-tile-actions">
+                    <?php /*
+                        Der Schalter sagt, ob die REGEL gilt - nicht,
+                        ob die Belohnungen an sind. Aus heisst: die
+                        Gruppe legt sich fuer heute schlafen, ihre
+                        Mitglieder richten sich nach ihren eigenen
+                        Bedingungen.
+                    */ ?>
+                    <form method="post" action="<?= $e($ziel) ?>">
+                        <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                        <input type="hidden" name="action" value="group_toggle">
+                        <input type="hidden" name="id" value="<?= $e($gid) ?>">
+                        <button class="switch<?= !empty($gruppe['enabled']) ? ' is-on' : '' ?>" type="submit"
+                                title="<?= $e(translate('channel_points.group.toggle_hint')) ?>"
+                                aria-label="<?= $e(translate('channel_points.group.toggle_hint')) ?>">
+                            <span class="switch-track"><span class="switch-knob"></span></span>
+                        </button>
+                    </form>
+
+                    <details class="confirm cp-dialog">
+                        <summary class="btn btn-small cp-pen"
+                                 title="<?= $e(translate('channel_points.edit_button')) ?>"
+                                 aria-label="<?= $e(translate('channel_points.edit_button')) ?>">&#9998;</summary>
+
+                        <div class="confirm-panel">
+                            <h3 class="cp-dialog-head"><?= $e((string) $gruppe['name']) ?></h3>
+
+                            <form method="post" action="<?= $e($ziel) ?>">
+                                <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+                                <input type="hidden" name="action" value="group_save">
+                                <input type="hidden" name="id" value="<?= $e($gid) ?>">
+                                <input type="hidden" name="enabled"
+                                       value="<?= !empty($gruppe['enabled']) ? '1' : '' ?>">
+
+                                <?php $gruppenFelder($gruppe) ?>
+
+                                <div class="row cp-dialog-actions">
+                                    <button class="btn" type="submit">
+                                        <?= $e(translate('common.save')) ?>
+                                    </button>
+                                    <button class="btn btn-ghost" type="button" data-confirm-cancel>
+                                        <?= $e(translate('common.cancel')) ?>
+                                    </button>
+                                </div>
+                            </form>
+
+                            <div class="cp-danger">
+                                <?= $view->render('_confirm', [
+                                    'label'    => translate('common.remove'),
+                                    'question' => translate('channel_points.group.delete_question'),
+                                    'note'     => translate('channel_points.group.delete_note'),
+                                    'confirm'  => translate('channel_points.delete_confirm'),
+                                    'action'   => $ziel,
+                                    'fields'   => ['csrf' => $csrf, 'action' => 'group_delete', 'id' => $gid],
+                                    'danger'   => true,
+                                ], null) ?>
+                            </div>
+                        </div>
+                    </details>
+                </div>
+            <?php endif ?>
+        </article>
+    <?php endforeach ?>
+</div>
+
+<?php endif ?>

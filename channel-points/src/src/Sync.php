@@ -170,6 +170,10 @@ final class Sync
         Rewards::forget($this->app, $id);
         Rewards::put($this->app, $neu);
 
+        // Twitch hat eine neue Kennung vergeben - die Gruppen muessen
+        // mit, sonst faellt die Belohnung lautlos aus allen heraus.
+        Groups::rename($this->app, $id, (string) $neu['id']);
+
         return true;
     }
 
@@ -227,6 +231,7 @@ final class Sync
         // was die Bedingungen noch hatte.
         Rewards::forget($this->app, $id);
         Rewards::put($this->app, $neu);
+        Groups::rename($this->app, $id, (string) $neu['id']);
 
         $this->app->log(sprintf(
             'Kanalpunkte: "%s" als eigene Belohnung neu angelegt.',

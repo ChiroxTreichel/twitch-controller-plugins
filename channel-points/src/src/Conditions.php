@@ -115,22 +115,23 @@ final class Conditions
     }
 
     /**
-     * Soll die Belohnung jetzt an oder aus sein?
+     * Was EIN Satz Bedingungen sagt.
      *
-     * null heisst "nicht anfassen" - und das ist der haeufigste Fall:
-     * ohne Bedingungen, ohne laufenden Stream oder bei einer
-     * Belohnung, die uns nicht gehoert.
+     * Derselbe Satz Felder steckt in einer Belohnung und in einer
+     * Gruppe - also dieselbe Rechnung. Wer sie stellt, entscheidet
+     * decide().
      *
-     * Ohne Stream wird bewusst nichts entschieden. Titel und Kategorie
-     * stehen dann auf dem Stand des letzten Streams, und daraus eine
-     * Entscheidung abzuleiten hiesse raten.
+     * null heisst "keine Meinung": keine Bedingungen eingetragen oder
+     * kein Stream. Ohne Stream wird bewusst nichts entschieden - Titel
+     * und Kategorie stehen dann auf dem Stand des letzten Streams, und
+     * daraus etwas abzuleiten hiesse raten.
      *
-     * @param array<string, mixed> $belohnung
+     * @param array<string, mixed> $felder
      * @param array{live: bool, title: string, game: string} $stream
      */
-    public static function decide(array $belohnung, array $stream): ?bool
+    public static function evaluate(array $felder, array $stream): ?bool
     {
-        if (empty($belohnung['manageable']) || !self::automatic($belohnung)) {
+        if (!self::automatic($felder)) {
             return null;
         }
 
@@ -138,6 +139,7 @@ final class Conditions
             return null;
         }
 
+        $belohnung = $felder;
         $titel = (string) $stream['title'];
         $spiel = (string) $stream['game'];
 
@@ -172,6 +174,98 @@ final class Conditions
     }
 
     /**
+     * Mehrere Meinungen zu einer machen.
+     *
+     * WER AUS SAGT, GEWINNT. Eine einzige Aus-Bedingung - an der
+     * Belohnung oder an irgendeiner ihrer Gruppen - schaltet ab, auch
+     * wenn alles andere passt.
+     *
+     * Sagt niemand aus und wenigstens einer an, ist es an. Hat
+     * niemand eine Meinung, bleibt es null: dann faesst dieses Plugin
+     * die Belohnung nicht an.
+     *
+     * @param list<bool|null> $meinungen
+     */
+    public static function combine(array $meinungen): ?bool
+    {
+        $einAn = false;
+
+        foreach ($meinungen as $meinung) {
+            if ($meinung === false) {
+                return false;
+            }
+
+            if ($meinung === true) {
+                $einAn = true;
+            }
+        }
+
+        return $einAn ? true : null;
+    }
+
+    /**
+     * Soll die Belohnung jetzt an oder aus sein?
+     *
+     * Ihre eigenen Bedingungen und die aller Gruppen, in denen sie
+     * steckt - zusammengelegt nach der Regel oben.
+     *
+     * Eine ausgeschaltete Gruppe zaehlt nicht mit. Ausgeschaltet
+     * heisst "diese Regel gilt gerade nicht", nicht "alles darin aus"
+     * - sonst waere der Schalter eine Falle.
+     *
+     * @param array<string, mixed> $belohnung
+     * @param array{live: bool, title: string, game: string} $stream
+     * @param list<array<string, mixed>> $gruppen alle Gruppen
+     */
+    public static function decide(array $belohnung, array $stream, array $gruppen = []): ?bool
+    {
+        // Was uns nicht gehoert, fassen wir nicht an - Twitch nimmt
+        // den Aufruf ohnehin nicht an.
+        if (empty($belohnung['manageable'])) {
+            return null;
+        }
+
+        $meinungen = [self::evaluate($belohnung, $stream)];
+
+        foreach (Groups::forReward($gruppen, (string) ($belohnung['id'] ?? '')) as $gruppe) {
+            if (empty($gruppe['enabled'])) {
+                continue;
+            }
+
+            $meinungen[] = self::evaluate($gruppe, $stream);
+        }
+
+        return self::combine($meinungen);
+    }
+
+    /**
+     * Steckt hinter dem Aus eine Gruppe?
+     *
+     * Fuer die Oberflaeche: ein Schalter, der sich von selbst bewegt,
+     * macht ratlos - und noch ratloser, wenn an der Belohnung selbst
+     * gar nichts steht, was ihn erklaeren wuerde.
+     *
+     * @param array<string, mixed> $belohnung
+     * @param array{live: bool, title: string, game: string} $stream
+     * @param list<array<string, mixed>> $gruppen
+     * @return array<string, mixed>|null die Gruppe, die abschaltet
+     */
+    public static function blockingGroup(array $belohnung, array $stream, array $gruppen): ?array
+    {
+        foreach (Groups::forReward($gruppen, (string) ($belohnung['id'] ?? '')) as $gruppe) {
+            if (empty($gruppe['enabled'])) {
+                continue;
+            }
+
+            if (self::evaluate($gruppe, $stream) === false) {
+                return $gruppe;
+            }
+        }
+
+        return null;
+    }
+
+    /**
      * Warum steht die Belohnung gerade so? - fuer die Oberflaeche.
      *
      * Ein Schalter, der sich von selbst bewegt, macht ratlos, wenn
@@ -184,7 +278,7 @@ final class Conditions
      * @param array<string, mixed> $belohnung
      * @param array{live: bool, title: string, game: string} $stream
      */
-    public static function reason(array $belohnung, array $stream): string
+    public static function reason(array $belohnung, array $stream, array $gruppen = []): string
     {
         /*
          * Erst die Frage, ob es sie bei Twitch ueberhaupt gibt. Eine
@@ -200,7 +294,17 @@ final class Conditions
             return translate('channel_points.why.foreign');
         }
 
-        if (!self::automatic($belohnung)) {
+        // Ohne eigene Bedingungen UND ohne eine Gruppe, die etwas
+        // sagt, passiert nichts.
+        $mitgeredet = self::automatic($belohnung);
+
+        foreach (Groups::forReward($gruppen, (string) ($belohnung['id'] ?? '')) as $gruppe) {
+            if (!empty($gruppe['enabled']) && self::automatic($gruppe)) {
+                $mitgeredet = true;
+            }
+        }
+
+        if (!$mitgeredet) {
             return translate('channel_points.why.manual');
         }
 
@@ -208,7 +312,20 @@ final class Conditions
             return translate('channel_points.why.offline');
         }
 
-        return self::decide($belohnung, $stream) === true
+        /*
+         * Sagt eine Gruppe aus, wird sie beim Namen genannt. Sonst
+         * sucht man die Bedingung an einer Belohnung, an der keine
+         * steht.
+         */
+        $sperrt = self::blockingGroup($belohnung, $stream, $gruppen);
+
+        if ($sperrt !== null) {
+            return translate('channel_points.why.group_off', [
+                'group' => (string) $sperrt['name'],
+            ]);
+        }
+
+        return self::decide($belohnung, $stream, $gruppen) === true
             ? translate('channel_points.why.on')
             : translate('channel_points.why.off');
     }
