@@ -151,18 +151,26 @@ final class Api
                  * ein Geraet, das die Zahl in eine Beschriftung
                  * schreibt, will genau das.
                  *
-                 * Und im Fehlerfall ein SATZ, kein leerer Koerper.
+                 * Ohne aktives Geraet kommt ein Leerstring - und
+                 * zwar mit 200, nicht mit 404.
                  *
-                 * Das alte System schickte dort nichts ("http_response_code(404); exit"),
-                 * und ein leerer Fehlerkoerper ist eine Falle: Apache
-                 * ersetzt ihn durch seine eigene Standardseite "404
-                 * Not Found - The requested URL was not found on this
-                 * server". Von "diese Route gibt es nicht" ist das
-                 * nicht zu unterscheiden - und genau danach haben wir
-                 * eine halbe Stunde gesucht.
+                 * Das alte System schickte dort einen leeren 404
+                 * ("http_response_code(404); exit"). Hinter nginx kam
+                 * damit wirklich nichts an; hinter Apache nicht. Der
+                 * ersetzt einen leeren Koerper bei einem FEHLERstatus
+                 * durch seine eigene Seite "404 Not Found - The
+                 * requested URL was not found on this server", und
+                 * die ist von "diese Route gibt es nicht" nicht zu
+                 * unterscheiden. Genau danach haben wir eine halbe
+                 * Stunde gesucht.
+                 *
+                 * Bei 200 fasst er nichts an. Das Geraet am anderen
+                 * Ende liest dann wirklich nichts - und "nichts"
+                 * heisst hier "gerade keine Lautstaerke", was kein
+                 * Fehler ist, sondern ein Zustand.
                  */
                 return $laut === null
-                    ? Response::text('No active device', 404)
+                    ? Response::text('')
                     : Response::text((string) $laut);
 
             case 'raiseVolume':

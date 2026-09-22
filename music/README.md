@@ -260,18 +260,23 @@ Verlaufslisten.
 | `a` | Antwort |
 | --- | --- |
 | `running` | `{"running": true\|false}` |
-| `currentVolume` | die Zahl als **reiner Text**; `404` mit `No active device`, wenn keins aktiv ist |
+| `currentVolume` | die Zahl als **reiner Text**; **Leerstring mit `200`**, wenn kein Gerät aktiv ist |
 | `raiseVolume` / `lowerVolume` | `{"volume": N}` — Schritte von 10 % |
 | `nextTrack` / `previousTrack` | `{"ok": true}` |
 | `addToFavorites` | `{"ok": true, "id": …}` — legt den laufenden Titel in **deine Spotify-Bibliothek** |
 
-**Kein Fehler kommt ohne Körper.** Ein leerer Fehlerkörper ist eine
-Falle: Apache ersetzt ihn durch seine eigene Seite „404 Not Found — The
-requested URL was not found on this server", und das ist von „diese
-Route gibt es nicht" nicht zu unterscheiden.
+**Ein leerer Körper nur mit `200`.** Bei einem *Fehler*status ersetzt
+Apache einen leeren Körper durch seine eigene Seite („404 Not Found —
+The requested URL was not found on this server"), und die ist von
+„diese Route gibt es nicht" nicht zu unterscheiden. Hinter nginx — wie
+im alten System — passiert das nicht; hier schon.
+
+Darum: kein aktives Gerät ist bei `currentVolume` kein Fehler, sondern
+ein Zustand, und der antwortet mit einem leeren `200`.
 
 Fehler: `401` ohne gültigen Token, `400` bei unbekanntem `a`, `404`
-ohne aktives Gerät oder ohne laufenden Titel, `502` wenn Spotify die
+bei `raiseVolume`/`lowerVolume` ohne aktives Gerät und bei
+`addToFavorites` ohne laufenden Titel, `502` wenn Spotify die
 Änderung ablehnt, `503` wenn Spotify gar nicht verbunden ist.
 
 Der **Token** wird bei der Installation gewürfelt (32 Bytes, 64
