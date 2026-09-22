@@ -261,23 +261,25 @@ Verlaufslisten.
 | --- | --- |
 | `running` | `{"running": true\|false}` |
 | `currentVolume` | die Zahl als **reiner Text**; **Leerstring mit `200`**, wenn kein Gerät aktiv ist |
-| `raiseVolume` / `lowerVolume` | `{"volume": N}` — Schritte von 10 % |
+| `raiseVolume` / `lowerVolume` | `{"volume": N}` — Schritte von 10 %; `{"volume": null}` ohne aktives Gerät |
 | `nextTrack` / `previousTrack` | `{"ok": true}` |
 | `addToFavorites` | `{"ok": true, "id": …}` — legt den laufenden Titel in **deine Spotify-Bibliothek** |
 
-**Ein leerer Körper nur mit `200`.** Bei einem *Fehler*status ersetzt
-Apache einen leeren Körper durch seine eigene Seite („404 Not Found —
-The requested URL was not found on this server"), und die ist von
-„diese Route gibt es nicht" nicht zu unterscheiden. Hinter nginx — wie
-im alten System — passiert das nicht; hier schon.
+**Ein Fehler ist nur, was wirklich einer ist.** Dass gerade nichts
+läuft, gehört nicht dazu: der Aufruf ist durchgegangen, die Verbindung
+stand, es gab nur nichts zu holen oder zu ändern. Das antwortet mit
+`200` und einem leeren Wert — `currentVolume` mit einem Leerstring,
+`raiseVolume`/`lowerVolume` mit `{"volume": null}`.
 
-Darum: kein aktives Gerät ist bei `currentVolume` kein Fehler, sondern
-ein Zustand, und der antwortet mit einem leeren `200`.
+Das ist nicht nur Geschmack: ein **leerer Körper bei einem
+Fehler**status wird von Apache durch dessen eigene Seite ersetzt
+(„404 Not Found — The requested URL was not found on this server"),
+und die ist von „diese Route gibt es nicht" nicht zu unterscheiden.
+Hinter nginx — wie im alten System — fällt das nicht auf; hier schon.
 
-Fehler: `401` ohne gültigen Token, `400` bei unbekanntem `a`, `404`
-bei `raiseVolume`/`lowerVolume` ohne aktives Gerät und bei
-`addToFavorites` ohne laufenden Titel, `502` wenn Spotify die
-Änderung ablehnt, `503` wenn Spotify gar nicht verbunden ist.
+Echte Fehler: `401` ohne gültigen Token, `400` bei unbekanntem `a`,
+`404` bei `addToFavorites` ohne laufenden Titel, `502` wenn Spotify
+die Änderung ablehnt, `503` wenn Spotify gar nicht verbunden ist.
 
 Der **Token** wird bei der Installation gewürfelt (32 Bytes, 64
 Hex-Zeichen) und liegt verschlüsselt in der Datenbank — nicht in einer

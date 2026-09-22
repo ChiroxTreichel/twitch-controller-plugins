@@ -127,9 +127,15 @@ final class Api
      * Eine Aktion ausfuehren - der Token ist an dieser Stelle schon
      * geprueft.
      *
-     * Die Statuscodes sind die des alten Systems: 404 ohne aktives
-     * Geraet oder ohne laufenden Titel, 502 wenn Spotify die Aenderung
-     * ablehnt.
+     * Zu den Statuscodes: ein Fehler ist nur, was WIRKLICH einer
+     * ist. Dass gerade nichts laeuft, gehoert nicht dazu - der
+     * Aufruf ist dann durchgegangen, die Verbindung stand, es gab
+     * nur nichts zu holen oder zu aendern. Das antwortet mit 200 und
+     * einem leeren Wert.
+     *
+     * 502 bleibt fuer "Spotify lehnt ab", 503 fuer "gar nicht
+     * verbunden", 404 fuer addToFavorites ohne laufenden Titel - da
+     * gibt es wirklich nichts zu speichern.
      */
     public static function handle(App $app, string $aktion): Response
     {
@@ -177,8 +183,18 @@ final class Api
             case 'lowerVolume':
                 $laut = self::volumeOf($spotify->playerState());
 
+                /*
+                 * Kein aktives Geraet ist auch hier kein Fehler: der
+                 * Aufruf ist durchgegangen, die Verbindung stand, es
+                 * gab nur gerade nichts zu aendern.
+                 *
+                 * "volume": null statt eines leeren Koerpers, damit
+                 * die Antwort lesbares JSON bleibt - wer sie sonst
+                 * auspackt, faellt bei einer leeren Zeichenkette auf
+                 * die Nase.
+                 */
                 if ($laut === null) {
-                    return Response::json(['error' => 'No active device'], 404);
+                    return Response::json(['volume' => null]);
                 }
 
                 $ziel = self::volumeTarget($aktion, $laut);
