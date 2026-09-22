@@ -1,7 +1,7 @@
 {
     "music.api.actions": "Mögliche Werte für a:",
     "music.api.heading": "Steuer-API",
-    "music.api.hint": "Für Geräte statt für Menschen: ein Stream Deck, eine Tastenkombination, ein Skript. Es gibt keinen Login – der Token ist die Anmeldung, und jede Aktion verlangt ihn.",
+    "music.api.hint": "Für Geräte statt für Menschen: ein eigenes Bediengerät, eine Tastenkombination, ein Skript. Es gibt keinen Login – der Token ist die Anmeldung, und jede Aktion verlangt ihn.",
     "music.api.methods": "GET und POST gehen beide. Bei POST dürfen a und token im Rumpf stehen – dann landet der Token nicht in Protokollen und Verlaufslisten.",
     "music.api.missing": "Es ist kein Token hinterlegt. Damit weist die API jeden Aufruf ab. Unten lässt sich einer erzeugen.",
     "music.api.renew": "Neuen Token erzeugen",

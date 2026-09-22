@@ -535,7 +535,7 @@ final class Music
      * Wie lang der Token ist.
      *
      * 32 Bytes, als Hex also 64 Zeichen - dieselbe Laenge wie im
-     * alten System. Er steht in Adressen, die auf einem Stream Deck
+     * alten System. Er steht in Adressen, die auf einem Bediengeraet
      * hinterlegt sind; kuerzer waere bequemer und ratbar, laenger
      * brauchte niemand.
      */

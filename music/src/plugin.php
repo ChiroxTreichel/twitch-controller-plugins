@@ -1132,7 +1132,7 @@ $router->get('/music/panel', static function () use ($app): Response {
  *
  *   /music/api?a=nextTrack&token=...
  *
- * So muss an einem Stream Deck nur der Rechnername getauscht werden.
+ * So muss am Bediengeraet nur der Rechnername getauscht werden.
  *
  * GET und POST, beide. GET, weil sich das in jedes Geraet eintippen
  * laesst; POST, weil ein Token in einer Adresse in jedem Protokoll

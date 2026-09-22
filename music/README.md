@@ -245,8 +245,8 @@ sie behalten will, schreibt sie vorher heraus.
 
 ## Steuer-API
 
-Für Geräte statt für Menschen: ein Stream Deck, eine Tastenkombination,
-ein Skript. Es gibt keinen Login — **ein Token ist die Anmeldung, und
+Für Geräte statt für Menschen: ein eigenes Bediengerät, eine
+Tastenkombination, ein Skript. Es gibt keinen Login — **ein Token ist die Anmeldung, und
 jede Aktion verlangt ihn.**
 
 ```
@@ -260,10 +260,15 @@ Verlaufslisten.
 | `a` | Antwort |
 | --- | --- |
 | `running` | `{"running": true\|false}` |
-| `currentVolume` | die Zahl als **reiner Text**, `404` ohne aktives Gerät |
+| `currentVolume` | die Zahl als **reiner Text**; `404` mit `No active device`, wenn keins aktiv ist |
 | `raiseVolume` / `lowerVolume` | `{"volume": N}` — Schritte von 10 % |
 | `nextTrack` / `previousTrack` | `{"ok": true}` |
 | `addToFavorites` | `{"ok": true, "id": …}` — legt den laufenden Titel in **deine Spotify-Bibliothek** |
+
+**Kein Fehler kommt ohne Körper.** Ein leerer Fehlerkörper ist eine
+Falle: Apache ersetzt ihn durch seine eigene Seite „404 Not Found — The
+requested URL was not found on this server", und das ist von „diese
+Route gibt es nicht" nicht zu unterscheiden.
 
 Fehler: `401` ohne gültigen Token, `400` bei unbekanntem `a`, `404`
 ohne aktives Gerät oder ohne laufenden Titel, `502` wenn Spotify die

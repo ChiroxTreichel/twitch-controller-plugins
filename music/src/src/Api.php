@@ -15,8 +15,8 @@ use TwitchController\Core\Http\Response;
  * vor und zurueck, "laeuft gerade etwas", den laufenden Titel in die
  * eigene Bibliothek legen.
  *
- * Sie haengt an einem GERAET, nicht an einer Sitzung - ein Stream
- * Deck, eine Tastenkombination, ein Skript. Darum gibt es keinen
+ * Sie haengt an einem GERAET, nicht an einer Sitzung - ein eigenes
+ * Bediengeraet, eine Tastenkombination, ein Skript. Darum gibt es keinen
  * Login, sondern einen Token, und darum sind die Aufrufe 1:1 wie
  * frueher aufgebaut:
  *
@@ -148,11 +148,21 @@ final class Api
 
                 /*
                  * Reiner Text und nicht JSON - so war es frueher, und
-                 * ein Stream Deck, das die Zahl in eine Beschriftung
+                 * ein Geraet, das die Zahl in eine Beschriftung
                  * schreibt, will genau das.
+                 *
+                 * Und im Fehlerfall ein SATZ, kein leerer Koerper.
+                 *
+                 * Das alte System schickte dort nichts ("http_response_code(404); exit"),
+                 * und ein leerer Fehlerkoerper ist eine Falle: Apache
+                 * ersetzt ihn durch seine eigene Standardseite "404
+                 * Not Found - The requested URL was not found on this
+                 * server". Von "diese Route gibt es nicht" ist das
+                 * nicht zu unterscheiden - und genau danach haben wir
+                 * eine halbe Stunde gesucht.
                  */
                 return $laut === null
-                    ? Response::text('', 404)
+                    ? Response::text('No active device', 404)
                     : Response::text((string) $laut);
 
             case 'raiseVolume':

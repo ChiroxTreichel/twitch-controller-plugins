@@ -1,7 +1,7 @@
 {
     "music.api.actions": "Possible values for a:",
     "music.api.heading": "Control API",
-    "music.api.hint": "For devices rather than people: a Stream Deck, a hotkey, a script. There is no login – the token is the authentication, and every action requires it.",
+    "music.api.hint": "For devices rather than people: a control box of your own, a hotkey, a script. There is no login – the token is the authentication, and every action requires it.",
     "music.api.methods": "GET and POST both work. With POST, a and token may go in the body – then the token does not end up in logs and history lists.",
     "music.api.missing": "No token is stored. The API rejects every call. One can be created below.",
     "music.api.renew": "Create a new token",
