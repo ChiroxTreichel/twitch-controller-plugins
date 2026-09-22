@@ -32,6 +32,9 @@
  * @var string $redirectUri
  * @var string $publicUrl
  * @var string $panelUrl
+ * @var string $apiUrl
+ * @var string $apiToken
+ * @var list<string> $apiActions
  * @var bool $canEdit
  * @var string $csrf
  * @var string $notice
@@ -186,7 +189,6 @@
 
         <p class="hint"><?= $e(translate('music.cooldown_hint')) ?></p>
     </div>
-
     <div class="card">
         <div class="card-head">
             <h2><?= $e(translate('music.rules')) ?></h2>
@@ -319,3 +321,47 @@
         </div>
     <?php endif ?>
 </form>
+
+<?php /* ================= Steuer-API ================= */ ?>
+<?php /*
+    Sie haengt an einem Geraet, nicht an einem Menschen: ein Stream
+    Deck, eine Tastenkombination, ein Skript. Darum kein Login,
+    sondern ein Token - und der steht hier, weil er sonst nirgends
+    steht.
+*/ ?>
+<div class="card">
+    <h2><?= $e(translate('music.api.heading')) ?></h2>
+    <p class="hint"><?= $e(translate('music.api.hint')) ?></p>
+
+    <?php if ($apiToken === ''): ?>
+        <div class="note note-error"><?= $e(translate('music.api.missing')) ?></div>
+    <?php endif ?>
+
+    <label class="field">
+        <span class="hint"><?= $e(translate('music.api.url')) ?></span>
+        <input class="input" type="text" readonly
+               value="<?= $e($apiUrl . '?a=nextTrack&token=' . $apiToken) ?>"
+               onclick="this.select()">
+    </label>
+
+    <p class="hint">
+        <?= $e(translate('music.api.actions')) ?>
+        <code><?= $e(implode(', ', $apiActions)) ?></code>
+    </p>
+
+    <p class="hint"><?= $e(translate('music.api.methods')) ?></p>
+
+    <?php if ($canEdit): ?>
+        <div class="row" style="margin-top:14px;">
+            <?= $view->render('_confirm', [
+                'label'    => translate('music.api.renew'),
+                'question' => translate('music.api.renew_question'),
+                'note'     => translate('music.api.renew_note'),
+                'confirm'  => translate('music.api.renew_confirm'),
+                'action'   => $url('/display/music/settings'),
+                'fields'   => ['csrf' => $csrf, 'action' => 'new_api_token'],
+                'danger'   => true,
+            ], null) ?>
+        </div>
+    <?php endif ?>
+</div>

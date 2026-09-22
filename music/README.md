@@ -243,6 +243,47 @@ sie behalten will, schreibt sie vorher heraus.
 
 ## Das Panel für OBS
 
+## Steuer-API
+
+Für Geräte statt für Menschen: ein Stream Deck, eine Tastenkombination,
+ein Skript. Es gibt keinen Login — **ein Token ist die Anmeldung, und
+jede Aktion verlangt ihn.**
+
+```
+/music/api?a=nextTrack&token=<token>
+```
+
+`GET` und `POST` gehen beide. Bei `POST` dürfen `a` und `token` im
+Rumpf stehen; dann landet der Token nicht in Protokollen und
+Verlaufslisten.
+
+| `a` | Antwort |
+| --- | --- |
+| `running` | `{"running": true\|false}` |
+| `currentVolume` | die Zahl als **reiner Text**, `404` ohne aktives Gerät |
+| `raiseVolume` / `lowerVolume` | `{"volume": N}` — Schritte von 10 % |
+| `nextTrack` / `previousTrack` | `{"ok": true}` |
+| `addToFavorites` | `{"ok": true, "id": …}` — legt den laufenden Titel in **deine Spotify-Bibliothek** |
+
+Fehler: `401` ohne gültigen Token, `400` bei unbekanntem `a`, `404`
+ohne aktives Gerät oder ohne laufenden Titel, `502` wenn Spotify die
+Änderung ablehnt, `503` wenn Spotify gar nicht verbunden ist.
+
+Der **Token** wird bei der Installation gewürfelt (32 Bytes, 64
+Hex-Zeichen) und liegt verschlüsselt in der Datenbank — nicht in einer
+`.env`. Zu sehen und neu zu würfeln ist er unter *Anzeige → Musik →
+Einstellungen*. Ein neuer macht den alten sofort ungültig.
+
+Verglichen wird mit `hash_equals`: ein gewöhnlicher Vergleich bricht
+beim ersten falschen Zeichen ab und verrät damit, wie weit jemand
+schon richtig lag.
+
+Zwei Abweichungen von `api.php` des alten Systems, beide bewusst:
+`running` braucht jetzt auch den Token (ohne ihn verriete es Fremden,
+ob gerade Musik läuft), und `addToFavorites` legt den Titel in die
+Spotify-Bibliothek statt in die Merkliste eines Zuschauers — die
+gehört dort einer Twitch-Kennung, und ein Token ist niemand.
+
 **`/music/panel`** liefert reinen Text — Songname, Interpret, wer ihn
 sich gewünscht hat, und die nächsten fünf aus der Warteschlange. Genau
 wie `panel.php` im alten System, und aus demselben Grund ohne HTML: es

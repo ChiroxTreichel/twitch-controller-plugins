@@ -527,6 +527,55 @@ final class Music
         return $app->settings->hasSecret('refresh_token', self::scope());
     }
 
+    // -----------------------------------------------------------------
+    //  Der Token der Steuer-API
+    // -----------------------------------------------------------------
+
+    /**
+     * Wie lang der Token ist.
+     *
+     * 32 Bytes, als Hex also 64 Zeichen - dieselbe Laenge wie im
+     * alten System. Er steht in Adressen, die auf einem Stream Deck
+     * hinterlegt sind; kuerzer waere bequemer und ratbar, laenger
+     * brauchte niemand.
+     */
+    public const API_TOKEN_BYTES = 32;
+
+    public static function apiToken(App $app): string
+    {
+        return $app->settings->secret('api_token', '', self::scope());
+    }
+
+    public static function setApiToken(App $app, string $token): void
+    {
+        $app->settings->setSecret('api_token', $token, self::scope());
+    }
+
+    /** Ein neuer Token - aus dem Zufall des Betriebssystems. */
+    public static function newApiToken(): string
+    {
+        return bin2hex(random_bytes(self::API_TOKEN_BYTES));
+    }
+
+    /**
+     * Einen Token anlegen, falls noch keiner da ist.
+     *
+     * Laeuft bei der Installation und bei jeder Aktualisierung. Beide
+     * Male darf ein vorhandener NICHT ersetzt werden - sonst waeren
+     * nach einem Update alle hinterlegten Knoepfe tot, und niemand
+     * wuesste, warum.
+     */
+    public static function ensureApiToken(Settings $settings): bool
+    {
+        if ($settings->hasSecret('api_token', self::scope())) {
+            return false;
+        }
+
+        $settings->setSecret('api_token', self::newApiToken(), self::scope());
+
+        return true;
+    }
+
     /** Der Name des verbundenen Spotify-Kontos, fuer die Anzeige. */
     public static function accountName(App $app): string
     {

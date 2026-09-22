@@ -26,6 +26,7 @@ use TwitchController\Core\App;
 use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
 use TwitchController\Core\Overlay\Bus;
+use TwitchController\Plugin\Music\Api;
 use TwitchController\Plugin\Music\Bans;
 use TwitchController\Plugin\Music\Favorites;
 use TwitchController\Plugin\Music\Link;
@@ -491,6 +492,15 @@ $router->get('/display/music/settings', static function (Request $request) use (
         'redirectUri' => Music::redirectUri($app),
         'publicUrl'   => $app->url('/music'),
         'panelUrl'    => $app->url('/music/panel'),
+
+        /*
+         * Die Steuer-API. Der Token wird bei der Installation
+         * gewuerfelt - steht hier trotzdem ein leerer, ist beim
+         * Einrichten etwas schiefgegangen, und die Seite sagt es.
+         */
+        'apiUrl'      => $app->url('/music/api'),
+        'apiToken'    => Music::apiToken($app),
+        'apiActions'  => Api::ACTIONS,
         'canEdit'     => $app->auth->can('Music.Global.Edit'),
 
         /*
@@ -581,6 +591,17 @@ $router->post('/display/music/settings', static function (Request $request) use 
             Music::disconnect($app);
 
             return $zurueckEinstellungen($app, translate('music.disconnected'));
+
+        /*
+         * Einen neuen Token wuerfeln.
+         *
+         * Danach sind alle hinterlegten Knoepfe tot, bis dort die neue
+         * Adresse steht - deshalb fragt die Oberflaeche vorher nach.
+         */
+        case 'new_api_token':
+            Music::setApiToken($app, Music::newApiToken());
+
+            return $zurueckEinstellungen($app, translate('music.api.token_new'));
 
     }
 
@@ -1102,6 +1123,53 @@ $router->get('/music/panel', static function () use ($app): Response {
         'Cache-Control' => 'no-store, must-revalidate',
     ]);
 });
+
+// -------------------------------------------------------------------
+//  Die Steuer-API
+// -------------------------------------------------------------------
+/*
+ * 1:1 in der Aufrufform wie im alten System:
+ *
+ *   /music/api?a=nextTrack&token=...
+ *
+ * So muss an einem Stream Deck nur der Rechnername getauscht werden.
+ *
+ * GET und POST, beide. GET, weil sich das in jedes Geraet eintippen
+ * laesst; POST, weil ein Token in einer Adresse in jedem Protokoll
+ * und jeder Verlaufsliste landet - wer das vermeiden will, schickt
+ * ihn im Rumpf.
+ *
+ * Kein 'auth': hier haengt kein Mensch dran, sondern ein Geraet. Der
+ * Token IST die Anmeldung, und er wird fuer jede Aktion verlangt.
+ */
+$steuerung = static function (Request $request) use ($app): Response {
+    // Aus dem Rumpf, sonst aus der Adresse - so tut es beides.
+    $wert = static function (string $name) use ($request): string {
+        $ausRumpf = $request->input($name);
+
+        return $ausRumpf !== '' ? $ausRumpf : trim((string) $request->get($name));
+    };
+
+    $aktion = $wert('a');
+
+    if (!Api::tokenOk(Music::apiToken($app), $wert('token'))) {
+        /*
+         * Erst der Token, dann die Frage nach der Aktion. Andersherum
+         * verriete die Antwort "Unknown action", welche Namen es
+         * gibt - an jemanden, der keinen Token hat.
+         */
+        return Response::json(['error' => 'Unauthorized'], 401);
+    }
+
+    if (!Api::knows($aktion)) {
+        return Response::json(['error' => 'Unknown action'], 400);
+    }
+
+    return Api::handle($app, $aktion);
+};
+
+$router->get('/music/api', $steuerung);
+$router->post('/music/api', $steuerung);
 
 $router->post('/music', static function (Request $request) use ($app, $darfWuenschen): Response {
     $zurueck = static function (?string $notice = null, ?string $error = null) use ($app): Response {

@@ -14,8 +14,25 @@ declare(strict_types=1);
  * Hier liegt alles in der Datenbank, wie alles andere auch.
  *
  * @var \TwitchController\Core\Database\Db $db
+ * @var \TwitchController\Core\Config\Settings $settings
  * @var string|null $fromVersion
  */
+
+use TwitchController\Plugin\Music\Music;
+
+/*
+ * Der Token der Steuer-API.
+ *
+ * Er wird HIER gewuerfelt und nicht beim ersten Aufruf: eine Anlage,
+ * die erst einen Token bekommt, wenn jemand danach fragt, steht bis
+ * dahin ohne einen da - und ein leerer Token heisst in Api::tokenOk()
+ * "niemand darf", was richtig ist, aber nur, wenn es nie vorkommt.
+ *
+ * Ein vorhandener bleibt. Diese Datei laeuft auch bei jeder
+ * Aktualisierung; wuerde sie neu wuerfeln, waeren danach alle
+ * hinterlegten Knoepfe tot.
+ */
+Music::ensureApiToken($settings);
 
 /*
  * Die Bannliste.
