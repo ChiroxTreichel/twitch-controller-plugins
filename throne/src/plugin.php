@@ -221,12 +221,26 @@ $hooks->on('core.obs.present', static function (?array $view, array $row, array 
         ];
     }
 
+    /*
+     * Der Wert gehoert in die Zeile.
+     *
+     * Ohne ihn stand dort nur ein Name, und die haeufigste Frage beim
+     * Blick in den Feed - "wie viel war das?" - liess sich nur durch
+     * Nachschlagen beantworten. Der Betrag steht in der Spalte, er
+     * kostet nichts.
+     *
+     * Fehlt er (ein Ereignis ohne Preis), bleibt es beim Namen
+     * allein. Eine 0,00 waere eine Auskunft, die niemand gegeben hat.
+     */
+    $wert = Throne::amountLabel($row['amount'] ?? null, $row['currency'] ?? null);
+    $name = $wer !== '' ? $wer : translate('throne.someone');
+
     return [
         'badge'  => $fall === 'gift'
             ? translate('throne.badge.gift')
             : translate('throne.badge.contribution'),
         'style'  => $fall === 'gift' ? 'throne_gift' : 'throne_contribution',
-        'title'  => $wer !== '' ? $wer : translate('throne.someone'),
+        'title'  => $wert === '' ? $name : $name . ' * ' . $wert,
         'filter' => $fall === 'gift' ? 'throne.gift' : 'throne.contribution',
     ];
 });

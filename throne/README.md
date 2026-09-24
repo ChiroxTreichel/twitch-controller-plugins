@@ -18,6 +18,17 @@ der Rest genauso: die Ereignisse landen im Feed.
 Beim Sammelziel gibt es deshalb keinen Namen. Im Feed steht dort, *was*
 voll geworden ist; im Alert kannst du `{{ item }}` benutzen.
 
+Im Feed steht bei Geschenk und Spende **der Wert hinter dem Namen**:
+
+```
+Throne Spende    chiroxt * 50.00€
+```
+
+Gibt es keinen Betrag, bleibt es beim Namen allein — eine `0,00` wäre
+eine Auskunft, die niemand gegeben hat. Eine Währung, für die kein
+Zeichen hinterlegt ist, steht als Code dahinter (`50.00 CHF`); lieber
+der Code als ein falsches Zeichen.
+
 ## Der Webhook steht offen — und ist trotzdem zu
 
 Throne kann sich hier nicht anmelden, also nimmt die Adresse jede

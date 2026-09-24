@@ -286,6 +286,53 @@ final class Throne
     }
 
     /**
+     * Die gelaeufigsten Waehrungen als Zeichen.
+     *
+     * Throne schickt einen Code ("EUR"). Im Feed steht die Zeile in
+     * einer Zeile neben vielen anderen - da liest sich "50.00EUR"
+     * schlechter als "50.00€". Was hier fehlt, bleibt als Code
+     * stehen: lieber "50.00 CHF" als ein falsches Zeichen.
+     */
+    private const SYMBOLS = [
+        'EUR' => '€',
+        'USD' => '$',
+        'GBP' => '£',
+        'JPY' => '¥',
+    ];
+
+    /**
+     * Der Betrag, wie er im Feed hinter dem Namen steht.
+     *
+     * Leer, wenn es keinen gibt - dann steht dort nur der Name, und
+     * das ist richtig: ein Ereignis ohne Preis (ein Abonnement, ein
+     * blosser Hinweis) soll keine 0,00 vortaeuschen.
+     *
+     * Die Zahl bleibt, wie sie in der Spalte steht. Sie kommt aus
+     * money() und hat dort schon zwei Nachkommastellen.
+     */
+    public static function amountLabel(mixed $betrag, mixed $waehrung): string
+    {
+        $betrag = trim((string) $betrag);
+
+        if ($betrag === '' || (float) $betrag <= 0.0) {
+            return '';
+        }
+
+        $code = strtoupper(trim((string) $waehrung));
+
+        if ($code === '') {
+            return $betrag;
+        }
+
+        // Ein bekanntes Zeichen klebt am Betrag, ein unbekannter Code
+        // steht mit Abstand dahinter - "50.00 CHF" liest sich, "50.00CHF"
+        // nicht.
+        return isset(self::SYMBOLS[$code])
+            ? $betrag . self::SYMBOLS[$code]
+            : $betrag . ' ' . $code;
+    }
+
+    /**
      * Zu welchem Fall gehoert ein gespeicherter Ereignistyp?
      *
      * Hereinkommen kann beides: "throne.gift_purchased" aus der
