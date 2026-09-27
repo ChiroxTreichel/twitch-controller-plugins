@@ -7,7 +7,9 @@ namespace TwitchController\Plugin\PaypalTipGoals;
 use RuntimeException;
 use Throwable;
 use TwitchController\Core\App;
+use TwitchController\Core\Config\Settings;
 use TwitchController\Core\Support\Http;
+use TwitchController\Plugin\TipGoals\TipGoals;
 
 /**
  * ===================================================================
@@ -25,6 +27,11 @@ use TwitchController\Core\Support\Http;
  * das ist unschoen, aber nicht gefaehrlich. Gefaehrlich waere der
  * umgekehrte Fall.
  *
+ * Seit 2.0 ist das hier nur noch der Zahlungsweg. Seite, Ziele,
+ * Spenden und Alert liegen im Plugin Tip-Goals; dort meldet sich
+ * PayPal als Anbieter an (tips.providers) und bucht mit
+ * Donations::complete().
+ *
  * Aus der Legacy uebernommen, Aufruf fuer Aufruf. Zwei Dinge sind
  * anders:
  *
@@ -37,17 +44,57 @@ use TwitchController\Core\Support\Http;
  */
 final class PayPal
 {
+    public const SLUG = 'paypal-tip-goals';
+
+    /** Der Schluessel, unter dem PayPal bei Tip-Goals angemeldet ist. */
+    public const PROVIDER = 'paypal';
+
     /** Wie lange ein Zugangstoken von PayPal gilt, abzueglich Sicherheit. */
     private const TOKEN_SLACK = 30;
 
     /**
-     * Mehr nimmt diese Seite nicht an.
+     * Die Vorgabe fuer die PayPal-Gebuehr.
      *
-     * Nicht aus Vorsicht gegen PayPal, sondern gegen Vertipper: wer
-     * 5 statt 5,00 meint, hat sich nicht um den Faktor tausend
-     * vergriffen - wer 5000 tippt, vielleicht schon.
+     * Als Konstante und nicht dreimal als Zeichenkette: der Wert stand
+     * im Getter UND im Einstellungsformular, und solange beide
+     * dasselbe sagen, faellt niemandem auf, dass es zwei sind. Aendert
+     * man nur einen, zeigt das leere Formular etwas anderes an, als
+     * ohne Eintrag gerechnet wird.
+     *
+     * Der Betrag ist der Satz fuer Spenden innerhalb Deutschlands.
+     * Geraten wird trotzdem nichts: was wirklich abgezogen wurde, sagt
+     * die Abrechnung, und wer einen anderen Satz hat, traegt ihn ein.
      */
-    public const MAX_AMOUNT = 10000.0;
+    public const FEE_PERCENT = '2.99';
+    public const FEE_FIXED = '0.39';
+
+    public static function scope(): string
+    {
+        return Settings::pluginScope(self::SLUG);
+    }
+
+    // -----------------------------------------------------------------
+    //  Gebuehren
+    // -----------------------------------------------------------------
+
+    /**
+     * Die PayPal-Gebuehr, fuer den Schalter "Gebuehren uebernehmen".
+     *
+     * Sie steht als Einstellung und wird nicht erraten: PayPal
+     * berechnet je nach Land und Konto anderes, und ein geratener Wert
+     * waere eine Zusage, die man nicht halten kann. Gerechnet wird
+     * damit nur der VORSCHLAG im Formular - was wirklich abgezogen
+     * wurde, sagt PayPal beim Einzug.
+     */
+    public static function feePercent(App $app): float
+    {
+        return max(0.0, (float) TipGoals::money($app->settings->string('fee_percent', self::FEE_PERCENT, self::scope())));
+    }
+
+    public static function feeFixed(App $app): float
+    {
+        return max(0.0, (float) TipGoals::money($app->settings->string('fee_fixed', self::FEE_FIXED, self::scope())));
+    }
 
     // -----------------------------------------------------------------
     //  Zugangsdaten
@@ -58,11 +105,11 @@ final class PayPal
         $clientId = trim($clientId);
 
         if ($clientId !== '') {
-            $app->settings->setSecret('paypal_client_id', $clientId, TipGoals::scope());
+            $app->settings->setSecret('paypal_client_id', $clientId, self::scope());
         }
 
         if (trim($secret) !== '') {
-            $app->settings->setSecret('paypal_secret', trim($secret), TipGoals::scope());
+            $app->settings->setSecret('paypal_secret', trim($secret), self::scope());
         }
     }
 
@@ -71,24 +118,24 @@ final class PayPal
         $app->settings->setMany([
             'paypal_client_id' => '',
             'paypal_secret'    => '',
-        ], TipGoals::scope());
+        ], self::scope());
     }
 
     public static function hasCredentials(App $app): bool
     {
-        return $app->settings->hasSecret('paypal_client_id', TipGoals::scope())
-            && $app->settings->hasSecret('paypal_secret', TipGoals::scope());
+        return $app->settings->hasSecret('paypal_client_id', self::scope())
+            && $app->settings->hasSecret('paypal_secret', self::scope());
     }
 
     /** Echtbetrieb oder Testkonto? */
     public static function live(App $app): bool
     {
-        return $app->settings->bool('paypal_live', false, TipGoals::scope());
+        return $app->settings->bool('paypal_live', false, self::scope());
     }
 
     public static function setLive(App $app, bool $live): void
     {
-        $app->settings->set('paypal_live', $live, TipGoals::scope());
+        $app->settings->set('paypal_live', $live, self::scope());
     }
 
     private static function baseUrl(App $app): string
@@ -126,8 +173,8 @@ final class PayPal
             ['grant_type' => 'client_credentials'],
             [
                 'Authorization' => 'Basic ' . base64_encode(
-                    $app->settings->secret('paypal_client_id', TipGoals::scope())
-                    . ':' . $app->settings->secret('paypal_secret', TipGoals::scope())
+                    $app->settings->secret('paypal_client_id', self::scope())
+                    . ':' . $app->settings->secret('paypal_secret', self::scope())
                 ),
                 'Accept' => 'application/json',
             ]
@@ -181,8 +228,12 @@ final class PayPal
                     'locale'              => 'de-DE',
                     'user_action'         => 'PAY_NOW',
                     'shipping_preference' => 'NO_SHIPPING',
-                    'return_url'          => $app->url('/tips/return'),
-                    'cancel_url'          => $app->url('/tips/cancel') . '?merker=' . rawurlencode($merker),
+                    // Zwei Abschnitte unter /tips: /tips/{page} der
+                    // Spendenseite faengt genau einen und antwortete
+                    // sonst selbst - so ist die Rueckkehr in 1.x nie
+                    // angekommen.
+                    'return_url'          => $app->url('/tips/paypal/return'),
+                    'cancel_url'          => $app->url('/tips/paypal/cancel') . '?merker=' . rawurlencode($merker),
                 ],
             ],
             [

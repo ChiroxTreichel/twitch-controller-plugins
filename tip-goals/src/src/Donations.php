@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TwitchController\Plugin\PaypalTipGoals;
+namespace TwitchController\Plugin\TipGoals;
 
 use TwitchController\Core\App;
 
@@ -11,24 +11,25 @@ use TwitchController\Core\App;
  *  Spenden: von der Absicht bis zur Buchung
  * ===================================================================
  *
- * Eine Spende hat vier Zustaende, und zwischen zweien davon liegt eine
+ * Eine Spende hat fuenf Zustaende, und zwischen zweien davon liegt eine
  * fremde Seite:
  *
- *   offen        angelegt, PayPal weiss noch nichts
- *   genehmigt    Order liegt bei PayPal, der Spender ist dort
- *   gebucht      eingezogen, Geld ist geflossen
- *   abgebrochen  nie zustande gekommen
+ *   open       angelegt, der Anbieter weiss noch nichts
+ *   pending    beim Anbieter angelegt, der Spender ist dort
+ *   captured   eingezogen, Geld ist geflossen
+ *   cancelled  nie zustande gekommen
+ *   expired    der Spender kam nicht zurueck
  *
- * Der Uebergang nach "gebucht" ist der einzige, bei dem Geld bewegt
- * wird - und er passiert genau einmal. Dafuer sorgen zwei Dinge: der
- * Merker geht als PayPal-Request-Id mit (PayPal zieht dann auch bei
- * einem zweiten Versuch nur einmal ein), und die Buchung hier prueft
- * den Zustand, bevor sie das Ziel erhoeht.
+ * Der Uebergang nach "captured" ist der einzige, bei dem Geld bewegt
+ * wird - und er passiert genau einmal, in complete(). Die Bedingung im
+ * UPDATE laesst von zwei gleichzeitigen Rueckkehrern nur einen durch;
+ * dass der Anbieter selbst nicht zweimal einzieht, ist Sache des
+ * Anbieter-Plugins (bei PayPal: der Merker als PayPal-Request-Id).
  *
- * Was eine offene Spende NICHT ist: eine Zusage. Wer bei PayPal
- * abbricht oder den Tab schliesst, laesst eine genehmigte Order
- * stehen - dann ist nichts geflossen. Solche Zeilen laufen ab und
- * werden weggeraeumt.
+ * Was eine offene Spende NICHT ist: eine Zusage. Wer beim Anbieter
+ * abbricht oder den Tab schliesst, laesst eine Zeile stehen, bei der
+ * nichts geflossen ist. Solche Zeilen laufen ab und werden
+ * weggeraeumt.
  *
  * Wie bei den Raid-Anfragen bekommt der Besucher KEIN Konto in dieser
  * Verwaltung, sondern ein signiertes Cookie mit seinem Twitch-Namen.
@@ -49,7 +50,7 @@ final class Donations
     /**
      * Wie lange eine offene Spende gilt.
      *
-     * Danach ist sie abgelaufen: der Spender hat den Weg zu PayPal
+     * Danach ist sie abgelaufen: der Spender hat den Weg beim Anbieter
      * nicht zu Ende gegangen. Eine halbe Stunde ist grosszuegig - wer
      * dort so lange braucht, kommt nicht mehr wieder.
      */
@@ -58,7 +59,7 @@ final class Donations
     /** Wie lange abgeschlossene Zeilen stehen bleiben. */
     public const KEEP_DAYS = 90;
 
-    public const TABLE = 'pp_donation_intents';
+    public const TABLE = 'tip_donations';
 
     // -----------------------------------------------------------------
     //  Anlegen und nachschlagen
@@ -68,11 +69,12 @@ final class Donations
      * Eine Spende vormerken und ihren Merker zurueckgeben.
      *
      * Der Merker ist zufaellig und nicht die Zeilennummer: er steht
-     * gleich in einer Adresse bei PayPal, und eine fortlaufende Nummer
-     * dort verriete, wie viele Spenden es gibt.
+     * gleich in einer Adresse beim Anbieter, und eine fortlaufende
+     * Nummer dort verriete, wie viele Spenden es gibt.
      */
     public static function create(
         App $app,
+        string $anbieter,
         array $wer,
         float $betrag,
         ?string $nachricht,
@@ -83,13 +85,14 @@ final class Donations
 
         $app->db->run(
             'INSERT INTO ' . self::TABLE . '
-                 (token, twitch_user_id, twitch_login, twitch_display_name,
+                 (token, provider, twitch_user_id, twitch_login, twitch_display_name,
                   message, anonymous, amount_eur, goal_id, status, expires_at)
-             VALUES (:token, :id, :login, :name, :nachricht, :anonym,
+             VALUES (:token, :anbieter, :id, :login, :name, :nachricht, :anonym,
                      CAST(:betrag AS NUMERIC), :ziel, \'open\',
                      now() + (:ttl || \' seconds\')::interval)',
             [
                 'token'     => $merker,
+                'anbieter'  => $anbieter,
                 'id'        => (string) ($wer['user_id'] ?? ''),
                 'login'     => (string) ($wer['login'] ?? ''),
                 'name'      => (string) ($wer['display_name'] ?? ''),
@@ -105,25 +108,43 @@ final class Donations
     }
 
     /** @return array<string, mixed>|null */
-    public static function byOrder(App $app, string $orderId): ?array
+    public static function byToken(App $app, string $merker): ?array
     {
-        if (trim($orderId) === '') {
+        if (trim($merker) === '') {
+            return null;
+        }
+
+        return $app->db->first('SELECT * FROM ' . self::TABLE . ' WHERE token = :token', ['token' => $merker]);
+    }
+
+    /**
+     * Eine Spende ueber die Nummer des Anbieters finden.
+     *
+     * Der Rueckweg bringt oft nur DIE mit - PayPal etwa haengt seine
+     * Order-Nummer an und nicht unseren Merker.
+     *
+     * @return array<string, mixed>|null
+     */
+    public static function byReference(App $app, string $anbieter, string $nummer): ?array
+    {
+        if (trim($nummer) === '') {
             return null;
         }
 
         return $app->db->first(
-            'SELECT * FROM ' . self::TABLE . ' WHERE paypal_order_id = :id',
-            ['id' => $orderId]
+            'SELECT * FROM ' . self::TABLE . ' WHERE provider = :anbieter AND provider_ref = :nummer',
+            ['anbieter' => $anbieter, 'nummer' => $nummer]
         );
     }
 
-    public static function markApproved(App $app, string $merker, string $orderId): void
+    /** Der Spender ist beim Anbieter; der hat ihr diese Nummer gegeben. */
+    public static function markPending(App $app, string $merker, string $nummer): void
     {
         $app->db->run(
             'UPDATE ' . self::TABLE . '
-                SET paypal_order_id = :order, status = \'approved\'
+                SET provider_ref = :nummer, status = \'pending\'
               WHERE token = :token AND status = \'open\'',
-            ['order' => $orderId, 'token' => $merker]
+            ['nummer' => $nummer, 'token' => $merker]
         );
     }
 
@@ -135,34 +156,72 @@ final class Donations
         $app->db->run(
             'UPDATE ' . self::TABLE . '
                 SET status = \'cancelled\'
-              WHERE token = :token AND status IN (\'open\', \'approved\')',
+              WHERE token = :token AND status IN (\'open\', \'pending\')',
             ['token' => $merker]
         );
     }
 
     /**
-     * Eine Spende als gebucht eintragen - genau einmal.
+     * Eine Spende buchen - genau einmal.
+     *
+     * Das ist der eine Weg, auf dem Geld in einen Balken kommt, und
+     * jeder Anbieter geht ihn: eintragen, Ziel erhoehen, tips.donation
+     * ausloesen. Der Anbieter meldet nur, WAS eingezogen wurde.
      *
      * Die Bedingung im WHERE ist das Schloss: zwei gleichzeitige
      * Rueckkehrer (Nachladen, zwei Tabs) lassen nur einen durch, und
      * nur der erhoeht danach das Ziel.
      *
+     * Auf das Ziel kommt der NETTObetrag, wenn der Anbieter ihn nennt -
+     * der Balken soll nicht mehr zeigen, als ankommt.
+     *
      * @return bool true, wenn DIESER Aufruf die Buchung war
      */
-    public static function markCaptured(App $app, string $merker, string $captureId): bool
+    public static function complete(App $app, string $merker, string $einzug, float $brutto, ?float $netto): bool
     {
-        return $app->db->run(
+        $spende = self::byToken($app, $merker);
+        if ($spende === null) {
+            return false;
+        }
+
+        $netto ??= $brutto;
+
+        $gebucht = $app->db->run(
             'UPDATE ' . self::TABLE . '
-                SET status = \'captured\', captured_at = now(), paypal_capture_id = :capture
+                SET status = \'captured\', captured_at = now(), provider_tx = :einzug,
+                    net_eur = CAST(:netto AS NUMERIC)
               WHERE token = :token AND status <> \'captured\'',
-            ['capture' => $captureId, 'token' => $merker]
+            ['einzug' => $einzug, 'netto' => TipGoals::money($netto), 'token' => $merker]
         )->rowCount() > 0;
+
+        if (!$gebucht) {
+            return false;
+        }
+
+        TipGoals::applyDonation($app, $netto, $spende['goal_id'] === null ? null : (int) $spende['goal_id']);
+
+        $app->hooks->dispatch('tips.donation', [
+            'provider' => (string) $spende['provider'],
+            'login'    => (string) $spende['twitch_login'],
+            'name'     => ((bool) $spende['anonymous'])
+                ? translate('tips.anonymous')
+                : (string) $spende['twitch_display_name'],
+            'amount'   => $brutto,
+            'net'      => $netto,
+            'message'  => (string) ($spende['message'] ?? ''),
+            'goal_id'  => $spende['goal_id'],
+        ]);
+
+        $app->log(TipGoals::SLUG . ': Spende ueber ' . number_format($brutto, 2, '.', '')
+            . ' von ' . $spende['twitch_login'] . ' via ' . $spende['provider'] . ' gebucht.');
+
+        return true;
     }
 
     /**
      * Abgelaufene und alte Zeilen wegraeumen.
      *
-     * Offene und genehmigte laufen ab - dort ist nichts geflossen.
+     * Offene und schwebende laufen ab - dort ist nichts geflossen.
      * Gebuchte bleiben 90 Tage: sie sind der Beleg, wenn jemand fragt,
      * wo seine Spende geblieben ist.
      *
@@ -181,7 +240,7 @@ final class Donations
         $app->db->run(
             'UPDATE ' . self::TABLE . '
                 SET status = \'expired\'
-              WHERE status IN (\'open\', \'approved\') AND expires_at < now()'
+              WHERE status IN (\'open\', \'pending\') AND expires_at < now()'
         );
 
         $app->db->run(
@@ -200,7 +259,7 @@ final class Donations
     public static function recent(App $app, int $anzahl = 25): array
     {
         return $app->db->all(
-            'SELECT token, twitch_login, twitch_display_name, anonymous, amount_eur,
+            'SELECT token, provider, twitch_login, twitch_display_name, anonymous, amount_eur,
                     message, goal_id, status, created_at, captured_at
                FROM ' . self::TABLE . '
               ORDER BY created_at DESC
@@ -290,7 +349,7 @@ final class Donations
             'secure'   => str_starts_with($app->url(), 'https://'),
             'httponly' => true,
             // Lax und nicht Strict: der Spender kommt von Twitch und
-            // von PayPal zurueck, und bei Strict waere das Cookie beim
+            // vom Zahlungsanbieter zurueck, und bei Strict waere das Cookie beim
             // ersten Aufruf danach nicht dabei.
             'samesite' => 'Lax',
         ]);

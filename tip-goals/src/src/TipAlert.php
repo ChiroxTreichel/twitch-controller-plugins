@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TwitchController\Plugin\PaypalTipGoals;
+namespace TwitchController\Plugin\TipGoals;
 
 use TwitchController\Core\App;
 use TwitchController\Plugin\Alerts\Alerts;
@@ -153,7 +153,7 @@ final class TipAlert
             // Mindestens 1, wie im alten System. Ein Betrag darunter
             // faellt auf die unterste Stufe zurueck - siehe tierFor().
             'min_amount' => max(1, (int) ($stufe['min_amount'] ?? 1)),
-            'text'       => $text !== '' ? $text : translate('pp_tip.alert_default'),
+            'text'       => $text !== '' ? $text : translate('tips.alert_default'),
             'video'      => trim((string) ($stufe['video'] ?? '')),
             'audio'      => trim((string) ($stufe['audio'] ?? '')),
             'duration'   => self::duration($stufe['duration'] ?? null),
@@ -290,7 +290,7 @@ final class TipAlert
          * Nicht nach dem Netto: auf dem Ziel landet, was ankommt, aber
          * die Stufe ist ein Versprechen an den Spender - "ab 5 Euro
          * kommt das grosse Video". Wer fuenf gibt, hat fuenf gegeben,
-         * auch wenn PayPal davon etwas einbehaelt.
+         * auch wenn der Anbieter davon etwas einbehaelt.
          */
         $stufe = self::tierFor($config['tiers'], (float) ($spende['amount'] ?? 0));
 

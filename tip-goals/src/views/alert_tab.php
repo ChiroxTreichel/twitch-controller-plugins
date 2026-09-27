@@ -37,7 +37,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
         <?php if ($canEdit): ?>
             <button class="file-field-button" type="button"
                     data-file-trigger="<?= $e($id) ?>"
-                    title="<?= $e(translate('pp_tip.alert.choose_file')) ?>">↑</button>
+                    title="<?= $e(translate('tips.alert.choose_file')) ?>">↑</button>
             <input class="file-field-native" id="<?= $e($id) ?>" type="file" accept="<?= $e($accept) ?>">
         <?php endif ?>
     </div>
@@ -46,7 +46,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
 ?>
 <div class="card">
     <div class="head-row">
-        <h2 style="margin:0;"><?= $e(translate('pp_tip.alert.title')) ?></h2>
+        <h2 style="margin:0;"><?= $e(translate('tips.alert.title')) ?></h2>
 
         <?php if ($canToggle): ?>
             <form method="post" action="<?= $e($target) ?>">
@@ -59,24 +59,24 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
                     "es ist an" oder "hier einschalten"?
                 */ ?>
                 <button class="switch<?= $config['enabled'] ? ' is-on' : '' ?>" type="submit"
-                        title="<?= $e(translate('pp_tip.alert.toggle_hint')) ?>"
-                        aria-label="<?= $e(translate('pp_tip.alert.toggle_hint')) ?>">
+                        title="<?= $e(translate('tips.alert.toggle_hint')) ?>"
+                        aria-label="<?= $e(translate('tips.alert.toggle_hint')) ?>">
                     <span class="switch-track"><span class="switch-knob"></span></span>
                 </button>
             </form>
         <?php else: ?>
             <span class="badge <?= $config['enabled'] ? 'badge-ok' : 'badge-off' ?>">
                 <?= $e($config['enabled']
-                    ? translate('pp_tip.alert.on')
-                    : translate('pp_tip.alert.off')) ?>
+                    ? translate('tips.alert.on')
+                    : translate('tips.alert.off')) ?>
             </span>
         <?php endif ?>
     </div>
 
-    <p class="hint"><?= $e(translate('pp_tip.alert.lead')) ?></p>
+    <p class="hint"><?= $e(translate('tips.alert.lead')) ?></p>
 
     <p class="hint">
-        <?= $e(translate('pp_tip.alert.placeholders')) ?>
+        <?= $e(translate('tips.alert.placeholders')) ?>
         <?php foreach ($placeholders as $platzhalter): ?>
             <code>{{ <?= $e($platzhalter) ?> }}</code>
         <?php endforeach ?>
@@ -105,13 +105,13 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
             erreicht ist. Liegt der Betrag unter allen, gilt die
             unterste: ein Alert soll kommen.
         */ ?>
-        <p class="hint"><?= $e(translate('pp_tip.alert.tiers_hint')) ?></p>
+        <p class="hint"><?= $e(translate('tips.alert.tiers_hint')) ?></p>
 
         <?php foreach ($config['tiers'] as $n => $stufe): ?>
             <div class="case-body" style="border:1px solid var(--line);border-radius:9px;padding:14px;margin:0 0 12px;">
                 <div class="row">
                     <label class="field">
-                        <span class="hint"><?= $e(translate('pp_tip.alert.min_amount')) ?></span>
+                        <span class="hint"><?= $e(translate('tips.alert.min_amount')) ?></span>
                         <input class="input" type="number" min="1" step="1"
                                name="tiers[<?= (int) $n ?>][min_amount]"
                                value="<?= (int) $stufe['min_amount'] ?>"
@@ -134,26 +134,26 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
                             <span class="hint">&nbsp;</span>
                             <button class="btn btn-ghost btn-small" type="submit"
                                     name="remove_tier" value="<?= (int) $n ?>">
-                                <?= $e(translate('pp_tip.alert.tier_remove')) ?>
+                                <?= $e(translate('tips.alert.tier_remove')) ?>
                             </button>
                         </div>
                     <?php endif ?>
                 </div>
 
                 <label class="field">
-                    <span class="hint"><?= $e(translate('pp_tip.alert.text')) ?></span>
+                    <span class="hint"><?= $e(translate('tips.alert.text')) ?></span>
                     <input class="input" type="text" name="tiers[<?= (int) $n ?>][text]"
                            maxlength="<?= (int) $maxText ?>"
                            value="<?= $e($stufe['text']) ?>" <?= $canEdit ? '' : 'readonly' ?>>
                 </label>
 
                 <div class="field">
-                    <span class="hint"><?= $e(translate('pp_tip.alert.video')) ?></span>
+                    <span class="hint"><?= $e(translate('tips.alert.video')) ?></span>
                     <?php $dateifeld('tiers[' . $n . '][video]', $stufe['video'], 'video/*'); ?>
                 </div>
 
                 <div class="field">
-                    <span class="hint"><?= $e(translate('pp_tip.alert.audio')) ?></span>
+                    <span class="hint"><?= $e(translate('tips.alert.audio')) ?></span>
                     <?php $dateifeld('tiers[' . $n . '][audio]', $stufe['audio'], 'audio/*'); ?>
                 </div>
 
@@ -163,7 +163,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
                     Wert liesse sich nie wieder auf "Vorgabe" zuruecksetzen.
                 */ ?>
                 <label class="field">
-                    <span class="hint"><?= $e(translate('pp_tip.alert.duration')) ?></span>
+                    <span class="hint"><?= $e(translate('tips.alert.duration')) ?></span>
                     <input class="input" type="number" min="0" max="120" step="1"
                            name="tiers[<?= (int) $n ?>][duration]"
                            value="<?= $stufe['duration'] > 0 ? (int) $stufe['duration'] : '' ?>"
@@ -176,7 +176,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
         <?php if ($canEdit && count($config['tiers']) < $maxTiers): ?>
             <div class="row">
                 <button class="btn btn-ghost btn-small" type="submit" name="add_tier" value="1">
-                    <?= $e(translate('pp_tip.alert.tier_add')) ?>
+                    <?= $e(translate('tips.alert.tier_add')) ?>
                 </button>
             </div>
         <?php endif ?>
@@ -192,7 +192,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
 <?php if ($canTest): ?>
     <div class="card">
         <div class="card-head">
-            <h2><?= $e(translate('pp_tip.alert.test')) ?></h2>
+            <h2><?= $e(translate('tips.alert.test')) ?></h2>
         </div>
 
         <?php /*
@@ -200,7 +200,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
             diesen einen Test. Vorher musste man eine echte Spende
             abwarten, um zu sehen, ob der Text stimmt.
         */ ?>
-        <p class="hint"><?= $e(translate('pp_tip.alert.test_hint')) ?></p>
+        <p class="hint"><?= $e(translate('tips.alert.test_hint')) ?></p>
 
         <form method="post" action="<?= $e($target) ?>">
             <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
@@ -217,7 +217,7 @@ $dateifeld = static function (string $name, string $wert, string $accept) use ($
             </div>
 
             <div class="row">
-                <button class="btn btn-ghost" type="submit"><?= $e(translate('pp_tip.alert.test_send')) ?></button>
+                <button class="btn btn-ghost" type="submit"><?= $e(translate('tips.alert.test_send')) ?></button>
             </div>
         </form>
     </div>

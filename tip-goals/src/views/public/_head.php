@@ -32,7 +32,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title><?= $e(($heading !== '' ? $heading . ' · ' : '') . $brand) ?></title>
     <meta name="robots" content="noindex, nofollow">
-    <link rel="stylesheet" href="<?= $e($asset('/plugin/paypal-tip-goals/assets/tips.css')) ?>">
+    <link rel="stylesheet" href="<?= $e($asset('/plugin/tip-goals/assets/tips.css')) ?>">
 
     <?php /*
         Ohne JavaScript ist das Karussell keins: sichtbar waere genau
@@ -65,14 +65,14 @@
 <body>
 <header class="page-header">
     <a class="brand" href="<?= $e($url('/tips')) ?>">
-        <?= $e($brand) ?> <span><?= $e(translate('pp_tip.public.brand_word')) ?></span>
+        <?= $e($brand) ?> <span><?= $e(translate('tips.public.brand_word')) ?></span>
     </a>
 
     <nav class="user-nav">
         <?php if ($identity !== null): ?>
             <span class="user-name">@<?= $e($identity['login']) ?></span>
             <a class="link-button" href="<?= $e($url('/tips/logout')) ?>">
-                <?= $e(translate('pp_tip.logout')) ?>
+                <?= $e(translate('tips.logout')) ?>
             </a>
         <?php endif ?>
     </nav>

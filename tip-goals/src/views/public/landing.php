@@ -25,12 +25,11 @@
  * @var string $brand
  * @var array{login: string, display_name: string, user_id: string}|null $identity
  * @var list<array{id: int, position: int, title: string, current: float, target: float, percent: float}> $goals
- * @var bool $canPay
+ * @var list<array{key: string, label: string, ready: bool, fee_percent: float, fee_fixed: float, settings: string}> $providers
  * @var float $minimum
+ * @var float $maximum
  * @var float $vorgabe
  * @var list<float> $presets
- * @var float $feePercent
- * @var float $feeFixed
  * @var string $csrf
  * @var list<string> $legal
  * @var string $notice
@@ -43,7 +42,14 @@ $euro = static fn (float $wert): string => number_format($wert, 2, ',', '.') . '
 /** Derselbe Betrag fuer ein Zahlenfeld: 12.50 - Punkt, keine Tausender. */
 $zahl = static fn (float $wert): string => number_format($wert, 2, '.', '');
 
-$heading = translate('pp_tip.public.heading', ['name' => $brand]);
+/** Der Satz eines Anbieters fuer die Rechnung im Browser. */
+$satz = static fn (float $wert): string => number_format($wert, 4, '.', '');
+
+// Vorgewaehlt ist der erste bereite Anbieter. Mit seinen Saetzen
+// rechnet die Anzeige, bis jemand einen anderen waehlt.
+$erster = $providers[0] ?? null;
+
+$heading = translate('tips.public.heading', ['name' => $brand]);
 echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null);
 ?>
 
@@ -61,12 +67,12 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
         sich wie ein Konto, das man hier anlegt, und das gibt es nicht.
     */ ?>
     <section class="hero">
-        <p class="lead"><?= $e(translate('pp_tip.public.lead')) ?></p>
+        <p class="lead"><?= $e(translate('tips.public.lead')) ?></p>
 
         <?php $laufend = $goals[0] ?? null; ?>
         <?php if ($laufend !== null): ?>
             <section class="tip-goal">
-                <h2><?= $e($laufend['title'] !== '' ? $laufend['title'] : translate('pp_tip.unnamed')) ?></h2>
+                <h2><?= $e($laufend['title'] !== '' ? $laufend['title'] : translate('tips.unnamed')) ?></h2>
 
                 <div class="goal-bar">
                     <span class="goal-fill" style="width: <?= $e($zahl($laufend['percent'])) ?>%"></span>
@@ -74,24 +80,24 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
 
                 <p class="goal-figures">
                     <strong><?= $e($euro($laufend['current'])) ?></strong>
-                    <span><?= $e(translate('pp_tip.public.of', ['target' => $euro($laufend['target'])])) ?></span>
+                    <span><?= $e(translate('tips.public.of', ['target' => $euro($laufend['target'])])) ?></span>
                 </p>
             </section>
         <?php endif ?>
 
-        <p class="muted small"><?= $e(translate('pp_tip.public.why_login')) ?></p>
+        <p class="muted small"><?= $e(translate('tips.public.why_login')) ?></p>
 
         <a class="primary-button" href="<?= $e($url('/tips/login')) ?>">
-            <?= $e(translate('pp_tip.public.login')) ?>
+            <?= $e(translate('tips.public.login')) ?>
         </a>
     </section>
 
-<?php elseif (!$canPay): ?>
+<?php elseif ($erster === null): ?>
     <?php /*
-        Angemeldet, aber PayPal ist nicht hinterlegt. Kein Formular,
-        das am Ende nur eine Fehlermeldung ergibt.
+        Angemeldet, aber kein Anbieter ist bereit - etwa weil der Zugang
+        fehlt. Kein Formular, das am Ende nur eine Fehlermeldung ergibt.
     */ ?>
-    <div class="flash"><?= $e(translate('pp_tip.public.not_ready')) ?></div>
+    <div class="flash"><?= $e(translate('tips.public.not_ready')) ?></div>
 
 <?php else: ?>
     <?php
@@ -103,7 +109,7 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
         foreach ($goals as $ziel) {
             $karten[] = [
                 'value'   => (string) $ziel['id'],
-                'title'   => $ziel['title'] !== '' ? $ziel['title'] : translate('pp_tip.unnamed'),
+                'title'   => $ziel['title'] !== '' ? $ziel['title'] : translate('tips.unnamed'),
                 'current' => $ziel['current'],
                 'target'  => $ziel['target'],
                 'percent' => $ziel['percent'],
@@ -115,7 +121,7 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
 
         $karten[] = [
             'value'   => 'none',
-            'title'   => translate('pp_tip.public.no_goal'),
+            'title'   => translate('tips.public.no_goal'),
             'current' => 0.0,
             'target'  => 0.0,
             'percent' => 0.0,
@@ -144,11 +150,11 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
                 anders aus, funktioniert aber.
             */ ?>
             <fieldset class="goal-picker">
-                <legend><?= $e(translate('pp_tip.public.pick_goal')) ?></legend>
+                <legend><?= $e(translate('tips.public.pick_goal')) ?></legend>
 
                 <div class="goal-carousel" data-start-index="<?= (int) $start ?>">
                     <button type="button" class="goal-carousel-nav goal-carousel-prev"
-                            aria-label="<?= $e(translate('pp_tip.public.goal_prev')) ?>">&#10094;</button>
+                            aria-label="<?= $e(translate('tips.public.goal_prev')) ?>">&#10094;</button>
 
                     <div class="goal-carousel-viewport">
                         <div class="goal-carousel-track">
@@ -165,13 +171,13 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
 
                                             <?php if ($karte['live']): ?>
                                                 <span class="goal-slide-active-tag">
-                                                    <?= $e(translate('pp_tip.public.goal_live')) ?>
+                                                    <?= $e(translate('tips.public.goal_live')) ?>
                                                 </span>
                                             <?php endif ?>
                                         </span>
 
                                         <?php if ($karte['none']): ?>
-                                            <span class="muted small"><?= $e(translate('pp_tip.public.no_goal_hint')) ?></span>
+                                            <span class="muted small"><?= $e(translate('tips.public.no_goal_hint')) ?></span>
                                         <?php else: ?>
                                             <span class="goal-bar">
                                                 <span class="goal-fill" style="width: <?= $e($zahl($karte['percent'])) ?>%"></span>
@@ -179,7 +185,7 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
 
                                             <span class="goal-figures">
                                                 <strong><?= $e($euro($karte['current'])) ?></strong>
-                                                <span><?= $e(translate('pp_tip.public.of', [
+                                                <span><?= $e(translate('tips.public.of', [
                                                     'target' => $euro($karte['target']),
                                                 ])) ?></span>
                                             </span>
@@ -191,7 +197,7 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
                     </div>
 
                     <button type="button" class="goal-carousel-nav goal-carousel-next"
-                            aria-label="<?= $e(translate('pp_tip.public.goal_next')) ?>">&#10095;</button>
+                            aria-label="<?= $e(translate('tips.public.goal_next')) ?>">&#10095;</button>
                 </div>
 
                 <div class="goal-carousel-dots">
@@ -205,8 +211,34 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
             </fieldset>
         <?php endif ?>
 
+        <?php if (count($providers) > 1): ?>
+            <?php /*
+                Mehrere Anbieter: der Spender waehlt. Jeder Knopf traegt
+                die Saetze seines Anbieters - die Rechnung darunter
+                folgt der Wahl.
+            */ ?>
+            <fieldset class="provider-picker">
+                <legend><?= $e(translate('tips.public.pay_with')) ?></legend>
+
+                <div class="provider-options">
+                    <?php foreach ($providers as $i => $anbieter): ?>
+                        <label class="provider-option">
+                            <input type="radio" name="provider"
+                                   value="<?= $e($anbieter['key']) ?>"
+                                   data-fee-percent="<?= $e($satz($anbieter['fee_percent'])) ?>"
+                                   data-fee-fixed="<?= $e($satz($anbieter['fee_fixed'])) ?>"
+                                   <?= $i === 0 ? 'checked' : '' ?>>
+                            <span><?= $e($anbieter['label']) ?></span>
+                        </label>
+                    <?php endforeach ?>
+                </div>
+            </fieldset>
+        <?php else: ?>
+            <input type="hidden" name="provider" value="<?= $e($erster['key']) ?>">
+        <?php endif ?>
+
         <fieldset>
-            <legend><?= $e(translate('pp_tip.public.amount_legend')) ?></legend>
+            <legend><?= $e(translate('tips.public.amount_legend')) ?></legend>
 
             <?php if ($presets !== []): ?>
                 <div class="amount-presets">
@@ -220,22 +252,23 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
 
             <div class="amount-row">
                 <label class="amount-label">
-                    <span><?= $e(translate('pp_tip.public.amount')) ?></span>
+                    <span><?= $e(translate('tips.public.amount')) ?></span>
                     <input type="number" name="amount" id="amount-input"
                            step="0.01"
                            min="<?= $e($zahl($minimum)) ?>"
-                           max="10000"
+                           max="<?= $e($zahl($maximum)) ?>"
                            value="<?= $e($zahl($vorgabe)) ?>"
                            inputmode="decimal" autocomplete="off" required>
                 </label>
 
                 <?php /*
                     Die Gebuehr uebernehmen. Was hier gerechnet wird,
-                    ist ein VORSCHLAG aus den Einstellungen - was
-                    PayPal wirklich abzieht, sagt erst die Abrechnung.
+                    ist ein VORSCHLAG aus den Einstellungen des
+                    Anbieters - was er wirklich abzieht, sagt erst die
+                    Abrechnung.
                 */ ?>
                 <div class="toggle-wrap cover-fees-row">
-                    <span><?= $e(translate('pp_tip.public.cover_fees_short')) ?></span>
+                    <span><?= $e(translate('tips.public.cover_fees_short')) ?></span>
                     <label class="toggle-switch">
                         <input type="checkbox" name="cover_fees" id="cover-fees-toggle" value="1">
                         <span class="toggle-slider"></span>
@@ -243,37 +276,37 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
                 </div>
             </div>
 
-            <p class="muted small"><?= $e(translate('pp_tip.public.minimum', ['min' => $euro($minimum)])) ?></p>
+            <p class="muted small"><?= $e(translate('tips.public.minimum', ['min' => $euro($minimum)])) ?></p>
 
-            <p class="net-warn" id="net-warn-block"><?= $e(translate('pp_tip.public.net_warn')) ?></p>
+            <p class="net-warn" id="net-warn-block"><?= $e(translate('tips.public.net_warn')) ?></p>
 
             <p class="net-info" id="net-info-block"
-               data-fee-percent="<?= $e(number_format($feePercent, 4, '.', '')) ?>"
-               data-fee-fixed="<?= $e($zahl($feeFixed)) ?>"
-               data-label-net="<?= $e(translate('pp_tip.public.net_label', ['name' => $brand])) ?>"
-               data-label-gross="<?= $e(translate('pp_tip.public.gross_label')) ?>"
-               data-formula-net="<?= $e(translate('pp_tip.public.net_formula')) ?>"
-               data-formula-gross="<?= $e(translate('pp_tip.public.gross_formula')) ?>">
-                <span id="net-label"><?= $e(translate('pp_tip.public.net_label', ['name' => $brand])) ?></span>
+               data-fee-percent="<?= $e($satz($erster['fee_percent'])) ?>"
+               data-fee-fixed="<?= $e($satz($erster['fee_fixed'])) ?>"
+               data-label-net="<?= $e(translate('tips.public.net_label', ['name' => $brand])) ?>"
+               data-label-gross="<?= $e(translate('tips.public.gross_label')) ?>"
+               data-formula-net="<?= $e(translate('tips.public.net_formula')) ?>"
+               data-formula-gross="<?= $e(translate('tips.public.gross_formula')) ?>">
+                <span id="net-label"><?= $e(translate('tips.public.net_label', ['name' => $brand])) ?></span>
                 <strong id="net-amount">–</strong>
                 <span class="net-formula" id="net-formula"></span>
             </p>
         </fieldset>
 
         <fieldset>
-            <legend><?= $e(translate('pp_tip.public.message')) ?></legend>
+            <legend><?= $e(translate('tips.public.message')) ?></legend>
 
             <label class="message-label">
                 <textarea name="message" rows="3" maxlength="280"
-                          placeholder="<?= $e(translate('pp_tip.public.message_placeholder')) ?>"></textarea>
+                          placeholder="<?= $e(translate('tips.public.message_placeholder')) ?>"></textarea>
             </label>
 
-            <p class="muted small"><?= $e(translate('pp_tip.public.message_hint')) ?></p>
+            <p class="muted small"><?= $e(translate('tips.public.message_hint')) ?></p>
         </fieldset>
 
         <fieldset>
             <div class="toggle-wrap">
-                <span><?= $e(translate('pp_tip.public.anonymous_short')) ?></span>
+                <span><?= $e(translate('tips.public.anonymous_short')) ?></span>
                 <label class="toggle-switch">
                     <input type="checkbox" name="anonymous" value="1">
                     <span class="toggle-slider"></span>
@@ -286,7 +319,7 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
                 wirklich anonym, und das ist eine Zusage, die man
                 lesen koennen soll, bevor man sie in Anspruch nimmt.
             */ ?>
-            <p class="muted small"><?= $e(translate('pp_tip.public.anonymous')) ?></p>
+            <p class="muted small"><?= $e(translate('tips.public.anonymous')) ?></p>
         </fieldset>
 
         <?php
@@ -311,19 +344,29 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
         <fieldset>
             <label class="checkbox-label">
                 <input type="checkbox" name="accept_terms" value="1" required>
-                <span><?= translate('pp_tip.public.terms', [
-                    'terms'   => $verweis('agb', translate('pp_tip.legal.terms')),
-                    'privacy' => $verweis('datenschutz', translate('pp_tip.legal.privacy_long')),
+                <span><?= translate('tips.public.terms', [
+                    'terms'   => $verweis('agb', translate('tips.legal.terms')),
+                    'privacy' => $verweis('datenschutz', translate('tips.legal.privacy_long')),
                 ]) ?></span>
             </label>
         </fieldset>
 
-        <button class="primary-button" type="submit"><?= $e(translate('pp_tip.public.submit')) ?></button>
+        <?php if (count($providers) > 1): ?>
+            <button class="primary-button" type="submit"><?= $e(translate('tips.public.submit')) ?></button>
 
-        <p class="muted small"><?= $e(translate('pp_tip.public.paypal_hint')) ?></p>
+            <p class="muted small"><?= $e(translate('tips.public.provider_hint_many')) ?></p>
+        <?php else: ?>
+            <button class="primary-button" type="submit"><?= $e(translate('tips.public.submit_to', [
+                'name' => $erster['label'],
+            ])) ?></button>
+
+            <p class="muted small"><?= $e(translate('tips.public.provider_hint', [
+                'name' => $erster['label'],
+            ])) ?></p>
+        <?php endif ?>
     </form>
 
-    <script src="<?= $e($asset('/plugin/paypal-tip-goals/assets/tips.js')) ?>" defer></script>
+    <script src="<?= $e($asset('/plugin/tip-goals/assets/tips.js')) ?>" defer></script>
 <?php endif ?>
 
 <?= $view->render('public/_foot', compact('brand', 'legal'), null) ?>

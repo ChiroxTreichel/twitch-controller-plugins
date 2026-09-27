@@ -15,12 +15,12 @@
  * @var list<string> $legal
  */
 
-use TwitchController\Plugin\PaypalTipGoals\Legal;
+use TwitchController\Plugin\TipGoals\Legal;
 ?>
 </main>
 
 <footer class="page-footer">
-    <p><?= $e(translate('pp_tip.public.footer', ['name' => $brand])) ?></p>
+    <p><?= $e(translate('tips.public.footer', ['name' => $brand])) ?></p>
 
     <nav class="footer-links">
         <?php foreach ($legal as $schluessel): ?>

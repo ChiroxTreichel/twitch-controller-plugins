@@ -3,16 +3,12 @@
 declare(strict_types=1);
 
 /**
- * Beide Tabellen gehen mit, die Einstellungen raeumt der Kern ab -
- * die PayPal-Zugangsdaten und die Rechtstexte inbegriffen.
+ * Die Zugangsdaten und Gebuehrensaetze raeumt der Kern mit dem Bereich
+ * dieses Plugins ab. Spenden und Ziele gehoeren Tip-Goals und bleiben.
  *
- * Die Spendenhistorie geht damit auch. Das ist eine Ansage wert: wer
- * belegen koennen will, welche Spende wann kam, holt sie sich VORHER
- * heraus. Bei PayPal bleibt selbstverstaendlich alles stehen - dort
- * sind die Zahlungen zuhause, hier stand nur, welchem Ziel sie galten.
- *
- * Zuerst die Spenden, dann die Ziele: die eine Tabelle zeigt auf die
- * andere.
+ * Nur falls der Umzug aus 1.x nie stattfand - Tip-Goals wurde nie
+ * installiert - liegen hier noch die alten Tabellen. Die gehen mit,
+ * wie sie es in 1.x auch getan haetten.
  *
  * @var \TwitchController\Core\Database\Db $db
  */

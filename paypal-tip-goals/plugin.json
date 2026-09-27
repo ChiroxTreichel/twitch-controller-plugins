@@ -1,23 +1,15 @@
 {
   "slug": "paypal-tip-goals",
   "name": "Tip-Goals - PayPal",
-  "version": "1.4.0",
-  "description": "Eine Spendenseite unter /tips: Twitch-Login, Betrag, Ziel aussuchen, per PayPal zahlen. Die Spende landet auf dem gewählten Ziel und als Balken im Overlay.",
+  "version": "2.0.0",
+  "description": "PayPal als Zahlungsweg für die Spendenseite von Tip-Goals: Order anlegen, bei PayPal bezahlen, zurück und einziehen.",
   "author": "Twitch-Controller",
   "requires": {
     "core": ">=2.3.0",
-    "goals": ">=1.3.0"
+    "tip-goals": ">=1.0.0"
   },
-  "optional": {
-    "alerts": ">=1.0.0"
-  },
-  "conflicts": {
-    "streamelements-tip-goals": "*",
-    "streamlabs-tip-goals": "*"
-  },
+  "optional": {},
   "tags": [
-    "overlay",
-    "goals",
     "donations",
     "paypal"
   ]

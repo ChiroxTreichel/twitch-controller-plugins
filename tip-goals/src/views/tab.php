@@ -17,6 +17,7 @@
  * @var int $maxGoals
  * @var bool $ready      Impressum vorhanden - ohne das bleibt /tips zu
  * @var string $publicUrl
+ * @var array<string, array{key: string, label: string, ready: bool, settings: string}> $providers
  * @var list<array<string, mixed>> $recent
  * @var string $lastError
  * @var bool $canEdit
@@ -30,32 +31,42 @@ $letzte = count($goals) - 1;
 ?>
 <div class="card">
     <div class="card-head">
-        <h2><?= $e(translate('pp_tip.tab')) ?></h2>
+        <h2><?= $e(translate('tips.tab')) ?></h2>
 
         <?php if ($goals !== []): ?>
-            <span class="hint"><?= $e(translate('pp_tip.count', [
+            <span class="hint"><?= $e(translate('tips.count', [
                 'count' => (string) count($goals),
             ])) ?></span>
         <?php endif ?>
     </div>
 
     <?php /*
-        Ohne Zugangsdaten sammelt die Liste nichts ein. Das steht hier
-        und nicht nur auf der Einstellungsseite: wer die Ziele pflegt,
-        ist auf DIESER Seite.
+        Ohne Impressum und ohne Zahlungsanbieter ist die oeffentliche
+        Seite zu - und dann nimmt niemand etwas an, egal wie viele Ziele
+        hier stehen. Das steht hier und nicht nur auf der
+        Einstellungsseite: wer die Ziele pflegt, ist auf DIESER Seite.
     */ ?>
-    <?php /*
-        Ohne Impressum ist die oeffentliche Seite zu - und dann nimmt
-        niemand etwas an, egal wie viele Ziele hier stehen.
-    */ ?>
+    <?php if ($providers === []): ?>
+        <div class="note note-warn"><?= $e(translate('tips.needs_provider')) ?></div>
+    <?php elseif (array_filter($providers, static fn (array $p): bool => $p['ready']) === []): ?>
+        <div class="note note-warn">
+            <?= $e(translate('tips.no_provider_ready')) ?>
+            <?php foreach ($providers as $anbieter): ?>
+                <?php if ($anbieter['settings'] !== ''): ?>
+                    <a href="<?= $e($url($anbieter['settings'])) ?>"><?= $e($anbieter['label']) ?></a>
+                <?php endif ?>
+            <?php endforeach ?>
+        </div>
+    <?php endif ?>
+
     <?php if (!$ready): ?>
         <div class="note note-warn">
-            <?= $e(translate('pp_tip.needs_imprint')) ?>
-            <a href="<?= $e($url('/display/goals/tips/settings/impressum')) ?>"><?= $e(translate('pp_tip.to_settings')) ?></a>
+            <?= $e(translate('tips.needs_imprint')) ?>
+            <a href="<?= $e($url('/display/goals/tips/settings/impressum')) ?>"><?= $e(translate('tips.to_settings')) ?></a>
         </div>
     <?php else: ?>
         <p class="hint">
-            <?= $e(translate('pp_tip.public_hint')) ?>
+            <?= $e(translate('tips.public_hint')) ?>
             <a class="mono" href="<?= $e($publicUrl) ?>" target="_blank" rel="noopener"><?= $e($publicUrl) ?></a>
         </p>
     <?php endif ?>
@@ -67,13 +78,13 @@ $letzte = count($goals) - 1;
     */ ?>
     <?php if ($lastError !== ''): ?>
         <div class="note note-error">
-            <strong><?= $e(translate('pp_tip.last_failed')) ?></strong>
+            <strong><?= $e(translate('tips.last_failed')) ?></strong>
             <span class="mono"><?= $e($lastError) ?></span>
         </div>
     <?php endif ?>
 
     <?php if ($goals === []): ?>
-        <p class="hint"><?= $e(translate('pp_tip.empty')) ?></p>
+        <p class="hint"><?= $e(translate('tips.empty')) ?></p>
     <?php else: ?>
         <form method="post" action="<?= $e($ziel) ?>">
             <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
@@ -86,7 +97,7 @@ $letzte = count($goals) - 1;
                             <span class="tip-goal-order">#<?= (int) ($i + 1) ?></span>
 
                             <?php if ($i === 0): ?>
-                                <span class="badge badge-ok"><?= $e(translate('pp_tip.current')) ?></span>
+                                <span class="badge badge-ok"><?= $e(translate('tips.current')) ?></span>
                             <?php endif ?>
 
                             <span class="tip-goal-percent hint"><?= $e(number_format($goal['percent'], 0)) ?>&nbsp;%</span>
@@ -94,7 +105,7 @@ $letzte = count($goals) - 1;
 
                         <div class="row">
                             <label class="field grow">
-                                <span class="hint"><?= $e(translate('pp_tip.title')) ?></span>
+                                <span class="hint"><?= $e(translate('tips.title')) ?></span>
                                 <input class="input" type="text"
                                        name="goals[<?= (int) $goal['id'] ?>][title]"
                                        maxlength="80"
@@ -107,7 +118,7 @@ $letzte = count($goals) - 1;
                                 negative Spenden nicht.
                             */ ?>
                             <label class="field">
-                                <span class="hint"><?= $e(translate('pp_tip.current_amount')) ?></span>
+                                <span class="hint"><?= $e(translate('tips.current_amount')) ?></span>
                                 <input class="input" type="number" step="0.01" min="0"
                                        name="goals[<?= (int) $goal['id'] ?>][current]"
                                        value="<?= $e(number_format($goal['current'], 2, '.', '')) ?>"
@@ -115,7 +126,7 @@ $letzte = count($goals) - 1;
                             </label>
 
                             <label class="field">
-                                <span class="hint"><?= $e(translate('pp_tip.target_amount')) ?></span>
+                                <span class="hint"><?= $e(translate('tips.target_amount')) ?></span>
                                 <input class="input" type="number" step="0.01" min="0"
                                        name="goals[<?= (int) $goal['id'] ?>][target]"
                                        value="<?= $e(number_format($goal['target'], 2, '.', '')) ?>"
@@ -148,15 +159,15 @@ $letzte = count($goals) - 1;
                 <?php foreach ($goals as $i => $goal): ?>
                     <div class="row">
                         <span class="tip-goal-order">#<?= (int) ($i + 1) ?></span>
-                        <span class="grow"><?= $e($goal['title'] !== '' ? $goal['title'] : translate('pp_tip.unnamed')) ?></span>
+                        <span class="grow"><?= $e($goal['title'] !== '' ? $goal['title'] : translate('tips.unnamed')) ?></span>
 
                         <form method="post" action="<?= $e($ziel) ?>">
                             <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
                             <input type="hidden" name="action" value="up">
                             <input type="hidden" name="id" value="<?= (int) $goal['id'] ?>">
                             <button class="btn btn-small" type="submit" <?= $i === 0 ? 'disabled' : '' ?>
-                                    title="<?= $e(translate('pp_tip.move_up')) ?>"
-                                    aria-label="<?= $e(translate('pp_tip.move_up')) ?>">&uarr;</button>
+                                    title="<?= $e(translate('tips.move_up')) ?>"
+                                    aria-label="<?= $e(translate('tips.move_up')) ?>">&uarr;</button>
                         </form>
 
                         <form method="post" action="<?= $e($ziel) ?>">
@@ -164,8 +175,8 @@ $letzte = count($goals) - 1;
                             <input type="hidden" name="action" value="down">
                             <input type="hidden" name="id" value="<?= (int) $goal['id'] ?>">
                             <button class="btn btn-small" type="submit" <?= $i === $letzte ? 'disabled' : '' ?>
-                                    title="<?= $e(translate('pp_tip.move_down')) ?>"
-                                    aria-label="<?= $e(translate('pp_tip.move_down')) ?>">&darr;</button>
+                                    title="<?= $e(translate('tips.move_down')) ?>"
+                                    aria-label="<?= $e(translate('tips.move_down')) ?>">&darr;</button>
                         </form>
 
                         <?php /*
@@ -175,8 +186,8 @@ $letzte = count($goals) - 1;
                         */ ?>
                         <?= $view->render('_confirm', [
                             'label'    => translate('common.remove'),
-                            'question' => translate('pp_tip.confirm_delete', [
-                                'name' => $goal['title'] !== '' ? $goal['title'] : translate('pp_tip.unnamed'),
+                            'question' => translate('tips.confirm_delete', [
+                                'name' => $goal['title'] !== '' ? $goal['title'] : translate('tips.unnamed'),
                             ]),
                             'confirm'  => translate('common.remove'),
                             'action'   => $ziel,
@@ -199,14 +210,14 @@ $letzte = count($goals) - 1;
         <form class="row" method="post" action="<?= $e($ziel) ?>">
             <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
             <input type="hidden" name="action" value="add">
-            <button class="btn" type="submit"><?= $e(translate('pp_tip.add')) ?></button>
+            <button class="btn" type="submit"><?= $e(translate('tips.add')) ?></button>
         </form>
     <?php endif ?>
 </div>
 
 <?php /*
-    Die letzten Spenden. Nicht als Buchhaltung gedacht - die steht bei
-    PayPal - sondern als Antwort auf die eine Frage, die man hier hat:
+    Die letzten Spenden. Nicht als Buchhaltung gedacht - die steht beim
+    Anbieter - sondern als Antwort auf die eine Frage, die man hier hat:
     "kommt was an?"
 
     Anonyme Spenden stehen ohne Namen da. Der Name ist bekannt, er
@@ -216,16 +227,17 @@ $letzte = count($goals) - 1;
 <?php if ($recent !== []): ?>
     <div class="card">
         <div class="card-head">
-            <h2><?= $e(translate('pp_tip.recent')) ?></h2>
+            <h2><?= $e(translate('tips.recent')) ?></h2>
         </div>
 
         <table>
             <thead>
                 <tr>
-                    <th><?= $e(translate('pp_tip.recent.when')) ?></th>
-                    <th><?= $e(translate('pp_tip.recent.who')) ?></th>
-                    <th><?= $e(translate('pp_tip.recent.amount')) ?></th>
-                    <th><?= $e(translate('pp_tip.recent.state')) ?></th>
+                    <th><?= $e(translate('tips.recent.when')) ?></th>
+                    <th><?= $e(translate('tips.recent.who')) ?></th>
+                    <th><?= $e(translate('tips.recent.amount')) ?></th>
+                    <th><?= $e(translate('tips.recent.provider')) ?></th>
+                    <th><?= $e(translate('tips.recent.state')) ?></th>
                 </tr>
             </thead>
             <tbody>
@@ -234,7 +246,7 @@ $letzte = count($goals) - 1;
                         <td><?= $e(Dates::short((string) $spende['created_at'])) ?></td>
                         <td>
                             <?= $e((bool) $spende['anonymous']
-                                ? translate('pp_tip.anonymous')
+                                ? translate('tips.anonymous')
                                 : (string) $spende['twitch_display_name']) ?>
 
                             <?php if (($spende['message'] ?? '') !== ''): ?>
@@ -242,6 +254,7 @@ $letzte = count($goals) - 1;
                             <?php endif ?>
                         </td>
                         <td><?= $e(number_format((float) $spende['amount_eur'], 2, ',', '.')) ?>&nbsp;€</td>
+                        <td><?= $e($providers[(string) $spende['provider']]['label'] ?? (string) $spende['provider']) ?></td>
                         <td>
                             <?php /*
                                 Nur "gebucht" heisst, dass Geld geflossen
@@ -259,11 +272,11 @@ $letzte = count($goals) - 1;
                                     auf.
                                 */ ?>
                                 <?= $e(match ((string) $spende['status']) {
-                                    'captured'  => translate('pp_tip.state.captured'),
-                                    'approved'  => translate('pp_tip.state.approved'),
-                                    'cancelled' => translate('pp_tip.state.cancelled'),
-                                    'expired'   => translate('pp_tip.state.expired'),
-                                    default     => translate('pp_tip.state.open'),
+                                    'captured'  => translate('tips.state.captured'),
+                                    'pending'   => translate('tips.state.pending'),
+                                    'cancelled' => translate('tips.state.cancelled'),
+                                    'expired'   => translate('tips.state.expired'),
+                                    default     => translate('tips.state.open'),
                                 }) ?>
                             </span>
                         </td>

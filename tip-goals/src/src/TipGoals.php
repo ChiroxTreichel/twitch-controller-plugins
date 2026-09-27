@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TwitchController\Plugin\PaypalTipGoals;
+namespace TwitchController\Plugin\TipGoals;
 
 use TwitchController\Core\App;
 use TwitchController\Core\Config\Settings;
@@ -15,31 +15,28 @@ use TwitchController\Plugin\Goals\Goals;
  * ===================================================================
  *
  * Eine Liste von Spendenzielen und ein Balken im Overlay. Aus dem
- * alten System uebernommen, mit einer Vereinfachung: Spenden gehen
- * IMMER auf das erste Ziel.
+ * alten System uebernommen. Worauf eine Spende geht, waehlt der
+ * Spender auf /tips; vorgewaehlt ist das oberste Ziel.
  *
  * Im alten System gab es dafuer einen eigenen "aktiv"-Zeiger, der
  * irgendwo in der Liste stehen konnte. Das war eine zweite Sache, die
- * man pflegen musste, und man sah ihr nicht an, warum ein Betrag beim
- * dritten Eintrag landete. Jetzt entscheidet die Reihenfolge: das
- * oberste Ziel ist das laufende. Ist es voll, schiebt man es nach
- * unten oder loescht es.
+ * man pflegen musste. Jetzt entscheidet die Reihenfolge: das oberste
+ * Ziel ist das laufende. Ist es voll, schiebt man es nach unten oder
+ * loescht es.
  *
  * Betraege stehen als NUMERIC in der Datenbank und nicht als
  * Fliesskomma. Bei Geld ist 0.1 + 0.2 kein akademisches Problem: der
  * Balken stuende irgendwann auf 49,999999 statt auf 50.
  *
- * Diese Klasse kennt die Quelle der Spenden NICHT. Was von
- * PayPal oder Streamlabs kommt, holt Source ab und reicht hier
- * eine Zahl herein - so ist der Unterschied zwischen den beiden
- * Plugins auf eine Datei beschraenkt.
+ * Diese Klasse kennt die Quelle der Spenden NICHT. Wie das Geld
+ * fliesst, bringt ein Anbieter-Plugin mit (siehe Providers); hier kommt
+ * nur an, welcher Betrag auf welches Ziel geht.
  */
 final class TipGoals
 {
-    public const SLUG = 'paypal-tip-goals';
+    public const SLUG = 'tip-goals';
 
-    /** Die Tabelle. Je Plugin eine eigene - sie schliessen sich aus. */
-    public const TABLE = 'pp_tip_goals';
+    public const TABLE = 'tip_goals';
 
     /**
      * Wie oft nachgefragt wird.
@@ -114,20 +111,13 @@ final class TipGoals
     public const STAMP_FINGERPRINT = '90f53d2ec019468b';
 
     /**
-     * Die Vorgabe fuer die PayPal-Gebuehr.
+     * Mehr nimmt diese Seite nicht an.
      *
-     * Als Konstante und nicht dreimal als Zeichenkette: der Wert stand
-     * im Getter UND im Einstellungsformular, und solange beide
-     * dasselbe sagen, faellt niemandem auf, dass es zwei sind. Aendert
-     * man nur einen, zeigt das leere Formular etwas anderes an, als
-     * ohne Eintrag gerechnet wird.
-     *
-     * Der Betrag ist der Satz fuer Spenden innerhalb Deutschlands.
-     * Geraten wird trotzdem nichts: was wirklich abgezogen wurde, sagt
-     * die Abrechnung, und wer einen anderen Satz hat, traegt ihn ein.
+     * Nicht aus Vorsicht gegen den Anbieter, sondern gegen Vertipper:
+     * wer 5 statt 5,00 meint, hat sich nicht um den Faktor tausend
+     * vergriffen - wer 5000 tippt, vielleicht schon.
      */
-    public const FEE_PERCENT = '2.99';
-    public const FEE_FIXED = '0.39';
+    public const MAX_AMOUNT = 10000.0;
 
     public static function scope(): string
     {
@@ -139,7 +129,7 @@ final class TipGoals
     // -----------------------------------------------------------------
 
     /**
-     * Der Name, der bei PayPal und im Kopf der Seite steht.
+     * Der Name, der beim Anbieter und im Kopf der Seite steht.
      *
      * Vorgabe ist der Kanalname - wer spendet, soll sehen, an WEN.
      */
@@ -192,39 +182,42 @@ final class TipGoals
     }
 
     /**
-     * Die PayPal-Gebuehr, fuer den Schalter "Gebuehren uebernehmen".
-     *
-     * Sie steht als Einstellung und wird nicht erraten: PayPal
-     * berechnet je nach Land und Konto anderes, und ein geratener Wert
-     * waere eine Zusage, die man nicht halten kann. Gerechnet wird
-     * damit nur der VORSCHLAG im Formular - was wirklich abgezogen
-     * wurde, sagt PayPal beim Einzug.
-     */
-    public static function feePercent(App $app): float
-    {
-        return max(0.0, (float) self::money($app->settings->string('fee_percent', self::FEE_PERCENT, self::scope())));
-    }
-
-    public static function feeFixed(App $app): float
-    {
-        return max(0.0, (float) self::money($app->settings->string('fee_fixed', self::FEE_FIXED, self::scope())));
-    }
-
-    /**
      * Aus einem Wunschbetrag den Bruttobetrag rechnen.
      *
      * Wer "die Gebuehren uebernehmen" anhakt, meint: beim Streamer
      * sollen X Euro ankommen. Also muss er X plus Gebuehr zahlen, und
      * die Gebuehr haengt am Endbetrag - daher die Division.
      *
+     * Die Saetze bringt der Anbieter mit: sie stehen in SEINEN
+     * Einstellungen, weil jeder anders rechnet. Geraten wird damit
+     * trotzdem nichts - gerechnet wird nur der VORSCHLAG, was wirklich
+     * abgezogen wurde, meldet der Anbieter beim Einzug.
+     *
      * Aufgerundet auf Cent, damit wirklich mindestens der Wunschwert
      * ankommt.
      */
-    public static function gross(App $app, float $wunsch): float
+    public static function gross(float $wunsch, float $prozent, float $fest): float
     {
-        $nenner = max(0.0001, 1.0 - (self::feePercent($app) / 100.0));
+        $nenner = max(0.0001, 1.0 - (max(0.0, $prozent) / 100.0));
 
-        return ceil((($wunsch + self::feeFixed($app)) / $nenner) * 100.0) / 100.0;
+        return ceil((($wunsch + max(0.0, $fest)) / $nenner) * 100.0) / 100.0;
+    }
+
+    /**
+     * Was bei einer Zahlung zuletzt schiefging.
+     *
+     * Fuer den Reiter in der Verwaltung und NICHT fuer den Spender: der
+     * Text kommt vom Anbieter, und was dort im Fehlerfall steht, ist
+     * eine Auskunft fuer den Betreiber.
+     */
+    public static function lastError(App $app): string
+    {
+        return $app->settings->string('last_error', '', self::scope());
+    }
+
+    public static function setLastError(App $app, string $text): void
+    {
+        $app->settings->set('last_error', self::cut(trim($text), 500), self::scope());
     }
 
     // -----------------------------------------------------------------
@@ -412,7 +405,7 @@ final class TipGoals
         )->rowCount();
 
         if ($getroffen === 0) {
-            // Das Ziel wurde geloescht, waehrend der Spender bei PayPal
+            // Das Ziel wurde geloescht, waehrend der Spender beim Anbieter
             // war. Die Spende ist da, der Balken bekommt sie nicht -
             // das gehoert ins Log, nicht in eine Fehlermeldung an den
             // Spender.
@@ -431,7 +424,7 @@ final class TipGoals
      * Gibt es dieses Ziel (noch)?
      *
      * Gefragt wird beim Anlegen der Spende UND beim Verbuchen: zwischen
-     * beidem liegt der Weg ueber PayPal, und dort kann Minuten
+     * beidem liegt der Weg ueber den Anbieter, und dort koennen Minuten
      * vergehen.
      */
     public static function exists(App $app, int $id): bool

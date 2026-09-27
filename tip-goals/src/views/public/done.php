@@ -1,6 +1,7 @@
 <?php
 /**
- * Nach der Rueckkehr von PayPal.
+ * Nach der Rueckkehr vom Zahlungsanbieter - gerendert ueber
+ * PublicPage::done(), aus dem Plugin des Anbieters.
  *
  * Dieselbe Seite fuer geglueckt und gescheitert, nur mit anderem Text:
  * wer hier landet, hat eine Frage - "ist mein Geld angekommen?" - und
@@ -33,7 +34,7 @@ echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null
 
     <p>
         <a class="primary-button" href="<?= $e($url('/tips')) ?>">
-            <?= $e(translate('pp_tip.done.back')) ?>
+            <?= $e(translate('tips.done.back')) ?>
         </a>
     </p>
 </div>

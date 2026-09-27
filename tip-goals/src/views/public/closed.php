@@ -13,12 +13,12 @@
  * @var list<string> $legal
  */
 
-$heading = translate('pp_tip.public.closed');
+$heading = translate('tips.public.closed');
 echo $view->render('public/_head', compact('brand', 'heading', 'identity'), null);
 ?>
 
 <div class="hero">
-    <p class="lead"><?= $e(translate('pp_tip.public.closed_hint')) ?></p>
+    <p class="lead"><?= $e(translate('tips.public.closed_hint')) ?></p>
 </div>
 
 <?= $view->render('public/_foot', compact('brand', 'legal'), null) ?>

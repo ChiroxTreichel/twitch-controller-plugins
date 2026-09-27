@@ -28,12 +28,12 @@ $ziel = $url('/display/goals/tips/appearance');
         <?= $e(translate('common.back')) ?>
     </a>
     <a class="btn btn-ghost" href="<?= $e($url('/display/goals/tips')) ?>">
-        <?= $e(translate('pp_tip.to_goals')) ?>
+        <?= $e(translate('tips.to_goals')) ?>
     </a>
 </div>
 
-<h1><?= $e(translate('pp_tip.appearance')) ?></h1>
-<p class="lead"><?= $e(translate('pp_tip.appearance_lead')) ?></p>
+<h1><?= $e(translate('tips.appearance')) ?></h1>
+<p class="lead"><?= $e(translate('tips.appearance_lead')) ?></p>
 
 <?php if ($notice !== ''): ?>
     <div class="note note-ok"><?= $e($notice) ?></div>
@@ -49,7 +49,7 @@ $ziel = $url('/display/goals/tips/appearance');
 */ ?>
 <?php if ($missing !== []): ?>
     <div class="note note-error">
-        <strong><?= $e(translate('pp_tip.missing_hint')) ?></strong>
+        <strong><?= $e(translate('tips.missing_hint')) ?></strong>
         <?php foreach ($missing as $eines): ?>
             <br><span class="mono"><?= $e($eines) ?></span>
         <?php endforeach ?>
@@ -57,8 +57,8 @@ $ziel = $url('/display/goals/tips/appearance');
 <?php endif ?>
 
 <div class="card">
-    <h2><?= $e(translate('pp_tip.required')) ?></h2>
-    <p class="hint"><?= $e(translate('pp_tip.required_hint')) ?></p>
+    <h2><?= $e(translate('tips.required')) ?></h2>
+    <p class="hint"><?= $e(translate('tips.required_hint')) ?></p>
 
     <table>
         <tbody>
@@ -77,14 +77,14 @@ $ziel = $url('/display/goals/tips/appearance');
         </tbody>
     </table>
 
-    <p class="hint"><?= $e(translate('pp_tip.format_hint')) ?></p>
+    <p class="hint"><?= $e(translate('tips.format_hint')) ?></p>
 </div>
 
 <div class="card">
-    <h2><?= $e(translate('pp_tip.markup')) ?></h2>
+    <h2><?= $e(translate('tips.markup')) ?></h2>
 
     <?php if (!$custom): ?>
-        <div class="note note-warn"><?= $e(translate('pp_tip.is_default')) ?></div>
+        <div class="note note-warn"><?= $e(translate('tips.is_default')) ?></div>
     <?php endif ?>
 
     <?php /*
@@ -98,19 +98,19 @@ $ziel = $url('/display/goals/tips/appearance');
         <input type="hidden" name="action" value="save">
 
         <label class="field">
-            <span class="hint"><?= $e(translate('pp_tip.field.html')) ?></span>
+            <span class="hint"><?= $e(translate('tips.field.html')) ?></span>
             <textarea class="input tip-code" name="html" rows="16" spellcheck="false"
                       <?= $canEdit ? '' : 'disabled' ?>><?= $e($html) ?></textarea>
         </label>
 
         <label class="field">
-            <span class="hint"><?= $e(translate('pp_tip.field.css')) ?></span>
+            <span class="hint"><?= $e(translate('tips.field.css')) ?></span>
             <textarea class="input tip-code" name="css" rows="18" spellcheck="false"
                       <?= $canEdit ? '' : 'disabled' ?>><?= $e($css) ?></textarea>
         </label>
 
-        <p class="hint"><?= $e(translate('pp_tip.no_script_hint')) ?></p>
-        <p class="hint"><?= $e(translate('pp_tip.scope_hint')) ?></p>
+        <p class="hint"><?= $e(translate('tips.no_script_hint')) ?></p>
+        <p class="hint"><?= $e(translate('tips.scope_hint')) ?></p>
     </form>
 
     <?php if ($canEdit): ?>
@@ -120,9 +120,9 @@ $ziel = $url('/display/goals/tips/appearance');
             </button>
 
             <?= $view->render('_confirm', [
-                'label'    => translate('pp_tip.reset_label'),
-                'question' => translate('pp_tip.reset_question'),
-                'confirm'  => translate('pp_tip.reset_label'),
+                'label'    => translate('tips.reset_label'),
+                'question' => translate('tips.reset_question'),
+                'confirm'  => translate('tips.reset_label'),
                 'action'   => $ziel,
                 'fields'   => ['csrf' => $csrf, 'action' => 'reset'],
                 'danger'   => true,

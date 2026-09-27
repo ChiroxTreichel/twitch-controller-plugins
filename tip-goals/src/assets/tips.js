@@ -32,6 +32,19 @@
         var prozent = parseFloat(kasten.getAttribute('data-fee-percent') || '0');
         var fest    = parseFloat(kasten.getAttribute('data-fee-fixed') || '0');
 
+        // Mehrere Anbieter: jeder rechnet anders, und die Saetze stehen
+        // an seinem Knopf. Ohne Wahl gilt, was am Kasten steht.
+        var anbieter = Array.prototype.slice.call(document.querySelectorAll('input[name="provider"][type="radio"]'));
+
+        function uebernimmSaetze() {
+            anbieter.forEach(function (knopf) {
+                if (knopf.checked) {
+                    prozent = parseFloat(knopf.getAttribute('data-fee-percent') || '0');
+                    fest    = parseFloat(knopf.getAttribute('data-fee-fixed') || '0');
+                }
+            });
+        }
+
         // Die Texte kommen aus der Seite und nicht von hier: uebersetzt
         // wird in PHP, und eine zweite Sprachliste in JavaScript liefe
         // irgendwann auseinander.
@@ -122,6 +135,14 @@
             schalter.addEventListener('change', aktualisiere);
         }
 
+        anbieter.forEach(function (knopf) {
+            knopf.addEventListener('change', function () {
+                uebernimmSaetze();
+                aktualisiere();
+            });
+        });
+
+        uebernimmSaetze();
         aktualisiere();
     }());
 

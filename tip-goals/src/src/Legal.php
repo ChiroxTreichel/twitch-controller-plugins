@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace TwitchController\Plugin\PaypalTipGoals;
+namespace TwitchController\Plugin\TipGoals;
 
 use TwitchController\Core\App;
 use TwitchController\Core\Support\Markdown;
@@ -37,9 +37,9 @@ final class Legal
      * @var array<string, string> Schluessel => Sprachschluessel des Titels
      */
     public const PAGES = [
-        'impressum'    => 'pp_tip.legal.imprint',
-        'datenschutz'  => 'pp_tip.legal.privacy',
-        'agb'          => 'pp_tip.legal.terms',
+        'impressum'    => 'tips.legal.imprint',
+        'datenschutz'  => 'tips.legal.privacy',
+        'agb'          => 'tips.legal.terms',
     ];
 
     /** Lang genug fuer ein Impressum, kurz genug fuer eine Einstellung. */
@@ -55,9 +55,9 @@ final class Legal
     public static function title(string $schluessel): string
     {
         return match ($schluessel) {
-            'impressum'   => translate('pp_tip.legal.imprint'),
-            'datenschutz' => translate('pp_tip.legal.privacy'),
-            'agb'         => translate('pp_tip.legal.terms'),
+            'impressum'   => translate('tips.legal.imprint'),
+            'datenschutz' => translate('tips.legal.privacy'),
+            'agb'         => translate('tips.legal.terms'),
             default       => $schluessel,
         };
     }
@@ -114,7 +114,7 @@ final class Legal
     /**
      * Darf die oeffentliche Seite ueberhaupt online?
      *
-     * Nur mit Impressum. Der Rest der Einrichtung - PayPal, Ziele -
+     * Nur mit Impressum. Der Rest der Einrichtung - Anbieter, Ziele -
      * entscheidet darueber, ob man SPENDEN kann; hieran haengt, ob die
      * Seite ueberhaupt etwas anzeigt.
      */
