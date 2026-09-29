@@ -46,6 +46,16 @@
     height: var(--alert-media-height, auto);
 }
 
+/*
+ * Das Tonelement haengt im Alert, weil die Browserquelle in OBS nur
+ * hoert, was im Dokument steht (siehe alerts.js). Zu sehen sein soll es
+ * nicht - ohne "controls" zeichnet es ohnehin nichts, aber verlassen
+ * will man sich darauf nicht.
+ */
+.alert-audio {
+    display: none;
+}
+
 .alert-copy {
     margin: 0;
     color: #fff;
