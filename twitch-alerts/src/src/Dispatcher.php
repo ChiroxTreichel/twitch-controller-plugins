@@ -30,49 +30,50 @@ final class Dispatcher
 
     /**
      * @param array<string, mixed> $event Zeile aus core.event.stored
+     * @return bool Ob ein Alert hinausging
      */
-    public function handle(array $event): void
+    public function handle(array $event): bool
     {
         $eventType = (string) ($event['event_type'] ?? '');
         if (!in_array($eventType, Types::eventTypes(), true)) {
-            return;
+            return false;
         }
 
         $payload = is_array($event['payload'] ?? null) ? $event['payload'] : [];
 
         $entschieden = $this->decide($eventType, $event, $payload);
         if ($entschieden === null) {
-            return;
+            return false;
         }
 
         [$type, $case, $values, $amount] = $entschieden;
 
         $config = Config::of($this->app, $type);
         if (!$config['enabled']) {
-            return;
+            return false;
         }
 
         $definition = Types::get($type);
         if ($definition === null) {
-            return;
+            return false;
         }
 
         if ($definition['mode'] === 'tiers') {
             $stufe = Config::matchTier($config['tiers'], $amount);
             if ($stufe === null) {
-                return;
+                return false;
             }
 
             $quelle = $stufe;
         } else {
             if (!isset($config['cases'][$case])) {
-                return;
+                return false;
             }
 
             $quelle = $config['cases'][$case];
         }
 
-        Alerts::send($this->app, [
+        return Alerts::send($this->app, [
             'kind'     => $type . ($case !== '' ? '.' . $case : ''),
             'text'     => (string) $quelle['text'],
             'values'   => $values,
@@ -80,6 +81,81 @@ final class Dispatcher
             'audio'    => (string) $quelle['audio'],
             'duration' => (int) $quelle['duration'],
         ]);
+    }
+
+    /**
+     * Welcher Alert-Typ gehoert zu diesem Ereignis? Leer, wenn keiner.
+     *
+     * Dieselbe Entscheidung wie in handle(), nur ohne zu schicken: der
+     * Feed fragt sie fuer JEDE Zeile, die er anzeigt.
+     *
+     * @param array<string, mixed> $event
+     */
+    public function typeOf(array $event): string
+    {
+        $eventType = (string) ($event['event_type'] ?? '');
+
+        if (!in_array($eventType, Types::eventTypes(), true)) {
+            return '';
+        }
+
+        $payload = is_array($event['payload'] ?? null) ? $event['payload'] : [];
+        $entschieden = $this->decide($eventType, $event, $payload);
+
+        return $entschieden === null ? '' : $entschieden[0];
+    }
+
+    /**
+     * Das Recht, einen Alert dieses Typs von Hand auszuloesen.
+     *
+     * Dasselbe, das auch der Test-Knopf im Reiter verlangt: ein
+     * wiederholter Alert steht im Stream wie jeder andere, und wer ihn
+     * nicht testen darf, soll ihn auch nicht wiederholen duerfen.
+     *
+     * Die Schreibweise stammt aus dem Rechtekatalog in plugin.php -
+     * Bereich.Funktion.Recht, wobei die Funktion der Alert-Typ ist.
+     */
+    public static function testPermission(string $type): string
+    {
+        return 'TwitchAlerts.' . str_replace('-', '', ucfirst($type)) . '.Test';
+    }
+
+    /**
+     * Darf dieses Ereignis wiederholt werden?
+     *
+     * Gefragt beim Aufbereiten jeder Feed-Zeile, also oft. Deshalb
+     * hier nur die billigen Fragen: kennt dieses Plugin den
+     * Ereignistyp, und hat der Benutzer das Recht. Ob der Alert
+     * eingeschaltet ist und ob eine Stufe passt, entscheidet erst
+     * replay() - dafuer muessten die Einstellungen gelesen werden.
+     *
+     * @param array<string, mixed> $event
+     */
+    public function canReplay(array $event): bool
+    {
+        $type = $this->typeOf($event);
+
+        return $type !== '' && permission(self::testPermission($type));
+    }
+
+    /**
+     * Ein gespeichertes Ereignis noch einmal ins Overlay.
+     *
+     * Es geht denselben Weg wie beim ersten Mal - handle() liest die
+     * Zeile und entscheidet neu. Damit gilt, was JETZT eingestellt ist:
+     * wer das Video seit dem Follow ausgetauscht hat, sieht das neue.
+     *
+     * Gespeichert wird dabei nichts: handle() liest nur und schickt.
+     *
+     * @param array<string, mixed> $event
+     */
+    public function replay(array $event): bool
+    {
+        if (!$this->canReplay($event)) {
+            return false;
+        }
+
+        return $this->handle($event);
     }
 
     /**

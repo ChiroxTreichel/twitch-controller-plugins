@@ -128,30 +128,43 @@ $router->post(Throne::WEBHOOK_PATH, static function (Request $request) use ($app
 // -------------------------------------------------------------------
 //  Der Alert
 // -------------------------------------------------------------------
-$hooks->on('core.event.stored', static function (array $event) use ($app): void {
+/**
+ * Den Alert zu einer gespeicherten Zeile schicken.
+ *
+ * Eine Funktion und nicht zweimal derselbe Rumpf: sie laeuft einmal,
+ * wenn das Ereignis hereinkommt, und noch einmal, wenn jemand im Feed
+ * auf Wiederholen drueckt. Beide Male soll derselbe Alert kommen -
+ * stuende die Logik zweimal da, liefen die beiden frueher oder spaeter
+ * auseinander.
+ *
+ * Gelesen wird dabei nur; gespeichert wird nichts.
+ *
+ * @param array<string, mixed> $event
+ */
+$schicke = static function (array $event) use ($app): bool {
     if (!$app->plugins->isEnabled('alerts')) {
-        return;
+        return false;
     }
 
     $fall = Throne::caseOf((string) ($event['event_type'] ?? ''));
 
     if ($fall === '') {
-        return;
+        return false;
     }
 
     $config = Config::of($app);
 
     if (!$config['enabled']) {
-        return;
+        return false;
     }
 
     $eines = $config['cases'][$fall] ?? null;
 
     if ($eines === null) {
-        return;
+        return false;
     }
 
-    Alerts::send($app, [
+    return Alerts::send($app, [
         'kind'     => 'throne',
         'text'     => $eines['text'],
         'video'    => $eines['video'],
@@ -159,6 +172,36 @@ $hooks->on('core.event.stored', static function (array $event) use ($app): void 
         'duration' => $eines['duration'],
         'values'   => Config::values($event),
     ]);
+};
+
+$hooks->on('core.event.stored', static function (array $event) use ($schicke): void {
+    $schicke($event);
+});
+
+// -------------------------------------------------------------------
+//  Wiederholen aus dem Feed
+// -------------------------------------------------------------------
+// Neben jeder Zeile unter /obs steht ein Knopf, der denselben Alert
+// noch einmal schickt. Das Recht dazu ist dasselbe, das auch der
+// Test-Knopf in den Einstellungen verlangt: ein wiederholter Alert
+// steht im Stream wie jeder andere.
+$hooks->on('core.obs.replayable', static function (bool $kann, array $row): bool {
+    return $kann || (
+        Throne::caseOf((string) ($row['event_type'] ?? '')) !== ''
+        && permission('Throne.Global.Edit')
+    );
+});
+
+$hooks->on('core.obs.replay', static function (bool $geschickt, array $row) use ($schicke): bool {
+    if ($geschickt || Throne::caseOf((string) ($row['event_type'] ?? '')) === '') {
+        return $geschickt;
+    }
+
+    if (!permission('Throne.Global.Edit')) {
+        return false;
+    }
+
+    return $schicke($row);
 });
 
 // -------------------------------------------------------------------

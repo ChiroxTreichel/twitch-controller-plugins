@@ -107,6 +107,23 @@ $hooks->on('core.event.stored', static function (array $event) use ($app): void 
 });
 
 // -------------------------------------------------------------------
+//  Wiederholen aus dem Feed
+// -------------------------------------------------------------------
+// Im Feed unter /obs steht neben jeder Zeile ein Knopf, der denselben
+// Alert noch einmal schickt - fuer den Fall, dass OBS gerade auf der
+// falschen Szene stand. Der Kern weiss nicht, zu welcher Zeile ein
+// Alert gehoert; er fragt, und hier steht die Antwort.
+$hooks->on('core.obs.replayable', static function (bool $kann, array $row) use ($app): bool {
+    return $kann || (new Dispatcher($app))->canReplay($row);
+});
+
+$hooks->on('core.obs.replay', static function (bool $geschickt, array $row) use ($app): bool {
+    // Schon erledigt? Dann nicht noch einmal - sonst stuende der Alert
+    // zweimal in der Warteschlange.
+    return $geschickt || (new Dispatcher($app))->replay($row);
+});
+
+// -------------------------------------------------------------------
 //  Speichern und testen
 // -------------------------------------------------------------------
 $router->post('/display/alerts/twitch/{type}', static function (
