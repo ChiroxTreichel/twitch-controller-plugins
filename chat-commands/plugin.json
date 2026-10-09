@@ -1,8 +1,8 @@
 {
   "slug": "chat-commands",
   "name": "Chat - Befehle",
-  "version": "1.2.2",
-  "description": "Befehle im Chat. !befehle zählt alle auf, !discord gibt den Anmeldelink nur an Zuschauer heraus, die dem Kanal lange genug folgen. Dazu beliebig viele eigene Befehle mit Antworttext und {USER}.",
+  "version": "1.3.0",
+  "description": "Befehle im Chat. !befehle zählt alle auf, !discord gibt den Anmeldelink nur an Zuschauer heraus, die dem Kanal lange genug folgen. Dazu beliebig viele eigene Befehle mit Antworttext und {{ username }}.",
   "author": "Twitch-Controller",
   "requires": {
     "core": ">=2.0.0"

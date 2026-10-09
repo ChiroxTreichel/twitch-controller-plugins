@@ -69,12 +69,20 @@ Name ohne `!` und ein Antworttext, bis zu 400 Zeichen. Platzhalter:
 
 | Platzhalter | wird zu |
 | --- | --- |
-| `{USER}` | `@login` des Schreibers |
+| `{{ username }}` | `@login` des Schreibers |
+
+Dieselbe Schreibweise wie bei den Alerts; `{{username}}` ohne
+Leerzeichen gilt auch.
 
 ```
 !liebe   →  <3 <3 <3 <3 <3
-!sauber  →  {USER} putzt hier mal durch den Chat
+!sauber  →  {{ username }} putzt hier mal durch den Chat
 ```
+
+Bis Fassung 1.2 hieß der Platzhalter `{USER}`. Das Update auf 1.3
+schreibt gespeicherte Befehle einmal um; danach gilt nur noch
+`{{ username }}` — ein neu eingetipptes `{USER}` bleibt so stehen, wie
+es dasteht.
 
 Erlaubt sind Kleinbuchstaben, Ziffern, Bindestrich und Unterstrich.
 Namen von Grundbefehlen werden abgelehnt — sonst stellte man etwas ein,

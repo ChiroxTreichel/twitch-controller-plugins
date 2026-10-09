@@ -24,7 +24,7 @@ $ziel = $url('/chat/commands/custom');
 
     <p class="hint placeholders">
         <?= $e(translate('chat_commands.placeholder_label')) ?>
-        <code>{USER}</code>
+        <code>{{ username }}</code>
     </p>
 
     <?php foreach ($commands as $name => $antwort): ?>

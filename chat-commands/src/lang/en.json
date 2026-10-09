@@ -40,7 +40,7 @@
   "chat_commands.perm.custom_view": "may see the custom commands.",
   "chat_commands.perm.toggle": "may switch chat commands on and off.",
   "chat_commands.placeholder_label": "Placeholder:",
-  "chat_commands.response_example": "{USER} your reply goes here",
+  "chat_commands.response_example": "{{ username }} your reply goes here",
   "chat_commands.saved": "!%{name} saved.",
   "chat_commands.tab.basic": "Basic commands",
   "chat_commands.tab.custom": "Custom commands",

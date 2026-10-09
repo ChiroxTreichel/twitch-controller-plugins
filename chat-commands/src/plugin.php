@@ -11,7 +11,7 @@ declare(strict_types=1);
  *
  *   Grundbefehle   !befehle und !discord, fest eingebaut, mit eigenen
  *                  Feldern
- *   Eigene Befehle Name und Antworttext, beliebig viele, mit {USER}
+ *   Eigene Befehle Name und Antworttext, beliebig viele, mit {{ username }}
  *
  * Gelesen und geantwortet wird ueber die Kernfaehigkeit Chat: das
  * Plugin haengt sich an core.chat.message und schickt seine Antwort

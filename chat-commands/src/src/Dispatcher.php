@@ -132,7 +132,12 @@ final class Dispatcher
     }
 
     /**
-     * {USER} wird zur Anrede des Schreibers.
+     * {{ username }} wird zur Anrede des Schreibers.
+     *
+     * Dieselbe Schreibweise wie bei den Alerts, mit und ohne
+     * Leerzeichen - von Hand tippt man schnell "{{username}}". Das
+     * fruehere {USER} gilt nicht mehr; gespeicherte Befehle hat
+     * install.php beim Update umgeschrieben.
      *
      * Bewusst der Login und nicht der Anzeigename: mit "@login" wird
      * die Anrede auf Twitch zu einer echten Erwaehnung, ein
@@ -143,7 +148,7 @@ final class Dispatcher
     public static function fillPlaceholders(string $text, array $message): string
     {
         return str_replace(
-            '{USER}',
+            ['{{ username }}', '{{username}}'],
             self::mention((string) ($message['chatter_login'] ?? '')),
             $text
         );

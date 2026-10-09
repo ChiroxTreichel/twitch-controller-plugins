@@ -40,7 +40,7 @@
   "chat_commands.perm.custom_view": "darf die eigenen Befehle sehen.",
   "chat_commands.perm.toggle": "darf Chatbefehle ein- und ausschalten.",
   "chat_commands.placeholder_label": "Platzhalter:",
-  "chat_commands.response_example": "{USER} hier steht deine Antwort",
+  "chat_commands.response_example": "{{ username }} hier steht deine Antwort",
   "chat_commands.saved": "!%{name} gespeichert.",
   "chat_commands.tab.basic": "Grundbefehle",
   "chat_commands.tab.custom": "Eigene Befehle",
