@@ -1,0 +1,51 @@
+/* Giveaway - Verwaltungsseite. */
+
+.giveaway-stats {
+    margin: 4px 0 16px;
+    color: var(--muted);
+}
+
+.giveaway-stats strong {
+    color: var(--ink);
+}
+
+.giveaway-actions {
+    margin-bottom: 8px;
+}
+
+/* Der Knopf, um den es im Stream geht - groesser als die anderen. */
+.giveaway-go {
+    padding: 12px 22px;
+    font-size: 1.05rem;
+    font-weight: 600;
+}
+
+.giveaway-entries {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
+.giveaway-rank {
+    width: 3em;
+}
+
+.giveaway-add {
+    margin-top: 14px;
+}
+
+.giveaway-fields .field {
+    min-width: 160px;
+}
+
+.giveaway-text {
+    display: block;
+    margin: 16px 0 4px;
+}
+
+.giveaway-text textarea {
+    resize: vertical;
+}
+
+.giveaway-text + .placeholders {
+    margin-top: 0;
+}

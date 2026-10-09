@@ -1,0 +1,98 @@
+/*
+ * Giveaway im Overlay: Preis oben, Rad, Gewinner darunter.
+ *
+ * Der Platz ist 760 Pixel breit (plugin.php), das Rad 640. Die
+ * Leinwand zeichnet doppelt so fein, damit die Kante in OBS nicht
+ * treppig aussieht.
+ */
+
+#ov-slot-giveaway {
+    font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+.gw {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding: 10px;
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 400ms ease, transform 400ms ease;
+}
+
+.gw.is-on {
+    opacity: 1;
+    transform: scale(1);
+}
+
+.gw-label,
+.gw-banner {
+    max-width: 740px;
+    padding: 10px 26px;
+    border-radius: 999px;
+    background: rgba(14, 16, 20, 0.85);
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 700;
+    text-align: center;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.gw-label:empty {
+    visibility: hidden;
+}
+
+.gw-stage {
+    position: relative;
+    width: 640px;
+    height: 640px;
+}
+
+.gw-wheel {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.5));
+}
+
+/* Der Zeiger oben, mit der Spitze ins Rad. */
+.gw-pointer {
+    position: absolute;
+    top: -14px;
+    left: 50%;
+    width: 0;
+    height: 0;
+    transform: translateX(-50%);
+    border-left: 26px solid transparent;
+    border-right: 26px solid transparent;
+    border-top: 52px solid #ffffff;
+    filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.5));
+}
+
+.gw-hub {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    background: #ffffff;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.45);
+}
+
+/* Der Gewinner: nur sichtbar, wenn es einen gibt - und dann mit Schwung. */
+.gw-banner {
+    background: #9146ff;
+    font-size: 34px;
+    visibility: hidden;
+    transform: scale(0.6);
+    opacity: 0;
+    transition: transform 350ms cubic-bezier(0.2, 1.6, 0.4, 1), opacity 250ms ease;
+}
+
+.gw.has-banner .gw-banner {
+    visibility: visible;
+    transform: scale(1);
+    opacity: 1;
+}
