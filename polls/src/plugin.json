@@ -1,0 +1,18 @@
+{
+  "slug": "polls",
+  "name": "Tools - Umfragen",
+  "version": "1.0.0",
+  "description": "Umfragen für die Community: Zuschauer stimmen nach Twitch-Anmeldung auf einer eigenen Seite ab, auf Wunsch mit eigenen Vorschlägen. Mit Live-Stand im Overlay und Ankündigung in Discord und im Twitch-Chat.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.11.0"
+  },
+  "optional": {},
+  "tags": [
+    "tools",
+    "umfragen",
+    "polls",
+    "overlay",
+    "discord"
+  ]
+}

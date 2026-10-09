@@ -1,0 +1,186 @@
+/*
+ * Umfrage-Seite fuer Zuschauer.
+ *
+ * Aufbau wie im alten umfragen.talutah.de - Leiste mit "x von n
+ * gewaehlt", Eintraege als breite Zeilen, Ergebnis mit Balken. Die
+ * Farben sind die dieses Systems statt des hellen Blau von damals.
+ */
+
+:root {
+    --bg: #0e1014;
+    --panel: #16191f;
+    --panel-2: #1d2129;
+    --line: #272c36;
+    --ink: #e9ecf1;
+    --muted: #98a1b0;
+    --accent: #9146ff;
+    --ok: #3ecf8e;
+    --error: #ef4d4d;
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+a { color: #b794ff; }
+
+.pp-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 20px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+}
+
+.pp-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; }
+.pp-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
+.pp-who { color: var(--muted); font-size: 0.9rem; }
+
+.pp {
+    max-width: 820px;
+    margin: 0 auto;
+    padding: 24px 16px 48px;
+}
+
+.pp h1 { margin: 0.1rem 0 0; font-size: 2rem; line-height: 1.2; overflow-wrap: anywhere; }
+.pp-sub { color: var(--muted); margin: 0.25rem 0 1rem; }
+.pp-timer { color: var(--muted); font-variant-numeric: tabular-nums; margin-bottom: 14px; }
+
+.pp-panel {
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 16px;
+    margin-bottom: 14px;
+}
+
+.pp-ok { border-color: rgba(62, 207, 142, 0.45); background: rgba(62, 207, 142, 0.1); }
+.pp-error { border-color: rgba(239, 77, 77, 0.5); background: rgba(239, 77, 77, 0.1); }
+.pp-desc { overflow-wrap: anywhere; }
+
+.pp-login { text-align: center; }
+.pp-login p { margin: 0 0 12px; color: var(--muted); }
+
+.pp-button {
+    display: inline-block;
+    border: 0;
+    border-radius: 10px;
+    padding: 10px 16px;
+    background: var(--accent);
+    color: #fff;
+    font: inherit;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.pp-button:hover { filter: brightness(1.1); }
+
+.pp-suggest label { display: block; font-weight: 600; margin-bottom: 8px; }
+.pp-row { display: flex; gap: 10px; }
+
+.pp-row input {
+    flex: 1;
+    min-width: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--bg);
+    color: var(--ink);
+    font: inherit;
+}
+
+/* Die Leiste klebt oben, damit man bei langen Listen den Zaehler sieht. */
+.pp-status {
+    position: sticky;
+    top: 8px;
+    z-index: 1;
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--panel-2);
+}
+
+.pp-status-left { font-weight: 600; }
+.pp-status-right { color: var(--muted); }
+
+.pp-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 12px;
+    margin: 10px 0;
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    background: var(--panel-2);
+    cursor: pointer;
+    overflow-wrap: anywhere;
+    transition: background 0.12s, border-color 0.12s;
+}
+
+.pp-option:hover { border-color: #3a4150; }
+.pp-option.is-selected { background: rgba(145, 70, 255, 0.18); border-color: rgba(145, 70, 255, 0.6); }
+.pp-option.is-preview { cursor: default; }
+.pp-option input { width: 18px; height: 18px; accent-color: var(--accent); cursor: pointer; flex: 0 0 auto; }
+
+.pp-actions { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+.pp-spacer { flex: 1; }
+.pp-note { color: var(--muted); font-size: 0.9rem; }
+
+.pp-result {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px;
+    margin: 10px 0;
+    border-radius: 12px;
+    background: var(--panel-2);
+    overflow-wrap: anywhere;
+}
+
+.pp-badge {
+    padding: 3px 8px;
+    border-radius: 999px;
+    background: var(--line);
+    font-size: 0.9rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.pp-bar {
+    grid-column: 1 / -1;
+    height: 10px;
+    border-radius: 999px;
+    background: var(--line);
+    overflow: hidden;
+}
+
+.pp-bar > span { display: block; height: 100%; background: var(--accent); }
+
+.pp-foot { color: var(--muted); font-size: 0.9rem; text-align: center; }
+
+.is-shaking { animation: pp-shake 0.2s linear 1; }
+
+@keyframes pp-shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(3px); }
+    50% { transform: translateX(-3px); }
+    75% { transform: translateX(2px); }
+    100% { transform: translateX(0); }
+}
+
+@media (max-width: 520px) {
+    .pp h1 { font-size: 1.6rem; }
+    .pp-row { flex-direction: column; }
+}

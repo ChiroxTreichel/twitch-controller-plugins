@@ -1,0 +1,106 @@
+/*
+ * Umfrage im Overlay - Farben und Masse aus dem alten admin/obs.php:
+ * dunkler Verlauf mit gruenem Schimmer oben rechts, gruen-blaue Balken.
+ *
+ * Damals fuellte es eine eigene Browserquelle ganz aus. Hier ist es ein
+ * Kasten auf der Buehne; wer es wieder allein will, legt eine Quelle
+ * mit ?view=polls an.
+ */
+
+#ov-slot-polls {
+    font-family: "Segoe UI", Arial, sans-serif;
+}
+
+.pl {
+    display: none;
+    flex-direction: column;
+    max-height: 1000px;
+    padding: 28px 32px;
+    border-radius: 24px;
+    background:
+        radial-gradient(circle at top right, rgba(54, 211, 153, 0.22), transparent 32%),
+        linear-gradient(135deg, rgba(7, 11, 18, 0.88), rgba(16, 26, 38, 0.82));
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+    color: #f7fbff;
+}
+
+.pl.is-on {
+    display: flex;
+}
+
+.pl-kicker {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 16px;
+}
+
+.pl-label {
+    font-size: 0.88rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: rgba(247, 251, 255, 0.72);
+}
+
+.pl-timer {
+    font-size: 2rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.pl-question {
+    margin: 0 0 18px;
+    font-size: 2.3rem;
+    font-weight: 800;
+    line-height: 1.08;
+    overflow-wrap: anywhere;
+}
+
+.pl-summary {
+    margin: 0 0 18px;
+    color: rgba(247, 251, 255, 0.72);
+    font-size: 1rem;
+}
+
+.pl-rows {
+    display: grid;
+    gap: 12px;
+    overflow: hidden;
+}
+
+.pl-row {
+    padding: 14px 16px;
+    border-radius: 18px;
+    background: rgba(255, 255, 255, 0.12);
+}
+
+.pl-row-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 16px;
+    font-size: 1.18rem;
+    overflow-wrap: anywhere;
+}
+
+.pl-votes {
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+.pl-bar {
+    height: 12px;
+    margin-top: 10px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.14);
+    overflow: hidden;
+}
+
+.pl-bar span {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: linear-gradient(90deg, #36d399, #7dd3fc);
+    transition: width 400ms ease;
+}
