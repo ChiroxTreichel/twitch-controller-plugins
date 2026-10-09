@@ -1,0 +1,16 @@
+{
+    "mod_chat.dock_hint": "Zum Mitlesen in OBS: %{menu}, dort %{url} als Adresse eintragen. Das Dock zeigt nur den Verlauf, ohne Eingabefeld.",
+    "mod_chat.empty": "Noch keine Nachrichten.",
+    "mod_chat.error.empty": "Die Nachricht ist leer.",
+    "mod_chat.error.send_failed": "Die Nachricht ging nicht raus. Bitte noch einmal versuchen.",
+    "mod_chat.error.session_lost": "Du bist nicht mehr angemeldet. Bitte die Seite neu laden.",
+    "mod_chat.error.too_long": "Die Nachricht ist zu lang – höchstens %{max} Zeichen.",
+    "mod_chat.jump": "↓ Neue Nachrichten",
+    "mod_chat.keep_hint": "Nachrichten bleiben %{days} Tage stehen und verschwinden dann von selbst.",
+    "mod_chat.keys": "Enter schickt ab, Umschalt + Enter macht eine neue Zeile.",
+    "mod_chat.lead": "Nachrichten an das ganze Team – alle, die hier angemeldet sind, lesen mit. Im Twitch-Chat erscheint davon nichts.",
+    "mod_chat.name": "Chat",
+    "mod_chat.nav.stream": "Stream",
+    "mod_chat.placeholder": "Nachricht an das Team …",
+    "mod_chat.send": "Senden"
+}

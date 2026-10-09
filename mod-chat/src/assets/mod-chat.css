@@ -1,0 +1,157 @@
+/* Moderatorenchat - Seite im Verwaltungsbereich und Dock fuer OBS. */
+
+.modchat {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+/* Traegt den Knopf "Neue Nachrichten", der ueber dem Verlauf schwebt. */
+.modchat-window {
+    position: relative;
+}
+
+/*
+ * So hoch, dass Eingabe und Hinweise darunter ohne Scrollen zu sehen
+ * sind. Gescrollt wird im Verlauf, nicht auf der Seite - sonst wandert
+ * das Eingabefeld mit jeder Nachricht nach unten weg.
+ */
+.modchat-log {
+    height: calc(100vh - 380px);
+    min-height: 260px;
+    overflow-y: auto;
+    padding: 2px;
+}
+
+.modchat-line {
+    padding: 3px 8px;
+    border-radius: 6px;
+    line-height: 1.45;
+    overflow-wrap: anywhere;
+}
+
+.modchat-line + .modchat-line {
+    margin-top: 2px;
+}
+
+.modchat-line.is-own {
+    background: rgba(145, 70, 255, 0.1);
+}
+
+.modchat-time {
+    margin-right: 2px;
+    color: var(--muted);
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+.modchat-name {
+    font-weight: 600;
+}
+
+.modchat-name::after {
+    content: ":";
+    color: var(--muted);
+}
+
+/* Umbrueche aus der Nachricht bleiben, wie sie getippt wurden. */
+.modchat-text {
+    white-space: pre-wrap;
+}
+
+.modchat-text a {
+    color: #b794ff;
+}
+
+.modchat-day {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 12px 0 6px;
+    color: var(--muted);
+    font-size: 0.78rem;
+}
+
+.modchat-day:first-child {
+    margin-top: 0;
+}
+
+.modchat-day::before,
+.modchat-day::after {
+    content: "";
+    flex: 1;
+    border-top: 1px solid var(--line);
+}
+
+.modchat-jump {
+    position: absolute;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px 14px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font: inherit;
+    font-size: 0.85rem;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.4);
+}
+
+.modchat-jump[hidden] {
+    display: none;
+}
+
+.modchat > .note {
+    margin: 0;
+}
+
+.modchat > .note[hidden] {
+    display: none;
+}
+
+.modchat-form {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.modchat-form textarea {
+    flex: 1;
+    min-height: 46px;
+    resize: vertical;
+}
+
+.modchat-keys {
+    margin: -4px 0 0;
+}
+
+/* --- Dock ----------------------------------------------------------- */
+
+/*
+ * Ein OBS-Dock ist schmal und oft niedrig. Der Verlauf nimmt die ganze
+ * Hoehe, ohne Karte drumherum - jeder Rand waere Platz, der fuer
+ * Nachrichten fehlt.
+ */
+.modchat-dock-body {
+    margin: 0;
+    background: var(--bg);
+    font-size: 14px;
+}
+
+.modchat-dock {
+    height: 100vh;
+    padding: 8px;
+    gap: 8px;
+}
+
+.modchat-dock .modchat-window {
+    flex: 1;
+    min-height: 0;
+}
+
+.modchat-dock .modchat-log {
+    height: 100%;
+    min-height: 0;
+}

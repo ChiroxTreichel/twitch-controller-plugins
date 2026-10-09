@@ -1,0 +1,16 @@
+{
+    "mod_chat.dock_hint": "To follow along in OBS: %{menu}, then enter %{url} as the address. The dock only shows the history, without an input field.",
+    "mod_chat.empty": "No messages yet.",
+    "mod_chat.error.empty": "The message is empty.",
+    "mod_chat.error.send_failed": "The message didn’t go through. Please try again.",
+    "mod_chat.error.session_lost": "You are no longer signed in. Please reload the page.",
+    "mod_chat.error.too_long": "The message is too long – at most %{max} characters.",
+    "mod_chat.jump": "↓ New messages",
+    "mod_chat.keep_hint": "Messages stay for %{days} days and then disappear on their own.",
+    "mod_chat.keys": "Enter sends, Shift + Enter starts a new line.",
+    "mod_chat.lead": "Messages to the whole team – everyone who can sign in here reads along. Nothing of it shows up in the Twitch chat.",
+    "mod_chat.name": "Chat",
+    "mod_chat.nav.stream": "Stream",
+    "mod_chat.placeholder": "Message to the team …",
+    "mod_chat.send": "Send"
+}
