@@ -128,7 +128,13 @@ final class Texts
         $werte = self::values($app);
 
         foreach ($werte as $name => $wert) {
-            $text = str_replace(['{{' . $name . '}}', '{{Conf.' . $name . '}}', '{{Color.' . $name . '}}'], $wert, $text);
+            // Mit Leerzeichen gilt auch - {{ multi_throne }} schreibt man
+            // so, wie bei den Alerts.
+            $text = str_replace(
+                ['{{' . $name . '}}', '{{ ' . $name . ' }}', '{{Conf.' . $name . '}}', '{{Color.' . $name . '}}'],
+                $wert,
+                $text
+            );
         }
 
         return $text;
@@ -183,6 +189,12 @@ final class Texts
 
             'HAPPY_HOUR_START' => $naechste === null ? '--:--' : sprintf('%02d:00', $naechste['start_hour']),
             'HAPPY_HOUR_END'   => $naechste === null ? '--:--' : sprintf('%02d:00', ($naechste['start_hour'] + 1) % 24),
+
+            // Klein geschrieben, wie gewuenscht - der eigene Text, wenn
+            // einer eingetragen ist, sonst die Zahl. Siehe den Reiter
+            // "Multiplikatoren".
+            'multi_paypal'     => Subathon::multiplierLabel($app, 'paypal'),
+            'multi_throne'     => Subathon::multiplierLabel($app, 'throne'),
         ];
     }
 

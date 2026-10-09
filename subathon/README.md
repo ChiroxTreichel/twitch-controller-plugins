@@ -24,12 +24,13 @@ im Lauf umlegt, verliert die Gutschriften dieser Zeit.
 ## Die Reiter
 
 Übernommen aus dem Windows-Programm (`legacy/subathon-tool`), mit
-denselben sieben Reitern unter *Tools → Subathon*:
+den sieben Reitern von dort und einem neuen unter *Tools → Subathon*:
 
 | Reiter | was dort steht |
 | --- | --- |
 | Übersicht | Zustand, die große Zahl (läuft sichtbar ab), ein Knopf: Pausieren / Weiter / Zurücksetzen |
 | Einstellungen | Startzeit, Obergrenze, Auslöser, was ein Abo/Bit/Cent bringt — **zu, solange er läuft** |
+| Multiplikatoren | wie viel mehr Spenden über PayPal und Throne zählen, mit eigenem Text für die Platzhalter — **neu** |
 | Overlay | die sechs Farben der Anzeige |
 | Nachrichten | die Laufschrift, eine je Zeile, mit Platzhaltern |
 | Manuelles Buchen | Abo, Geschenk-Abos, Bits, Spende, Minuten von Hand — **ausgeblendet** |
@@ -68,7 +69,32 @@ stehen im Reiter daneben.
 **Spenden** zählen von **PayPal**, **StreamElements**, **StreamLabs**
 und **Throne**. Die ersten drei melden sich über den Haken
 `tips.donation`, Throne über sein Ereignis — das Plugin muss dafür
-jeweils installiert sein.
+jeweils installiert sein. Alle rechnen über „Cent pro Sub".
+
+Bei Throne zählen **Kauf** und **Beitrag**. Ein vollgewordenes
+Sammelziel (`gift_crowdfunded`) zählt nicht: es trägt den vollen Preis,
+und die Beiträge dazu sind schon einzeln gebucht. Bis 1.5 zählte es
+mit — die Zeit kam dann doppelt.
+
+### Multiplikatoren
+
+Im Reiter **Multiplikatoren** lässt sich für **PayPal** und **Throne**
+einstellen, wie viel eine Spende über diesen Weg mehr zählt: `1` wie
+jede andere, `2` doppelt, `0` gar nicht — in Schritten von 0,1, bis
+höchstens 10. Die Happy Hour kommt obendrauf. StreamElements und
+StreamLabs zählen immer einfach: sie schicken keinen Anbieter mit, an
+dem man sie erkennen könnte.
+
+Im Verlauf steht der **echte Betrag**; was der Multiplikator gebracht
+hat, zeigen die Sekunden daneben.
+
+Daneben steht je ein **optionaler Text**. Ist er gesetzt, setzt der
+Platzhalter ihn statt der Zahl ein — „doppelt" liest sich in der
+Laufschrift besser als „2".
+
+Anders als die Einstellungen ist der Reiter **nicht gesperrt**, solange
+der Subathon läuft: ein Multiplikator ist wie die Happy Hour eine
+Aktion, die man mittendrin umstellt.
 
 Abos, Geschenk-Abos und Bits kommen über die **EventSub des Kerns**.
 Das Programm brachte dafür eigene Twitch-Tokens und eine eigene
@@ -156,6 +182,10 @@ jedem anderen Platz auch.
 `{{Conf.OWNER}}`, `{{Conf.HAPPY_HOUR_START}}`,
 `{{Conf.HAPPY_HOUR_END}}` — dazu die sechs Farben als `{{Color.DONE}}`
 und so weiter. Der aktuelle Wert steht im Reiter daneben.
+
+Neu: `{{ multi_paypal }}` und `{{ multi_throne }}` — der eigene Text
+aus dem Reiter *Multiplikatoren*, sonst die Zahl („1,5", „2"). Mit und
+ohne Leerzeichen.
 
 Das Präfix `Conf.` ist **freiwillig**: beide Schreibweisen gelten. Im
 Programm wurden zwei der Platzhalter nur ohne Präfix ersetzt, in der

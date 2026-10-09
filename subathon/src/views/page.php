@@ -28,6 +28,7 @@
  * @var int $perSub
  * @var int $perBits
  * @var int $perCent
+ * @var array<string, array{value: float, text: string}> $multipliers
  * @var array<string, string> $colors
  * @var list<string> $messages
  * @var list<array{start_hour: int, type: int}> $happy
@@ -107,11 +108,12 @@ $darfEinstellen = $canEdit && !$locked;
 <?php
 /*
  * "Manuelles Buchen" steht nur da, wenn es eingeschaltet ist - siehe
- * die Einstellungen. Die anderen sechs immer.
+ * die Einstellungen. Die anderen immer.
  */
 $reiterListe = [
     'overview' => translate('subathon.tab.overview'),
     'settings' => translate('subathon.tab.settings'),
+    'multipliers' => translate('subathon.tab.multipliers'),
     'overlay'  => translate('subathon.tab.overlay'),
     'messages' => translate('subathon.tab.messages'),
 ];
@@ -317,6 +319,75 @@ $reiterListe['history'] = translate('subathon.tab.history');
     </form>
 <?php endif ?>
 
+<?php /* ================= Multiplikatoren ================= */ ?>
+<?php if ($tab === 'multipliers'): ?>
+    <form method="post" action="<?= $e($url('/tools/subathon')) ?>">
+        <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
+        <input type="hidden" name="action" value="multipliers">
+        <input type="hidden" name="tab" value="multipliers">
+
+        <div class="card">
+            <div class="card-head">
+                <h2><?= $e(translate('subathon.tab.multipliers')) ?></h2>
+            </div>
+
+            <p class="hint"><?= $e(translate('subathon.multipliers_hint')) ?></p>
+
+            <?php /*
+                Eine Zeile je Weg: der Wert, der eigene Text fuer die
+                Platzhalter, und was fuenf Euro damit bringen - so sieht
+                man beim Tippen, was die Zahl bedeutet. Ohne Happy Hour:
+                die haengt an der Uhrzeit, nicht am Weg.
+            */ ?>
+            <table class="subathon-multipliers">
+                <thead>
+                    <tr>
+                        <th><?= $e(translate('subathon.multipliers.source')) ?></th>
+                        <th><?= $e(translate('subathon.multipliers.value')) ?></th>
+                        <th><?= $e(translate('subathon.multipliers.text')) ?></th>
+                        <th><?= $e(translate('subathon.multipliers.five_euro')) ?></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php foreach ($multipliers as $quelle => $multi): ?>
+                        <tr>
+                            <td>
+                                <strong><?= $e($quelle === 'paypal' ? translate('subathon.source.paypal') : translate('subathon.source.throne')) ?></strong>
+                                <div class="hint mono">{{ multi_<?= $e($quelle) ?> }}</div>
+                            </td>
+                            <td>
+                                <input class="input" type="number" name="multi_<?= $e($quelle) ?>"
+                                       min="0" max="<?= $e(number_format(\TwitchController\Plugin\Subathon\Subathon::MULTIPLIER_MAX, 1, '.', '')) ?>"
+                                       step="<?= $e(number_format(\TwitchController\Plugin\Subathon\Subathon::MULTIPLIER_STEP, 1, '.', '')) ?>"
+                                       value="<?= $e(number_format($multi['value'], 1, '.', '')) ?>" required
+                                       aria-label="<?= $e(translate('subathon.multipliers.value')) ?>"
+                                       <?= $canEdit ? '' : 'readonly' ?>>
+                            </td>
+                            <td>
+                                <input class="input" type="text" name="multi_<?= $e($quelle) ?>_text"
+                                       maxlength="<?= $e((string) \TwitchController\Plugin\Subathon\Subathon::MULTIPLIER_TEXT_MAX) ?>"
+                                       value="<?= $e($multi['text']) ?>"
+                                       placeholder="<?= $e(translate('subathon.multipliers.text_example')) ?>"
+                                       aria-label="<?= $e(translate('subathon.multipliers.text')) ?>"
+                                       <?= $canEdit ? '' : 'readonly' ?>>
+                            </td>
+                            <td class="mono"><?= $e($uhr(\TwitchController\Plugin\Subathon\Subathon::secondsForCents($perSub, $perCent, (int) round(500 * $multi['value'])))) ?></td>
+                        </tr>
+                    <?php endforeach ?>
+                </tbody>
+            </table>
+
+            <p class="hint"><?= $e(translate('subathon.multipliers.text_hint')) ?></p>
+
+            <?php if ($canEdit): ?>
+                <div class="row">
+                    <button class="btn" type="submit"><?= $e(translate('common.save')) ?></button>
+                </div>
+            <?php endif ?>
+        </div>
+    </form>
+<?php endif ?>
+
 <?php /* ================= Overlay ================= */ ?>
 <?php if ($tab === 'overlay'): ?>
     <form method="post" action="<?= $e($url('/tools/subathon')) ?>">
@@ -387,6 +458,13 @@ $reiterListe['history'] = translate('subathon.tab.history');
                     ] as $name): ?>
                         <tr>
                             <td class="mono">{{Conf.<?= $e($name) ?>}}</td>
+                            <td class="mono"><?= $e($preview[$name]) ?></td>
+                        </tr>
+                    <?php endforeach ?>
+                    <?php // Die Multiplikatoren - klein und mit Leerzeichen, wie gewuenscht. ?>
+                    <?php foreach (['multi_paypal', 'multi_throne'] as $name): ?>
+                        <tr>
+                            <td class="mono">{{ <?= $e($name) ?> }}</td>
                             <td class="mono"><?= $e($preview[$name]) ?></td>
                         </tr>
                     <?php endforeach ?>

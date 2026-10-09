@@ -309,16 +309,20 @@ $hooks->on('core.event.stored', static function (array $event) use ($app, $melde
             );
             break;
 
-        default:
-            /*
-             * Throne meldet seine Spenden nicht ueber 'tips.donation',
-             * sondern legt sie als Ereignis ab - mit Betrag in Euro.
-             * Damit zaehlen alle vier Wege, die es hier gibt.
-             */
-            if (!str_starts_with($typ, 'throne.')) {
-                return;
-            }
-
+        /*
+         * Throne meldet seine Spenden nicht ueber 'tips.donation',
+         * sondern legt sie als Ereignis ab - mit Betrag in Euro. Sie
+         * zaehlen wie jede Spende ("Cent pro Sub"), dazu mit dem
+         * eigenen Multiplikator.
+         *
+         * Nur Kauf und Beitrag. "gift_crowdfunded" ist der Abschluss
+         * eines Sammelziels und traegt den vollen Preis - die Beitraege
+         * dazu sind aber schon einzeln gebucht. Frueher zaehlte jedes
+         * throne.* mit Betrag, und ein vollgewordenes Sammelziel
+         * brachte seine Zeit ein zweites Mal.
+         */
+        case 'throne.gift_purchased':
+        case 'throne.contribution_purchased':
             $betrag = (float) ($event['amount'] ?? 0);
 
             if ($betrag <= 0) {
@@ -328,9 +332,13 @@ $hooks->on('core.event.stored', static function (array $event) use ($app, $melde
             Booking::donation(
                 $app,
                 (int) round($betrag * 100),
-                $wer !== '' ? $wer : translate('subathon.anonymous')
+                $wer !== '' ? $wer : translate('subathon.anonymous'),
+                Subathon::multiplier($app, 'throne')
             );
             break;
+
+        default:
+            return;
     }
 
     $melden($app);
@@ -338,7 +346,12 @@ $hooks->on('core.event.stored', static function (array $event) use ($app, $melde
 
 /*
  * Spenden. PayPal, StreamElements und StreamLabs melden sie unter
- * 'tips.donation', Throne ebenso - vier Wege, eine Buchung.
+ * 'tips.donation'; Throne kommt oben ueber sein Ereignis - vier Wege,
+ * eine Buchung.
+ *
+ * Nur PayPal schickt einen Anbieter mit ('provider' => 'paypal') und
+ * bekommt darum seinen Multiplikator. StreamElements und StreamLabs
+ * zaehlen einfach.
  *
  * Das Programm fragte dafuer allein bei StreamElements nach, im
  * Sekundentakt, mit einem eigenen OAuth-Token in der config.json.
@@ -359,7 +372,8 @@ $hooks->on('tips.donation', static function (array $spende) use ($app, $melden):
     Booking::donation(
         $app,
         (int) round($betrag * 100),
-        $wer !== '' ? $wer : translate('subathon.anonymous')
+        $wer !== '' ? $wer : translate('subathon.anonymous'),
+        (string) ($spende['provider'] ?? '') === 'paypal' ? Subathon::multiplier($app, 'paypal') : 1.0
     );
 
     $melden($app);
@@ -399,7 +413,7 @@ $zurueck = static function (App $app, ?string $notice = null, ?string $error = n
 
 $router->get('/tools/subathon', static function (Request $request) use ($app, $plugin): Response {
     $reiter = (string) $request->get('tab');
-    $reiter = in_array($reiter, ['overview', 'settings', 'overlay', 'messages', 'manual', 'happy', 'history'], true)
+    $reiter = in_array($reiter, ['overview', 'settings', 'multipliers', 'overlay', 'messages', 'manual', 'happy', 'history'], true)
         ? $reiter
         : 'overview';
 
@@ -439,6 +453,17 @@ $router->get('/tools/subathon', static function (Request $request) use ($app, $p
         'perSub'   => Subathon::secondsPerSub($app),
         'perBits'  => Subathon::bitsPerSub($app),
         'perCent'  => Subathon::centPerSub($app),
+
+        'multipliers' => array_combine(
+            Subathon::MULTIPLIER_SOURCES,
+            array_map(
+                static fn (string $quelle): array => [
+                    'value' => Subathon::multiplier($app, $quelle),
+                    'text'  => Subathon::multiplierText($app, $quelle),
+                ],
+                Subathon::MULTIPLIER_SOURCES
+            )
+        ),
 
         'colors'   => Subathon::colors($app),
         'messages' => Subathon::messages($app),
@@ -754,6 +779,47 @@ $router->post('/tools/subathon', static function (Request $request) use ($app, $
                 null,
                 'manual'
             );
+
+        // ----- Multiplikatoren -------------------------------------
+        /*
+         * Ohne die Sperre der Einstellungen: ein Multiplikator ist wie
+         * die Happy Hour eine Aktion, die man mitten im Subathon
+         * umstellt ("ab jetzt zaehlt Throne doppelt") - und keine
+         * Grundrechnung, die waehrend des Laufs fest sein muss.
+         */
+        case 'multipliers':
+            if (!$darfAendern) {
+                return $zurueck($app, null, translate('common.error.no_permission'));
+            }
+
+            $werte = [];
+
+            foreach (Subathon::MULTIPLIER_SOURCES as $quelle) {
+                $wert = Subathon::parseMultiplier((string) $request->input('multi_' . $quelle));
+
+                // Alle pruefen, bevor einer gespeichert wird - sonst
+                // stuende nach einem Fehler im zweiten Feld der erste
+                // schon geaendert da.
+                if ($wert === null) {
+                    return $zurueck($app, null, translate('subathon.error.multiplier', [
+                        'max' => Texts::number(Subathon::MULTIPLIER_MAX),
+                    ]), 'multipliers');
+                }
+
+                $werte['multi_' . $quelle] = $wert;
+                $werte['multi_' . $quelle . '_text'] = mb_substr(
+                    trim((string) preg_replace('/\s+/u', ' ', $request->input('multi_' . $quelle . '_text'))),
+                    0,
+                    Subathon::MULTIPLIER_TEXT_MAX
+                );
+            }
+
+            $app->settings->setMany($werte, Subathon::scope());
+
+            // Die Laufschrift kann die Werte zeigen - also neu melden.
+            $melden($app);
+
+            return $zurueck($app, translate('subathon.saved'), null, 'multipliers');
 
         // ----- Happy Hour ------------------------------------------
         case 'happy_add':

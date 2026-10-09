@@ -138,17 +138,24 @@ final class Booking
      * Gerechnet wird in Cent, wie im Programm: "Cent pro Sub" ist die
      * Einstellung, und Kommastellen in einer Multiplikation sind eine
      * Fehlerquelle mehr.
+     *
+     * Der Multiplikator (PayPal, Throne) macht die Spende so viel Cent
+     * wert, wie sie zaehlen soll - die Rechnung bleibt dieselbe. Im
+     * Verlauf steht trotzdem der echte Betrag; was der Multiplikator
+     * gebracht hat, zeigen die Sekunden daneben. Die Happy Hour kommt
+     * danach obendrauf.
      */
-    public static function donation(App $app, int $cents, string $who): int
+    public static function donation(App $app, int $cents, string $who, float $multiplier = 1.0): int
     {
         $cents = max(0, $cents);
+        $zaehlt = (int) round($cents * max(0.0, $multiplier));
 
         return self::credit(
             $app,
             'donation',
             $who,
             number_format($cents / 100, 2, '.', ''),
-            Subathon::secondsForCents(Subathon::secondsPerSub($app), Subathon::centPerSub($app), $cents),
+            Subathon::secondsForCents(Subathon::secondsPerSub($app), Subathon::centPerSub($app), $zaehlt),
             true
         );
     }

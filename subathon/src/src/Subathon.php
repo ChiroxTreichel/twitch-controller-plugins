@@ -149,6 +149,81 @@ final class Subathon
         return max(1, $app->settings->int('cent_per_sub', self::DEFAULT_CENT_PER_SUB, self::scope()));
     }
 
+    // -----------------------------------------------------------------
+    //  Multiplikatoren
+    // -----------------------------------------------------------------
+
+    /**
+     * Woher eine Spende kommen kann, die einen eigenen Multiplikator hat.
+     *
+     * StreamElements und StreamLabs fehlen mit Absicht: sie melden in
+     * 'tips.donation' keinen Anbieter mit, und ein Multiplikator, der
+     * nicht weiss, worauf er wirkt, waere geraten.
+     */
+    public const MULTIPLIER_SOURCES = ['paypal', 'throne'];
+
+    /** Mehr als zehnfach ist ein Tippfehler, keine Aktion. */
+    public const MULTIPLIER_MAX = 10.0;
+
+    /** In Zehnteln - feiner unterscheidet im Stream niemand. */
+    public const MULTIPLIER_STEP = 0.1;
+
+    /** Der Text, der statt der Zahl in der Laufschrift steht. */
+    public const MULTIPLIER_TEXT_MAX = 100;
+
+    /**
+     * Wie viel eine Spende ueber diesen Weg mehr zaehlt.
+     *
+     * 1 heisst: wie jede andere Spende. 0 heisst: zaehlt gar nicht -
+     * auch das darf man wollen.
+     */
+    public static function multiplier(App $app, string $quelle): float
+    {
+        $wert = $app->settings->get('multi_' . $quelle, 1.0, self::scope());
+
+        return is_numeric($wert) ? max(0.0, min(self::MULTIPLIER_MAX, round((float) $wert, 1))) : 1.0;
+    }
+
+    /** Der eigene Text zum Multiplikator - leer, wenn keiner da ist. */
+    public static function multiplierText(App $app, string $quelle): string
+    {
+        return $app->settings->string('multi_' . $quelle . '_text', '', self::scope());
+    }
+
+    /**
+     * Was {{ multi_paypal }} und {{ multi_throne }} einsetzen.
+     *
+     * Der eigene Text, wenn einer da ist - "doppelt" liest sich in der
+     * Laufschrift besser als "2". Sonst die Zahl, ohne Nachkommastelle,
+     * wo keine noetig ist.
+     */
+    public static function multiplierLabel(App $app, string $quelle): string
+    {
+        $text = self::multiplierText($app, $quelle);
+
+        return $text !== '' ? $text : Texts::number(self::multiplier($app, $quelle));
+    }
+
+    /**
+     * Ein Multiplikator aus dem Formular - "1,5" wie "1.5".
+     *
+     * Null heisst: nicht lesbar. Leer ist nicht lesbar und nicht 0 -
+     * ein Feld, das man aus Versehen leert, soll keine Spenden
+     * abschalten. Gerundet auf Zehntel, wie das Feld zaehlt.
+     */
+    public static function parseMultiplier(string $eingabe): ?float
+    {
+        $eingabe = str_replace(',', '.', trim($eingabe));
+
+        if ($eingabe === '' || !is_numeric($eingabe)) {
+            return null;
+        }
+
+        $wert = round((float) $eingabe, 1);
+
+        return $wert < 0 || $wert > self::MULTIPLIER_MAX ? null : $wert;
+    }
+
     /**
      * Soll der Reiter "Manuelles Buchen" da sein?
      *
