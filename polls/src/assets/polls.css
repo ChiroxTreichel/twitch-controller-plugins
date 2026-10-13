@@ -105,3 +105,11 @@
 .polls-test {
     margin-top: 12px;
 }
+
+.polls-mention {
+    align-items: flex-end;
+}
+
+[data-polls-role][hidden] {
+    display: none;
+}

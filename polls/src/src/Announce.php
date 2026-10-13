@@ -293,9 +293,16 @@ final class Announce
     /**
      * Eine Nachricht an den Discord-Webhook.
      *
+     * Die Mention aus den Einstellungen steht vor dem Text, nach der
+     * Strichlinie - sie gehoert zur Nachricht, nicht zur Trennung von
+     * der vorigen.
+     *
+     * @param bool $pingen false beim Testknopf: die Mention steht da,
+     *                     wie sie spaeter aussieht, aber niemand wird
+     *                     dafuer aus dem Bett geklingelt.
      * @return array{ok: bool, error: string}
      */
-    public function discord(string $absender, string $text): array
+    public function discord(string $absender, string $text, bool $pingen = true): array
     {
         $webhook = Polls::webhook($this->app);
 
@@ -305,12 +312,24 @@ final class Announce
             return ['ok' => false, 'error' => translate('polls.error.no_webhook')];
         }
 
+        $mention = Polls::mentionFor($this->app);
+
+        /*
+         * Ist @everyone erlaubt, gilt das fuer die ganze Nachricht - auch
+         * fuer Eintraege, die Zuschauer vorgeschlagen haben. Darum wird
+         * es im Text unschaedlich gemacht (ein unsichtbares Zeichen nach
+         * dem @); pingen darf nur die Mention davor.
+         */
+        $text = str_replace(['@everyone', '@here'], ["@\u{200B}everyone", "@\u{200B}here"], $text);
+
         try {
             $antwort = Http::json('POST', $webhook, [
                 'username' => $absender,
-                'content'  => self::cut(self::LINE . "\n" . $text, self::MAX_DISCORD),
-                // Kein @everyone aus einer Beschreibung heraus.
-                'allowed_mentions' => ['parse' => []],
+                'content'  => self::cut(
+                    self::LINE . "\n" . ($mention['prefix'] !== '' ? $mention['prefix'] . ' ' : '') . $text,
+                    self::MAX_DISCORD
+                ),
+                'allowed_mentions' => $pingen ? $mention['allowed'] : ['parse' => []],
             ]);
         } catch (Throwable $e) {
             $this->app->log('Umfragen: Discord nicht erreichbar - ' . $e->getMessage());

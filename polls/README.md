@@ -45,6 +45,15 @@ des alten Systems:
 - *„Die Umfrage … wurde beendet“* mit dem Gewinner — bei Gleichstand
   mit „je“, bei mehr als einer Wahl als „Platz 1, Platz 2, …“
 
+**Mention**: Ebenfalls in den Einstellungen wählbar, wen eine
+Ankündigung in Discord anpingt — *Keine Mention*, `@everyone`, `@here`
+oder *Eigene Rolle* mit der Rollen-ID (nur Ziffern; eine kopierte
+Erwähnung `<@&…>` wird auf die Ziffern gekürzt). Die Mention steht vor
+der Nachricht, nach der Strichlinie. Pingen darf **nur sie**: ein
+`@everyone` in einem Eintrag, den ein Zuschauer vorgeschlagen hat, wird
+unschädlich gemacht. Der Testknopf zeigt die Mention, pingt aber
+niemanden an.
+
 **Twitch-Chat**: dieselben zwei Anlässe, kurz in einer Zeile mit Link.
 
 Das Ergebnis sagt der Hintergrundprozess an, sobald die Zeit um ist.

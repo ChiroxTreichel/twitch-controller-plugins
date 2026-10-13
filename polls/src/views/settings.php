@@ -9,6 +9,8 @@
  * @var callable $e
  * @var callable $url
  * @var string $webhook
+ * @var string $mention
+ * @var string $roleId
  * @var string $position
  * @var int $width
  * @var bool $canEdit
@@ -43,6 +45,34 @@ $ziel = $url('/tools/polls/settings');
             <input class="input mono" type="url" name="discord_webhook" value="<?= $e($webhook) ?>"
                    placeholder="https://discord.com/api/webhooks/…" <?= $canEdit ? '' : 'readonly' ?>>
         </label>
+
+        <?php /*
+            Die Rollen-ID steht nur da, wenn "Eigene Rolle" gewaehlt ist
+            (polls.js). Ohne Skript steht sie immer da und gilt nur bei
+            dieser Wahl.
+        */ ?>
+        <div class="row polls-mention">
+            <label class="field">
+                <span class="hint"><?= $e(translate('polls.field.mention')) ?></span>
+                <select name="discord_mention" data-polls-mention <?= $canEdit ? '' : 'disabled' ?>>
+                    <?php foreach (Polls::MENTIONS as $art): ?>
+                        <option value="<?= $e($art) ?>" <?= $art === $mention ? 'selected' : '' ?>><?= $e(match ($art) {
+                            'everyone' => translate('polls.mention.everyone'),
+                            'here'     => translate('polls.mention.here'),
+                            'role'     => translate('polls.mention.role'),
+                            default    => translate('polls.mention.none'),
+                        }) ?></option>
+                    <?php endforeach ?>
+                </select>
+            </label>
+            <label class="field grow" data-polls-role <?= $mention === 'role' ? '' : 'hidden' ?>>
+                <span class="hint"><?= $e(translate('polls.field.role_id')) ?></span>
+                <input class="input mono" type="text" name="discord_role_id" value="<?= $e($roleId) ?>"
+                       inputmode="numeric" maxlength="40" placeholder="123456789012345678"
+                       <?= $canEdit ? '' : 'readonly' ?>>
+            </label>
+        </div>
+        <p class="hint"><?= $e(translate('polls.mention_hint')) ?></p>
     </div>
 
     <div class="card">

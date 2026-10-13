@@ -289,6 +289,8 @@ $router->get('/tools/polls/settings', static function (Request $request) use ($a
         'title'     => translate('polls.settings'),
         'active'    => 'tools/polls',
         'webhook'   => Polls::webhook($app),
+        'mention'   => Polls::mention($app),
+        'roleId'    => Polls::mentionRole($app),
         'position'  => Polls::overlayPosition($app),
         'width'     => Polls::overlayWidth($app),
         'canEdit'   => $app->auth->can('Polls.Global.Edit'),
@@ -310,7 +312,9 @@ $router->post('/tools/polls/settings', static function (Request $request) use ($
     }
 
     if ($request->input('action') === 'test_discord') {
-        $ergebnis = (new Announce($app))->discord(translate('polls.discord.bot_new'), translate('polls.discord.test'));
+        // Ohne Ping: die Mention steht da, wie sie spaeter aussieht, aber
+        // ein Test soll nicht den ganzen Server wecken.
+        $ergebnis = (new Announce($app))->discord(translate('polls.discord.bot_new'), translate('polls.discord.test'), false);
 
         return $ergebnis['ok']
             ? $zurueck($ziel, translate('polls.test_sent'))
@@ -319,6 +323,8 @@ $router->post('/tools/polls/settings', static function (Request $request) use ($
 
     $fehler = Polls::saveSettings($app, [
         'discord_webhook'  => $request->input('discord_webhook'),
+        'discord_mention'  => $request->input('discord_mention'),
+        'discord_role_id'  => $request->input('discord_role_id'),
         'overlay_position' => $request->input('overlay_position'),
         'overlay_width'    => $request->input('overlay_width'),
     ]);

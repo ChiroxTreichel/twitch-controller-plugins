@@ -96,8 +96,76 @@ final class Polls
         return max(300, min(1920, $app->settings->int('overlay_width', 600, self::scope())));
     }
 
+    // -----------------------------------------------------------------
+    //  Mention in Discord
+    // -----------------------------------------------------------------
+
     /**
-     * Webhook und Overlay speichern.
+     * Wen eine Ankuendigung in Discord anpingt.
+     *
+     *   none      niemanden
+     *   everyone  @everyone - alle im Server
+     *   here      @here - alle, die gerade online sind
+     *   role      eine Rolle, ueber ihre ID
+     */
+    public const MENTIONS = ['none', 'everyone', 'here', 'role'];
+
+    public static function mention(App $app): string
+    {
+        $art = $app->settings->string('discord_mention', 'none', self::scope());
+
+        return in_array($art, self::MENTIONS, true) ? $art : 'none';
+    }
+
+    public static function mentionRole(App $app): string
+    {
+        return $app->settings->string('discord_role_id', '', self::scope());
+    }
+
+    /**
+     * Was vor der Nachricht steht und was Discord pingen darf.
+     *
+     * Beides gehoert zusammen: ohne "allowed_mentions" stuende die
+     * Erwaehnung zwar da, aber niemand bekaeme etwas mit - Discord
+     * pingt nur, was dort ausdruecklich erlaubt ist. Alles andere
+     * bleibt gesperrt, auch ein @everyone aus einer Beschreibung.
+     *
+     * @return array{prefix: string, allowed: array<string, list<string>>}
+     */
+    public static function mentionFor(App $app): array
+    {
+        $rolle = self::mentionRole($app);
+
+        return match (self::mention($app)) {
+            'everyone' => ['prefix' => '@everyone', 'allowed' => ['parse' => ['everyone']]],
+            // Dieselbe Erlaubnis: Discord fasst @here unter "everyone".
+            'here'     => ['prefix' => '@here', 'allowed' => ['parse' => ['everyone']]],
+            'role'     => $rolle === ''
+                ? ['prefix' => '', 'allowed' => ['parse' => []]]
+                : ['prefix' => '<@&' . $rolle . '>', 'allowed' => ['parse' => [], 'roles' => [$rolle]]],
+            default    => ['prefix' => '', 'allowed' => ['parse' => []]],
+        };
+    }
+
+    /**
+     * Eine Rollen-ID aus dem Formular: nur Ziffern.
+     *
+     * Wer in Discord "Rollen-ID kopieren" waehlt, bekommt die Ziffern.
+     * Kopiert jemand stattdessen die fertige Erwaehnung (<@&123…>),
+     * wird sie hier auf die Ziffern gekuerzt - das ist dieselbe Rolle.
+     * Leer heisst: nicht lesbar.
+     */
+    public static function parseRoleId(string $eingabe): string
+    {
+        $eingabe = trim((string) preg_replace('/^<@&(\d+)>$/', '$1', trim($eingabe)));
+
+        // Discord-IDs sind Snowflakes: 17 bis 20 Ziffern. Etwas Spiel
+        // nach beiden Seiten, falls Discord sie eines Tages verlaengert.
+        return preg_match('/^\d{15,25}$/', $eingabe) === 1 ? $eingabe : '';
+    }
+
+    /**
+     * Webhook, Mention und Overlay speichern.
      *
      * @param array<string, string> $eingabe
      * @return string leer bei Erfolg, sonst der Grund
@@ -110,8 +178,30 @@ final class Polls
             return translate('polls.error.webhook');
         }
 
+        $art = (string) ($eingabe['discord_mention'] ?? 'none');
+        $art = in_array($art, self::MENTIONS, true) ? $art : 'none';
+        $rolle = '';
+
+        if ($art === 'role') {
+            $rolle = self::parseRoleId((string) ($eingabe['discord_role_id'] ?? ''));
+
+            // Vor dem Speichern pruefen: sonst stuende eine halbe
+            // Einstellung da - "Eigene Rolle", aber keine Rolle.
+            if ($rolle === '') {
+                return translate('polls.error.role_id');
+            }
+        }
+
         $scope = self::scope();
         $app->settings->set('discord_webhook', $webhook, $scope);
+        $app->settings->set('discord_mention', $art, $scope);
+
+        // Die ID bleibt stehen, wenn man auf eine andere Mention
+        // umschaltet - beim Zurueckschalten muss man sie nicht neu
+        // suchen.
+        if ($rolle !== '') {
+            $app->settings->set('discord_role_id', $rolle, $scope);
+        }
 
         $stelle = (string) ($eingabe['overlay_position'] ?? '');
         $app->settings->set('overlay_position', in_array($stelle, self::POSITIONS, true) ? $stelle : 'top-right', $scope);

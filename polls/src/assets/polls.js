@@ -115,7 +115,24 @@
     document.addEventListener('change', function (ereignis) {
         var wahl = ereignis.target;
 
-        if (!wahl.matches || !wahl.matches('[data-polls-mode]')) {
+        if (!wahl.matches) {
+            return;
+        }
+
+        // Die Rollen-ID nur bei "Eigene Rolle".
+        if (wahl.matches('[data-polls-mention]')) {
+            Array.prototype.forEach.call(wahl.form.querySelectorAll('[data-polls-role]'), function (feld) {
+                feld.hidden = wahl.value !== 'role';
+
+                if (!feld.hidden) {
+                    feld.querySelector('input').focus();
+                }
+            });
+
+            return;
+        }
+
+        if (!wahl.matches('[data-polls-mode]')) {
             return;
         }
 
