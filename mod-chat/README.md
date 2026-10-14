@@ -36,8 +36,9 @@ es auf die Anmeldung und danach zurück in den Chat.
 Kommt eine **neue Nachricht**, blinkt das Dock in umgekehrten Farben —
 so lange, bis du einmal hineinklickst. Der Streamer schaut aufs Spiel,
 nicht aufs Dock; im Dock gibt es auch keinen Fenstertitel, der
-mitzählt. Eigene Nachrichten (aus einem anderen Reiter) lösen nichts
-aus, und beim Laden des Docks blinkt nichts.
+mitzählt. Das gilt für **jede** neue Nachricht, auch für die eigene —
+das Dock ist nur zum Lesen da, was dort ankommt, wurde also woanders
+geschrieben. Beim Laden des Docks blinkt nichts.
 
 Geblinkt wird einmal pro Sekunde — schneller wäre für manche Menschen
 gefährlich. Ist im System „weniger Bewegung“ eingestellt, bleibt das

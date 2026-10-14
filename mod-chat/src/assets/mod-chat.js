@@ -182,7 +182,6 @@
         function anhaengen(nachrichten) {
             var warUnten = untenNah();
             var eigene = false;
-            var fremde = false;
             var dazu = 0;
 
             nachrichten.forEach(function (nachricht) {
@@ -205,12 +204,8 @@
 
                 if (nachricht.own) {
                     eigene = true;
-                } else {
-                    fremde = true;
-
-                    if (document.hidden) {
-                        ungelesen++;
-                    }
+                } else if (document.hidden) {
+                    ungelesen++;
                 }
             });
 
@@ -228,11 +223,15 @@
              * gibt es keinen Fenstertitel, der mitzaehlt - und der
              * Streamer schaut auf das Spiel, nicht auf das Dock.
              *
-             * Nur bei Nachrichten anderer: was man selbst geschrieben
-             * hat (in einem anderen Reiter), muss einem niemand melden.
-             * Und nur bei NEUEN - beim Laden des Docks blinkt nichts.
+             * Bei JEDER neuen Nachricht, auch der eigenen. In 1.1.0
+             * blieben eigene aussen vor - aber das Dock ist nur zum
+             * Lesen da, was dort ankommt, wurde zwangslaeufig woanders
+             * geschrieben. Und wer es allein ausprobierte, sah nie
+             * etwas blinken.
+             *
+             * Nur bei NEUEN: beim Laden des Docks blinkt nichts.
              */
-            if (dock && fremde) {
+            if (dock) {
                 wurzel.classList.add('is-blinking');
             }
 
