@@ -19,6 +19,9 @@
 
     var TAKT_MS = 2000;
 
+    /* Wie lange das Dock je Zustand steht, wenn es blinkt. */
+    var BLINK_MS = 500;
+
     /*
      * "Unten" heisst: hoechstens so weit davon weg. Wer ganz unten
      * liest, will die neue Nachricht sehen; wer hochgescrollt hat, um
@@ -150,6 +153,7 @@
         var letzterTag = tage.length ? tage[tage.length - 1].dataset.day : '';
 
         var dock = wurzel.classList.contains('modchat-dock');
+        var blinkTakt = null;
         var takt = null;
         var holtGerade = false;
         var nochEinmal = false;
@@ -232,7 +236,7 @@
              * Nur bei NEUEN: beim Laden des Docks blinkt nichts.
              */
             if (dock) {
-                wurzel.classList.add('is-blinking');
+                blinken();
             }
 
             // Die eigene Nachricht will man sehen, egal wo man gerade
@@ -305,6 +309,42 @@
                 window.clearInterval(takt);
                 takt = null;
             }
+
+            ruhe();
+        }
+
+        /*
+         * Das Blinken schaltet ein Takt hier im Skript, keine CSS-
+         * Animation. In 1.1.0 war es eine - und der Browser in OBS
+         * meldet offenbar "weniger Bewegung", worauf das Dock nur noch hell
+         * stehen blieb. Ein Takt haengt an keiner solchen Einstellung
+         * und an keiner Animation, die ein eingebetteter Browser
+         * anhalten koennte.
+         *
+         * Eine halbe Sekunde je Zustand, also ein Wechsel hin und
+         * zurueck pro Sekunde - mehr als drei Wechsel pro Sekunde
+         * koennen fuer manche Menschen gefaehrlich sein.
+         */
+        function blinken() {
+            wurzel.classList.add('is-blinking');
+
+            if (blinkTakt !== null) {
+                return;
+            }
+
+            wurzel.classList.add('is-inverted');
+            blinkTakt = window.setInterval(function () {
+                wurzel.classList.toggle('is-inverted');
+            }, BLINK_MS);
+        }
+
+        function ruhe() {
+            if (blinkTakt !== null) {
+                window.clearInterval(blinkTakt);
+                blinkTakt = null;
+            }
+
+            wurzel.classList.remove('is-blinking', 'is-inverted');
         }
 
         // Was der Server gerendert hat, bekommt seine Links hier - eine
@@ -405,9 +445,7 @@
          * Loslassen schon woanders ist.
          */
         if (dock) {
-            wurzel.addEventListener('pointerdown', function () {
-                wurzel.classList.remove('is-blinking');
-            });
+            wurzel.addEventListener('pointerdown', ruhe);
         }
 
         takt = window.setInterval(holen, TAKT_MS);

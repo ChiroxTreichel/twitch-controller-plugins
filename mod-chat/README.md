@@ -41,8 +41,9 @@ das Dock ist nur zum Lesen da, was dort ankommt, wurde also woanders
 geschrieben. Beim Laden des Docks blinkt nichts.
 
 Geblinkt wird einmal pro Sekunde — schneller wäre für manche Menschen
-gefährlich. Ist im System „weniger Bewegung“ eingestellt, bleibt das
-Dock stattdessen umgekehrt stehen, bis du klickst.
+gefährlich. Den Takt schlägt das Skript und nicht eine CSS-Animation:
+der Browser in OBS meldet offenbar „weniger Bewegung“, und in 1.1.0/1.1.1 blieb
+das Dock dort deshalb nur hell stehen.
 
 ## Wer darf
 

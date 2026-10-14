@@ -151,30 +151,13 @@
 
 /*
  * Neue Nachricht: das Dock blinkt in umgekehrten Farben, bis jemand
- * hineinklickt (mod-chat.js). Einmal je Sekunde - schneller waere
- * mehr als drei Wechsel pro Sekunde, und das ist die Grenze, ab der
- * Blinken fuer manche Menschen gefaehrlich wird.
+ * hineinklickt. Den Takt schlaegt mod-chat.js - es schaltet
+ * "is-inverted" alle halbe Sekunde an und aus. Keine CSS-Animation:
+ * der Browser in OBS meldet offenbar "weniger Bewegung", und eine Animation
+ * stand dort still.
  */
-.modchat-dock.is-blinking {
-    animation: modchat-blink 1s steps(1, end) infinite;
-}
-
-@keyframes modchat-blink {
-    50% {
-        filter: invert(1);
-    }
-}
-
-/*
- * Wer weniger Bewegung eingestellt hat, bekommt kein Blinken, sondern
- * ein Dock, das umgekehrt stehen bleibt - auffaellig genug, und es
- * flackert nichts.
- */
-@media (prefers-reduced-motion: reduce) {
-    .modchat-dock.is-blinking {
-        animation: none;
-        filter: invert(1);
-    }
+.modchat-dock.is-inverted {
+    filter: invert(1);
 }
 
 .modchat-dock .modchat-window {
