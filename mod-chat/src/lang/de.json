@@ -1,5 +1,5 @@
 {
-    "mod_chat.dock_hint": "Zum Mitlesen in OBS: %{menu}, dort %{url} als Adresse eintragen. Das Dock zeigt nur den Verlauf, ohne Eingabefeld.",
+    "mod_chat.dock_hint": "Zum Mitlesen in OBS: %{menu}, dort %{url} als Adresse eintragen. Das Dock zeigt nur den Verlauf, ohne Eingabefeld – und blinkt bei einer neuen Nachricht, bis du einmal hineinklickst.",
     "mod_chat.empty": "Noch keine Nachrichten.",
     "mod_chat.error.empty": "Die Nachricht ist leer.",
     "mod_chat.error.send_failed": "Die Nachricht ging nicht raus. Bitte noch einmal versuchen.",

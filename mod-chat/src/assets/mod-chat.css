@@ -144,6 +144,37 @@
     height: 100vh;
     padding: 8px;
     gap: 8px;
+    /* Eigener Hintergrund: sonst kehrte das Blinken unten nur die
+       Schrift um, und die Flaeche dahinter bliebe dunkel. */
+    background: var(--bg);
+}
+
+/*
+ * Neue Nachricht: das Dock blinkt in umgekehrten Farben, bis jemand
+ * hineinklickt (mod-chat.js). Einmal je Sekunde - schneller waere
+ * mehr als drei Wechsel pro Sekunde, und das ist die Grenze, ab der
+ * Blinken fuer manche Menschen gefaehrlich wird.
+ */
+.modchat-dock.is-blinking {
+    animation: modchat-blink 1s steps(1, end) infinite;
+}
+
+@keyframes modchat-blink {
+    50% {
+        filter: invert(1);
+    }
+}
+
+/*
+ * Wer weniger Bewegung eingestellt hat, bekommt kein Blinken, sondern
+ * ein Dock, das umgekehrt stehen bleibt - auffaellig genug, und es
+ * flackert nichts.
+ */
+@media (prefers-reduced-motion: reduce) {
+    .modchat-dock.is-blinking {
+        animation: none;
+        filter: invert(1);
+    }
 }
 
 .modchat-dock .modchat-window {

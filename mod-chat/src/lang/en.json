@@ -1,5 +1,5 @@
 {
-    "mod_chat.dock_hint": "To follow along in OBS: %{menu}, then enter %{url} as the address. The dock only shows the history, without an input field.",
+    "mod_chat.dock_hint": "To follow along in OBS: %{menu}, then enter %{url} as the address. The dock only shows the history, without an input field – and flashes on a new message until you click into it once.",
     "mod_chat.empty": "No messages yet.",
     "mod_chat.error.empty": "The message is empty.",
     "mod_chat.error.send_failed": "The message didn’t go through. Please try again.",

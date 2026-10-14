@@ -149,6 +149,7 @@
         var tage = verlauf.querySelectorAll('[data-day]');
         var letzterTag = tage.length ? tage[tage.length - 1].dataset.day : '';
 
+        var dock = wurzel.classList.contains('modchat-dock');
         var takt = null;
         var holtGerade = false;
         var nochEinmal = false;
@@ -181,6 +182,7 @@
         function anhaengen(nachrichten) {
             var warUnten = untenNah();
             var eigene = false;
+            var fremde = false;
             var dazu = 0;
 
             nachrichten.forEach(function (nachricht) {
@@ -203,8 +205,12 @@
 
                 if (nachricht.own) {
                     eigene = true;
-                } else if (document.hidden) {
-                    ungelesen++;
+                } else {
+                    fremde = true;
+
+                    if (document.hidden) {
+                        ungelesen++;
+                    }
                 }
             });
 
@@ -215,6 +221,19 @@
             var leer = verlauf.querySelector('[data-empty]');
             if (leer) {
                 leer.remove();
+            }
+
+            /*
+             * Im Dock blinkt das Fenster, bis jemand hineinklickt. Dort
+             * gibt es keinen Fenstertitel, der mitzaehlt - und der
+             * Streamer schaut auf das Spiel, nicht auf das Dock.
+             *
+             * Nur bei Nachrichten anderer: was man selbst geschrieben
+             * hat (in einem anderen Reiter), muss einem niemand melden.
+             * Und nur bei NEUEN - beim Laden des Docks blinkt nichts.
+             */
+            if (dock && fremde) {
+                wurzel.classList.add('is-blinking');
             }
 
             // Die eigene Nachricht will man sehen, egal wo man gerade
@@ -377,6 +396,18 @@
                         knopf.disabled = false;
                         feld.focus();
                     });
+            });
+        }
+
+        /*
+         * Ein Klick irgendwo ins Dock beendet das Blinken. "pointerdown"
+         * und nicht "click": schon das Druecken ist das Zeichen, dass
+         * jemand hinsieht - und es kommt auch an, wenn die Maus beim
+         * Loslassen schon woanders ist.
+         */
+        if (dock) {
+            wurzel.addEventListener('pointerdown', function () {
+                wurzel.classList.remove('is-blinking');
             });
         }
 
