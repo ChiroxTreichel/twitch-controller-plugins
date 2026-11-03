@@ -74,17 +74,24 @@ final class ShoutoutTarget
             return ['ok' => false, 'error' => translate('ln_shoutout.error.no_channel')];
         }
 
+        $angaben = [
+            'from_broadcaster_id' => $eigene,
+            'to_broadcaster_id'   => $zielKanalId,
+            // Der Moderator ist hier der Kanalinhaber selbst - das Token
+            // gehoert ihm, und Twitch verlangt, dass beides zusammenpasst.
+            'moderator_id'        => $eigene,
+        ];
+
         try {
+            // Die Angaben stehen in der Adresse, wie Twitch sie dort
+            // erwartet - UND im Koerper. Api::post() schickt ohne Koerper
+            // ein leeres PHP-Array, also "[]" als JSON, und daran
+            // scheitert Twitch: "Request body was not parsable". Mit den
+            // Angaben als Objekt ist der Koerper gueltig, und Twitch
+            // liest ohnehin die Adresse.
             $antwort = $app->twitch->api()
                 ->as(TokenStore::BROADCASTER)
-                ->post('chat/shoutouts', [
-                    'from_broadcaster_id' => $eigene,
-                    'to_broadcaster_id'   => $zielKanalId,
-                    // Der Moderator ist hier der Kanalinhaber selbst -
-                    // das Token gehoert ihm, und Twitch verlangt, dass
-                    // beides zusammenpasst.
-                    'moderator_id'        => $eigene,
-                ]);
+                ->post('chat/shoutouts', $angaben, $angaben);
         } catch (Throwable $e) {
             return ['ok' => false, 'error' => $e->getMessage()];
         }
