@@ -78,13 +78,21 @@ final class Raid
             return ['ok' => false, 'error' => translate('raids_raid.error.self')];
         }
 
+        $angaben = [
+            'from_broadcaster_id' => $eigene,
+            'to_broadcaster_id'   => $zielId,
+        ];
+
         try {
+            // Die Angaben stehen in der Adresse, wie Twitch sie dort
+            // erwartet - UND im Koerper. Api::post() schickt ohne Koerper
+            // ein leeres PHP-Array, also "[]" als JSON, und daran
+            // scheitert Twitch: "Request body was not parsable". Mit den
+            // Angaben als Objekt ist der Koerper gueltig, und Twitch
+            // liest ohnehin die Adresse.
             $antwort = $app->twitch->api()
                 ->as(TokenStore::BROADCASTER)
-                ->post('raids', [
-                    'from_broadcaster_id' => $eigene,
-                    'to_broadcaster_id'   => $zielId,
-                ]);
+                ->post('raids', $angaben, $angaben);
         } catch (Throwable $e) {
             return ['ok' => false, 'error' => $e->getMessage()];
         }
