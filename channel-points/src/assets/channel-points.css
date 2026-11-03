@@ -65,8 +65,18 @@
     background: var(--cp-tile, var(--accent));
 }
 
-/* Ausgeschaltet: die ganze Kachel tritt zurueck, nicht nur ein Wort. */
-.cp-tile.is-off {
+/*
+ * Ausgeschaltet: die ganze Kachel tritt zurueck, nicht nur ein Wort.
+ *
+ * Die Deckkraft sitzt an den Teilen der Kachel und NICHT an der Kachel
+ * selbst. Eine Kachel mit opacity unter 1 wird zu einem eigenen
+ * Stapelkontext: der Dialog darin kam mit seinem z-index dann nicht
+ * mehr aus ihr heraus und lag hinter den Kacheln, die danach kommen -
+ * und war obendrein selbst halb durchsichtig.
+ */
+.cp-tile.is-off > :not(.cp-tile-actions),
+.cp-tile.is-off .cp-tile-actions > :not(.cp-dialog),
+.cp-tile.is-off .cp-dialog > summary {
     opacity: 0.62;
 }
 
