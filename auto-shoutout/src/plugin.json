@@ -1,0 +1,16 @@
+{
+  "slug": "auto-shoutout",
+  "name": "Chat - Auto-Shoutout",
+  "version": "1.0.0",
+  "description": "Löst automatisch einen Twitch-Shoutout aus, sobald ein eingetragener Kanal im laufenden Stream zum ersten Mal in den Chat schreibt.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.1.2"
+  },
+  "optional": {},
+  "tags": [
+    "chat",
+    "networking",
+    "twitch"
+  ]
+}

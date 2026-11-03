@@ -1,0 +1,143 @@
+/* -------------------------------------------------------------------
+ *  Auto-Shoutout: die Kanalkacheln
+ *
+ *  Wie bei der Live-Benachrichtigung: Bild, Name, Kreuz in der Ecke.
+ *  Unten steht statt der Ziel-Haken der Stand in dieser Runde.
+ * ------------------------------------------------------------------- */
+.aso-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 12px;
+    margin: 14px 0 0;
+}
+
+.aso-tile {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 14px 12px 10px;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+}
+
+.aso-head {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    color: inherit;
+    text-decoration: none;
+}
+
+.aso-head:hover .aso-name {
+    text-decoration: underline;
+}
+
+.aso-avatar {
+    flex: 0 0 auto;
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.aso-avatar-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--panel-2, rgba(255, 255, 255, .06));
+    font: 600 1.5rem/1 system-ui, sans-serif;
+    color: var(--muted);
+}
+
+/* Shoutout in dieser Runde gegeben: gruener Ring, wie "live" bei der
+   Live-Benachrichtigung - man sieht im Gitter auf einen Blick, wer
+   schon dran war. */
+.aso-avatar.is-done {
+    box-shadow:
+        0 0 0 2px var(--ok),
+        0 0 12px 2px rgba(62, 207, 142, .55);
+}
+
+.aso-avatar.is-waiting {
+    box-shadow: 0 0 0 2px var(--warn, #f59e0b);
+}
+
+.aso-avatar.is-failed {
+    box-shadow: 0 0 0 2px var(--danger, #ef4444);
+}
+
+.aso-name {
+    max-width: 100%;
+    font-size: 0.9rem;
+    font-weight: 600;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.aso-state {
+    font-size: 0.82rem;
+    line-height: 1.35;
+    text-align: center;
+    color: var(--muted);
+}
+
+.aso-state.is-done {
+    color: var(--ok);
+}
+
+.aso-state.is-waiting {
+    color: var(--warn, #f59e0b);
+}
+
+.aso-state.is-failed {
+    color: var(--danger, #ef4444);
+}
+
+/* Der Grund einer Ablehnung, klein darunter. Umbrechen statt kuerzen:
+   genau diesen Text will man lesen. */
+.aso-error {
+    display: block;
+    margin-top: 2px;
+    font-size: 0.74rem;
+    color: var(--muted);
+    overflow-wrap: anywhere;
+}
+
+.aso-foot {
+    margin-top: auto;
+    font-size: 0.74rem;
+    text-align: center;
+}
+
+.aso-remove {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    z-index: 1;
+}
+
+.aso-remove button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 22px;
+    height: 22px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 50%;
+    background: var(--panel);
+    cursor: pointer;
+    font-size: 0.95rem;
+    line-height: 1;
+    color: var(--muted);
+}
+
+.aso-remove button:hover {
+    border-color: var(--danger, #ef4444);
+    color: var(--danger, #ef4444);
+}
