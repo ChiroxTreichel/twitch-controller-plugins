@@ -29,8 +29,9 @@ use TwitchController\Core\Twitch\TokenStore;
  * Zwei Bedingungen von Twitch, die man kennen muss:
  *
  *   Der eigene Kanal muss LIVE sein. Ohne Stream lehnt Twitch den
- *   Shoutout ab. Dieses Plugin fragt das vorher absichtlich NICHT ab
- *   (Wunsch zum Testen) - die Ablehnung steht dann an der Kachel.
+ *   Shoutout ab. Ist der Kanal offline, bricht dieses Plugin darum
+ *   still ab - ohne Meldung, ohne Log, und ohne die Nachricht fuer
+ *   die Runde zu zaehlen.
  *
  *   Sperrfristen: zwei Minuten zwischen zwei Shoutouts, sechzig fuer
  *   denselben Kanal. Twitch antwortet mit 429. Ein solcher Shoutout
@@ -289,6 +290,17 @@ final class AutoShoutout
             return;
         }
 
+        // Nur Kanaele aus der Liste - erst dann lohnt die Frage, ob der
+        // eigene Stream laeuft.
+        $bekannt = $app->db->value(
+            'SELECT 1 FROM auto_shoutout_channels WHERE login = :login',
+            ['login' => $login]
+        );
+
+        if ($bekannt === null || !self::live($app)) {
+            return;
+        }
+
         $runde = self::round($app);
 
         // Der Vergleich der Runde steht IM UPDATE: nur eine Nachricht
@@ -334,7 +346,7 @@ final class AutoShoutout
      */
     public static function tick(App $app): void
     {
-        if (!self::enabled($app) || self::coolingDown($app)) {
+        if (!self::enabled($app) || self::coolingDown($app) || !self::live($app)) {
             return;
         }
 
@@ -419,6 +431,64 @@ final class AutoShoutout
             $nochmal ? 'wartet' : 'gescheitert',
             $ergebnis['error']
         ));
+    }
+
+    // -----------------------------------------------------------------
+    //  Laeuft der eigene Stream?
+    // -----------------------------------------------------------------
+
+    /**
+     * Wie lange ein ueber Helix geholter Stand gilt.
+     *
+     * Gefragt wird nur, wenn jemand aus der Liste schreibt (oder etwas
+     * vorgemerkt ist) - und dann hoechstens alle paar Minuten. Den
+     * Wechsel melden ohnehin stream.online / .offline sofort.
+     */
+    private const LIVE_REFRESH_SECONDS = 300;
+
+    /**
+     * Ist der eigene Kanal live?
+     *
+     * Aus den Events stream.online / .offline (siehe setLive()), mit
+     * Helix als Rueckfall - wer das Plugin mitten im Stream installiert,
+     * haette sonst bis zum naechsten Streamstart "offline".
+     */
+    public static function live(App $app): bool
+    {
+        $stand = $app->settings->bool('live', false, self::scope());
+        $geprueft = $app->settings->int('live_checked_at', 0, self::scope());
+
+        if (time() - $geprueft < self::LIVE_REFRESH_SECONDS) {
+            return $stand;
+        }
+
+        $kanalId = $app->settings->string('twitch_broadcaster_id');
+        if ($kanalId === '') {
+            return false;
+        }
+
+        try {
+            $antwort = $app->twitch->api()
+                ->as(TokenStore::BROADCASTER)
+                ->get('streams', ['user_id' => $kanalId]);
+        } catch (Throwable) {
+            return $stand;
+        }
+
+        if (!$antwort->ok()) {
+            return $stand;
+        }
+
+        $laeuft = is_array($antwort->json['data'][0] ?? null);
+        self::setLive($app, $laeuft);
+
+        return $laeuft;
+    }
+
+    public static function setLive(App $app, bool $an): void
+    {
+        $app->settings->set('live', $an, self::scope());
+        $app->settings->set('live_checked_at', time(), self::scope());
     }
 
     private static function coolingDown(App $app): bool

@@ -11,10 +11,8 @@ declare(strict_types=1);
  * einer davon in diesem Stream zum ersten Mal in den Chat, geht ein
  * Twitch-Shoutout auf ihn hinaus. Siehe AutoShoutout.
  *
- * Absichtlich (vorerst) OHNE die Bedingung "nur, wenn ich live bin":
- * zum Ausprobieren wird immer versucht. Twitch selbst lehnt einen
- * Shoutout ohne laufenden Stream ab - der Grund steht dann an der
- * Kachel und im Log.
+ * Nur waehrend der eigene Kanal live ist. Offline wird still
+ * abgebrochen - ohne Meldung und ohne die Nachricht zu zaehlen.
  *
  * @var \TwitchController\Core\App $app
  * @var \TwitchController\Core\Hook\Hooks $hooks
@@ -94,11 +92,22 @@ $hooks->on('cron.tick', static function () use ($app): void {
     AutoShoutout::tick($app);
 });
 
-// Streamstart = neue Runde. stream.online abonniert der Kern schon.
+// Streamstart = neue Runde, Streamende = Ruhe. Beides abonniert der
+// Kern schon.
 $hooks->on('core.event.stored', static function (array $event) use ($app): void {
-    if ((string) ($event['event_type'] ?? '') !== 'twitch.stream.online') {
+    $typ = (string) ($event['event_type'] ?? '');
+
+    if ($typ === 'twitch.stream.offline') {
+        AutoShoutout::setLive($app, false);
+
         return;
     }
+
+    if ($typ !== 'twitch.stream.online') {
+        return;
+    }
+
+    AutoShoutout::setLive($app, true);
 
     $payload = is_array($event['payload'] ?? null) ? $event['payload'] : [];
     $seit = strtotime((string) ($payload['started_at'] ?? ''));

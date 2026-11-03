@@ -24,10 +24,9 @@ werden vorgemerkt und im Abstand von zwei Minuten nachgeholt.
 
 ## Der eigene Stream
 
-Twitch nimmt einen Shoutout nur an, während der eigene Kanal live ist.
-Dieses Plugin prüft das vorher (vorerst) **nicht** – ist man offline,
-steht Twitchs Ablehnung an der Kachel und im Log
-(`docker compose logs -f web worker`).
+Shoutouts gibt es nur, während der eigene Kanal live ist – Twitch nimmt
+sie sonst ohnehin nicht an. Ist man offline, bricht das Plugin still ab:
+keine Meldung, und die Nachricht zählt nicht für die Runde.
 
 ## Twitch-Freigabe
 
