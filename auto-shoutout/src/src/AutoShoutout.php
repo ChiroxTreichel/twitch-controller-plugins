@@ -88,6 +88,45 @@ final class AutoShoutout
         $app->settings->set('enabled', $an, self::scope());
     }
 
+    // -----------------------------------------------------------------
+    //  Custom-Command
+    // -----------------------------------------------------------------
+
+    /** Twitch nimmt 500 Zeichen je Chatnachricht. */
+    public const COMMAND_MAX = 500;
+
+    /**
+     * Ein eigener Chattext statt des Twitch-Shoutouts, etwa
+     * "!so {{username}}" fuer einen anderen Bot. Leer = der echte
+     * Shoutout ueber Helix.
+     */
+    public static function command(App $app): string
+    {
+        return trim($app->settings->string('command', '', self::scope()));
+    }
+
+    public static function setCommand(App $app, string $text): void
+    {
+        // Eine Zeile: ein Umbruch hat in einer Chatnachricht nichts
+        // verloren.
+        $text = trim((string) preg_replace('/\s+/u', ' ', $text));
+        $app->settings->set('command', mb_substr($text, 0, self::COMMAND_MAX), self::scope());
+    }
+
+    /**
+     * Den Platzhalter einsetzen. {{username}} ist der Login - den
+     * verstehen andere Bots sicher, den Anzeigenamen nicht immer.
+     * {{displayname}} gibt es fuer den, der den Namen schoen will.
+     */
+    public static function renderCommand(string $vorlage, string $login, string $name): string
+    {
+        return (string) preg_replace_callback(
+            '/\{\{\s*(username|displayname)\s*\}\}/i',
+            static fn (array $t): string => strtolower($t[1]) === 'username' ? $login : ($name !== '' ? $name : $login),
+            $vorlage
+        );
+    }
+
     /**
      * Hat der Kanal die Freigabe? Gefragt wird das gespeicherte Token,
      * nicht Twitch - eine Ja/Nein-Frage soll keinen Netzaufruf kosten.
@@ -383,7 +422,7 @@ final class AutoShoutout
               WHERE login = :login
                 AND pending
                 AND (tried_at IS NULL OR tried_at < now() - (:gap || ' seconds')::interval)
-          RETURNING user_id, tries",
+          RETURNING user_id, display_name, tries",
             ['login' => $login, 'gap' => (string) (self::GAP_SECONDS - 10)]
         );
 
@@ -391,7 +430,7 @@ final class AutoShoutout
             return;
         }
 
-        $ergebnis = self::send($app, (string) $zeile['user_id']);
+        $ergebnis = self::send($app, $login, (string) $zeile['user_id'], (string) $zeile['display_name']);
 
         if ($ergebnis['ok']) {
             $app->settings->set('last_sent_at', time(), self::scope());
@@ -499,12 +538,24 @@ final class AutoShoutout
     }
 
     /**
-     * Der Aufruf bei Twitch.
+     * Der Aufruf bei Twitch - oder, mit Custom-Command, eine Chatnachricht.
+     *
+     * Der Takt von zwei Minuten bleibt auch beim Custom-Command: Bots
+     * wie StreamElements haben fuer ihr !so eigene Sperrfristen und
+     * verschlucken sonst, was zu dicht kommt.
      *
      * @return array{ok: bool, cooldown: bool, error: string}
      */
-    private static function send(App $app, string $zielId): array
+    private static function send(App $app, string $login, string $zielId, string $name): array
     {
+        $vorlage = self::command($app);
+
+        if ($vorlage !== '') {
+            $ergebnis = $app->chat->send(self::renderCommand($vorlage, $login, $name));
+
+            return ['ok' => $ergebnis['ok'], 'cooldown' => false, 'error' => $ergebnis['ok'] ? '' : $ergebnis['error']];
+        }
+
         if ($zielId === '') {
             return ['ok' => false, 'cooldown' => false, 'error' => translate('auto_shoutout.error.no_target_id')];
         }

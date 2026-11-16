@@ -17,6 +17,8 @@
  * @var bool $canAdd
  * @var bool $canDelete
  * @var bool $canReset
+ * @var bool $canSettings
+ * @var string $command
  * @var string $notice
  * @var string $error
  * @var string $csrf
@@ -29,6 +31,14 @@ $ziel = $url('/chat/auto-shoutout');
 <h1><?= $e(translate('auto_shoutout.name')) ?></h1>
 <p class="lead"><?= $e(translate('auto_shoutout.lead')) ?></p>
 
+<?php if ($canSettings): ?>
+    <p>
+        <a class="btn btn-ghost btn-small" href="<?= $e($url('/chat/auto-shoutout/settings')) ?>">
+            <?= $e(translate('auto_shoutout.settings')) ?>
+        </a>
+    </p>
+<?php endif ?>
+
 <?php if ($notice !== ''): ?>
     <div class="note note-ok"><?= $e($notice) ?></div>
 <?php endif ?>
@@ -40,7 +50,7 @@ $ziel = $url('/chat/auto-shoutout');
     <div class="note note-warn"><?= $e(translate('auto_shoutout.is_off')) ?></div>
 <?php endif ?>
 
-<?php if (!$ready): ?>
+<?php if (!$ready && $command === ''): ?>
     <div class="note note-warn"><?= $e(translate('auto_shoutout.no_scope_hint')) ?></div>
 <?php endif ?>
 

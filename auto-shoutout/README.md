@@ -22,6 +22,20 @@ einmal pro Stunde. Schreiben mehrere eingetragene Kanäle kurz
 nacheinander, bekommt der erste sofort seinen Shoutout, die anderen
 werden vorgemerkt und im Abstand von zwei Minuten nachgeholt.
 
+## Custom-Command
+
+Optional unter **Konto → Plugins → Auto-Shoutout einrichten** (oder
+über den Knopf **Einstellungen** auf der Seite): ein eigener Chattext statt des
+Twitch-Shoutouts, z. B. `!so {{username}}` für einen anderen Bot.
+
+- `{{username}}` wird durch den Login ersetzt, `{{displayname}}` durch
+  den Anzeigenamen.
+- Gesendet wird über den Chat des Controllers (Bot-Konto, sonst der
+  Kanalinhaber).
+- Bleibt das Feld leer, gibt es den normalen Twitch-Shoutout.
+- Der Abstand von zwei Minuten zwischen zwei Shoutouts bleibt auch
+  hier – andere Bots haben für ihr `!so` meist eigene Sperrfristen.
+
 ## Der eigene Stream
 
 Shoutouts gibt es nur, während der eigene Kanal live ist – Twitch nimmt
@@ -38,6 +52,7 @@ Seite; der Kanal muss dafür einmal neu verbunden werden.
 - `AutoShoutout.Global.View` – Seite sehen
 - `AutoShoutout.Global.Toggle` – ein- und ausschalten
 - `AutoShoutout.Global.Reset` – Runde neu starten
+- `AutoShoutout.Global.Settings` – Custom-Command ändern
 - `AutoShoutout.Channels.Add` / `AutoShoutout.Channels.Delete` – Kanäle pflegen
 
 ## Was das Plugin speichert

@@ -34,6 +34,7 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
             'AutoShoutout.Global.View'     => translate('auto_shoutout.perm.view'),
             'AutoShoutout.Global.Toggle'   => translate('auto_shoutout.perm.toggle'),
             'AutoShoutout.Global.Reset'    => translate('auto_shoutout.perm.reset'),
+            'AutoShoutout.Global.Settings' => translate('auto_shoutout.perm.settings'),
             'AutoShoutout.Channels.Add'    => translate('auto_shoutout.perm.add'),
             'AutoShoutout.Channels.Delete' => translate('auto_shoutout.perm.delete'),
         ],
@@ -73,6 +74,16 @@ $hooks->on('admin.nav', static function (array $nav) use ($app): array {
     ];
 
     return $nav;
+});
+
+// Der Knopf "Einstellungen" in der Plugin-Liste.
+$hooks->on('plugin.settings', static function (array $links): array {
+    $links[AutoShoutout::SLUG] = [
+        'label' => translate('auto_shoutout.settings_title'),
+        'href'  => '/chat/auto-shoutout/settings',
+    ];
+
+    return $links;
 });
 
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
@@ -224,8 +235,46 @@ $router->get('/chat/auto-shoutout', static function (Request $request) use ($app
         'canAdd'      => permission('AutoShoutout.Channels.Add'),
         'canDelete'   => permission('AutoShoutout.Channels.Delete'),
         'canReset'    => permission('AutoShoutout.Global.Reset'),
+        'canSettings' => permission('AutoShoutout.Global.Settings'),
+        'command'     => AutoShoutout::command($app),
         'csrf'        => $app->auth->csrfToken(),
         'notice'      => (string) $request->get('notice'),
         'error'       => (string) $request->get('error'),
     ]));
 }, ['auth' => true, 'permission' => 'AutoShoutout.Global.View']);
+
+// -------------------------------------------------------------------
+//  Die Einstellungen
+// -------------------------------------------------------------------
+$zurEinstellung = static function (array $query = []) use ($app): Response {
+    return Response::redirect(
+        $app->url('/chat/auto-shoutout/settings') . ($query === [] ? '' : '?' . http_build_query($query))
+    );
+};
+
+$router->get('/chat/auto-shoutout/settings', static function (Request $request) use ($app, $plugin): Response {
+    return Response::html($app->view->from($plugin->directory . '/views')->render('settings', [
+        'title'      => translate('auto_shoutout.settings_title'),
+        'active'     => 'chat/auto-shoutout',
+        'command'    => AutoShoutout::command($app),
+        'maxCommand' => AutoShoutout::COMMAND_MAX,
+        'canEdit'    => permission('AutoShoutout.Global.Settings'),
+        'csrf'       => $app->auth->csrfToken(),
+        'notice'     => (string) $request->get('notice'),
+        'error'      => (string) $request->get('error'),
+    ]));
+}, ['auth' => true, 'permission' => 'AutoShoutout.Global.View']);
+
+$router->post('/chat/auto-shoutout/settings', static function (Request $request) use ($app, $zurEinstellung): Response {
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $zurEinstellung(['error' => translate('common.error.form_expired')]);
+    }
+
+    if (!permission('AutoShoutout.Global.Settings')) {
+        return $zurEinstellung(['error' => translate('common.error.no_permission')]);
+    }
+
+    AutoShoutout::setCommand($app, $request->input('command'));
+
+    return $zurEinstellung(['notice' => translate('auto_shoutout.settings_saved')]);
+}, ['auth' => true]);
