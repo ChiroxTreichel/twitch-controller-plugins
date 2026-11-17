@@ -20,9 +20,11 @@
  * @var string $name
  * @var bool $ready   Twitch-Freigabe vorhanden?
  * @var string $csrf
+ * @var string $watch Raid::watchMode() - bei "yes" oeffnet raids-raid.js
+ *                    das Fenster schon beim Klick, siehe dort
  */
 ?>
-<form method="post" action="<?= $e($url('/networking/raids/raid')) ?>">
+<form method="post" action="<?= $e($url('/networking/raids/raid')) ?>" data-raid-watch-mode="<?= $e($watch) ?>">
     <input type="hidden" name="csrf" value="<?= $e($csrf) ?>">
     <input type="hidden" name="login" value="<?= $e($login) ?>">
 

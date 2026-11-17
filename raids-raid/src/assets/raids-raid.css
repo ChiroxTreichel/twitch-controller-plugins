@@ -11,6 +11,10 @@
     background: var(--accent, #7c3aed);
     border-color: var(--accent, #7c3aed);
     color: var(--accent-ink, #fff);
+
+    /* Das Basis-Plugin zieht den Knopf auf die volle Breite der Kachel;
+       .btn ist aber inline-flex und legt die Beschriftung nach links. */
+    justify-content: center;
 }
 
 .raid-start:hover:not([disabled]) {
@@ -23,4 +27,39 @@
     border-color: var(--line);
     color: var(--muted);
     cursor: not-allowed;
+}
+
+/* -------------------------------------------------------------------
+ *  Rueckfrage nach dem Raid: den Stream in einem eigenen Fenster?
+ *
+ *  Ein natives <dialog> mit showModal(): es liegt in der obersten
+ *  Ebene des Browsers und damit ueber allen Kacheln, ohne z-index.
+ * ------------------------------------------------------------------- */
+.raid-watch {
+    width: min(460px, 92vw);
+    padding: 20px 22px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--panel, #17171c);
+    color: var(--ink, #eee);
+}
+
+.raid-watch::backdrop {
+    background: rgba(0, 0, 0, 0.55);
+}
+
+.raid-watch h2 {
+    margin: 0 0 8px;
+    font-size: 1.05rem;
+}
+
+.raid-watch p {
+    margin: 0 0 16px;
+}
+
+.raid-watch-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: flex-end;
 }

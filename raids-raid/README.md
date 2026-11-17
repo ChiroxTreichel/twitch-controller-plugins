@@ -67,3 +67,19 @@ etwas, von dem man gelesen hat, und niemand wüsste, warum.
 Eine Zahl: `started_at` im Bereich `plugin:raids-raid`, der Zeitpunkt
 des letzten Starts. Keine Tabelle. Wen man raiden kann, weiß Raids; ob
 ein Raid läuft, weiß Twitch.
+
+## Den Stream des Ziels sehen
+
+Hat Twitch den Raid angenommen, fragt die Seite, ob der Stream des Ziels
+in einem **eigenen Fenster** aufgehen soll. So siehst du, wo du landest,
+und die Seite mit dem Abbruch-Knopf bleibt daneben offen.
+
+Unter *Plugins → Raids - Raiden → Einstellungen* lässt sich das festlegen:
+
+- **Fragen** (Vorgabe): nach jedem Raid nachfragen
+- **Ja**: ohne Frage öffnen. Das Fenster geht schon beim Klick auf
+  *Raiden* auf und zeigt den Stream, sobald Twitch bestätigt hat. Lehnt
+  Twitch ab, schließt es sich wieder. Blockiert der Browser das Fenster,
+  wird doch gefragt.
+- **Nein**: nichts öffnen
+

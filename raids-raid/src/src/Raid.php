@@ -55,6 +55,31 @@ final class Raid
     }
 
     // -----------------------------------------------------------------
+    //  Den Stream des Ziels oeffnen
+    // -----------------------------------------------------------------
+
+    /**
+     * Was nach einem bestaetigten Raid passiert:
+     *
+     *   ask  fragen, ob der Stream in einem eigenen Fenster aufgehen soll
+     *   yes  ohne Frage oeffnen
+     *   no   nichts
+     */
+    public const WATCH_MODES = ['ask', 'yes', 'no'];
+
+    public static function watchMode(App $app): string
+    {
+        $modus = $app->settings->string('watch_mode', 'ask', self::scope());
+
+        return in_array($modus, self::WATCH_MODES, true) ? $modus : 'ask';
+    }
+
+    public static function setWatchMode(App $app, string $modus): void
+    {
+        $app->settings->set('watch_mode', in_array($modus, self::WATCH_MODES, true) ? $modus : 'ask', self::scope());
+    }
+
+    // -----------------------------------------------------------------
     //  Starten und abbrechen
     // -----------------------------------------------------------------
 

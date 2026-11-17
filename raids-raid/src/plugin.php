@@ -51,6 +51,15 @@ $hooks->on('permissions.catalog', static function (array $catalog): array {
 // -------------------------------------------------------------------
 //  Die Twitch-Freigabe
 // -------------------------------------------------------------------
+$hooks->on('plugin.settings', static function (array $links): array {
+    $links[Raid::SLUG] = [
+        'label' => translate('raids_raid.settings'),
+        'href'  => '/networking/raids/raid/settings',
+    ];
+
+    return $links;
+});
+
 $hooks->on('core.twitch.broadcaster_scopes', static function (array $scopes): array {
     $scopes[] = Raid::SCOPE;
 
@@ -71,6 +80,7 @@ $hooks->on('core.twitch.scope_labels', static function (array $labels): array {
 // -------------------------------------------------------------------
 $hooks->on('admin.assets', static function (array $assets) use ($app): array {
     $assets['css'][] = $app->asset('/plugin/raids-raid/assets/raids-raid.css');
+    $assets['js'][] = $app->asset('/plugin/raids-raid/assets/raids-raid.js');
 
     return $assets;
 });
@@ -86,15 +96,17 @@ $hooks->on('raids.tile_actions', static function (array $knoepfe) use ($app, $pl
     $vorlagen = $app->view->from($plugin->directory . '/views');
     $bereit = Raid::ready($app);
     $csrf = $app->auth->csrfToken();
+    $modus = Raid::watchMode($app);
 
     $knoepfe[] = [
         'order'  => 10,
-        'render' => static function (array $kachel) use ($vorlagen, $bereit, $csrf): string {
+        'render' => static function (array $kachel) use ($vorlagen, $bereit, $csrf, $modus): string {
             return $vorlagen->render('button', [
                 'login' => (string) ($kachel['login'] ?? ''),
                 'name'  => (string) ($kachel['display_name'] ?? ''),
                 'ready' => $bereit,
                 'csrf'  => $csrf,
+                'watch' => $modus,
             ], null);
         },
     ];
@@ -122,7 +134,18 @@ $hooks->on('raids.live_actions', static function (array $knoepfe) use ($app, $pl
         // steht.
         'order'  => 90,
         'render' => static fn (): string => $vorlagen->render('cancel', [
-            'csrf' => $csrf,
+            'csrf'  => $csrf,
+            // Nur direkt nach dem Start steht "watch" in der Adresse -
+            // dann kommt die Rueckfrage zum Stream-Fenster. Durch
+            // normalizeLogin, weil der Wert in eine Adresse zu Twitch
+            // geht.
+            //
+            // Bei "yes" kommt sie nur, wenn das Skript das Fenster nicht
+            // selbst oeffnen konnte (blockiert, oder das Roulette hat
+            // gedrueckt) - sonst nimmt es "watch" vorher aus der Adresse.
+            'watch' => Raid::watchMode($app) === 'no'
+                ? ''
+                : Channels::normalizeLogin((string) ($_GET['watch'] ?? '')),
         ], null),
     ];
 
@@ -162,7 +185,12 @@ $router->post('/networking/raids/raid', static function (Request $request) use (
 
     $app->log('RaidsRaid: Raid auf ' . $login . ' gestartet.');
 
-    return $zurueck(['notice' => translate('raids_raid.started', ['name' => $login])]);
+    // "watch" laesst auf der Live-Seite die Rueckfrage erscheinen, ob
+    // der Stream des Ziels in einem eigenen Fenster aufgehen soll.
+    return $zurueck([
+        'notice' => translate('raids_raid.started', ['name' => $login]),
+        'watch'  => Raid::watchMode($app) === 'no' ? null : $login,
+    ]);
 }, ['auth' => true]);
 
 $router->post('/networking/raids/raid/cancel', static function (Request $request) use ($app, $zurueck): Response {
@@ -184,3 +212,32 @@ $router->post('/networking/raids/raid/cancel', static function (Request $request
 
     return $zurueck(['notice' => translate('raids_raid.cancelled')]);
 }, ['auth' => true]);
+
+// -------------------------------------------------------------------
+//  Einstellungen
+// -------------------------------------------------------------------
+// Eine einzige: was nach dem Raid mit dem Stream des Ziels passiert.
+// Kein eigenes Recht - wer raiden darf, entscheidet auch, ob dabei ein
+// Fenster aufgeht.
+$router->get('/networking/raids/raid/settings', static function (Request $request) use ($app, $plugin): Response {
+    return Response::html($app->view->from($plugin->directory . '/views')->render('settings', [
+        'title'  => translate('raids_raid.settings'),
+        'active' => 'networking/raids',
+        'mode'   => Raid::watchMode($app),
+        'csrf'   => $app->auth->csrfToken(),
+        'notice' => (string) $request->get('notice'),
+        'error'  => (string) $request->get('error'),
+    ]));
+}, ['auth' => true, 'permission' => 'RaidsRaid.Global.Start']);
+
+$router->post('/networking/raids/raid/settings', static function (Request $request) use ($app): Response {
+    $ziel = $app->url('/networking/raids/raid/settings');
+
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return Response::redirect($ziel . '?' . http_build_query(['error' => translate('common.error.form_expired')]));
+    }
+
+    Raid::setWatchMode($app, $request->input('watch_mode'));
+
+    return Response::redirect($ziel . '?' . http_build_query(['notice' => translate('raids_raid.saved')]));
+}, ['auth' => true, 'permission' => 'RaidsRaid.Global.Start']);
