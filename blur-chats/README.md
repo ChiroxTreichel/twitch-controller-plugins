@@ -21,10 +21,14 @@ Damit der Chat wirklich unlesbar ist, die **Deckkraft hoch** lassen
 
 ## Einrichten
 
-1. In OBS eine **Browserquelle** anlegen mit der Adresse
-   `https://<deine-domain>/overlay?view=blur-chats`.
+1. Blur Chats liegt im **Background-Overlay**. In OBS eine
+   **Browserquelle** anlegen mit der Adresse
+   `https://<deine-domain>/overlay/background`, falls es sie noch nicht
+   gibt.
 2. Die Quelle **genau so groß** machen wie die Bühne unter
-   *Konto → Overlay* (Vorgabe 1920 × 1080) und **über das Spiel** legen.
+   *Konto → Overlay* (Vorgabe 1920 × 1080) und **über das Spiel, aber
+   unter den Avatar** legen. Soll Blur Chats doch vor allem liegen, lege
+   es unter *Konto → Overlay → Plätze* auf Main.
    Kleiner schneidet ab, größer lässt rechts und unten Platz — die
    Bereiche sitzen dann nicht, wo sie sollen.
 3. Einmal anmelden: Rechtsklick auf die Quelle, *Interagieren*, dort

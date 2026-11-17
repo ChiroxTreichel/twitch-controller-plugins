@@ -95,6 +95,9 @@ $hooks->on('overlay.slots', static function (array $slots): array {
     $slots[Regions::SLOT] = [
         'label'    => translate('blur_chats.name'),
         'position' => 'fill',
+        // Hinter den Avatar: die Abdeckung soll das Spiel treffen, nicht
+        // die Person vor der Kamera. Unter Konto > Overlay umlegbar.
+        'layer'    => 'background',
     ];
 
     return $slots;
