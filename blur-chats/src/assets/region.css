@@ -1,0 +1,52 @@
+/*
+ * Blur Chats - wie ein Bereich aussieht.
+ *
+ * Geteilt von Overlay und Editor: die Vorschau auf der Verwaltungsseite
+ * soll genau das zeigen, was im Stream ankommt. Darum steht das hier
+ * und nicht doppelt in zwei Stylesheets, die irgendwann
+ * auseinanderlaufen.
+ *
+ * Ein Bereich besteht aus zwei Schichten:
+ *
+ *   .blur-chats-fill   Farbe und Deckkraft, weicher Rand ueber
+ *                      filter: blur() am Element selbst
+ *   .blur-chats-grain  leichte Koernung fuer den Milchglas-Eindruck
+ *
+ * Die Koernung wird NICHT weichgezeichnet - bei 24 Pixeln Rand waere
+ * davon nichts mehr uebrig. Sie bekommt stattdessen eine Maske, die
+ * zum Rand hin ausblendet, so breit wie der Rand (--bc-feather).
+ *
+ * Farbe, Deckkraft, Ecken und Rand setzt das Skript je Bereich als
+ * Inline-Stil; Lage und Groesse in Pixeln der Buehne.
+ */
+
+.blur-chats-region {
+    position: absolute;
+    box-sizing: border-box;
+    --bc-feather: 0px;
+}
+
+.blur-chats-fill,
+.blur-chats-grain {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+}
+
+.blur-chats-grain {
+    opacity: 0.12;
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-size: 180px 180px;
+
+    /* Zwei Verlaeufe, geschnitten: einer von links nach rechts, einer
+       von oben nach unten. Was beide durchlassen, bleibt sichtbar. */
+    -webkit-mask-image:
+        linear-gradient(to right, transparent, #000 var(--bc-feather), #000 calc(100% - var(--bc-feather)), transparent),
+        linear-gradient(to bottom, transparent, #000 var(--bc-feather), #000 calc(100% - var(--bc-feather)), transparent);
+    -webkit-mask-composite: source-in;
+    mask-image:
+        linear-gradient(to right, transparent, #000 var(--bc-feather), #000 calc(100% - var(--bc-feather)), transparent),
+        linear-gradient(to bottom, transparent, #000 var(--bc-feather), #000 calc(100% - var(--bc-feather)), transparent);
+    mask-composite: intersect;
+    pointer-events: none;
+}

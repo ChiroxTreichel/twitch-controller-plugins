@@ -1,0 +1,14 @@
+{
+  "slug": "blur-chats",
+  "name": "Overlay - Blur Chats",
+  "version": "1.0.0",
+  "description": "Deckt je Twitch-Kategorie Stellen im Bild mit Milchglas ab – etwa den Ingame-Chat. Wechselt die Kategorie, springen die Bereiche im Overlay von selbst um.",
+  "author": "Twitch-Controller",
+  "requires": {
+    "core": ">=2.16.0"
+  },
+  "tags": [
+    "overlay",
+    "stream"
+  ]
+}

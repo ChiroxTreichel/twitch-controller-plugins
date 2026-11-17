@@ -1,0 +1,246 @@
+/* Blur Chats - Verwaltungsseite. Wie ein Bereich aussieht, steht in region.css. */
+
+/* -------------------------------------------------------------------
+   Kategorien
+   ------------------------------------------------------------------- */
+.bc-cats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 0 0 16px;
+    padding: 0;
+    list-style: none;
+}
+
+.bc-cat {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--ink);
+    text-decoration: none;
+}
+
+.bc-cat:hover {
+    background: var(--panel-2, rgba(255, 255, 255, .06));
+}
+
+.bc-cat.is-selected {
+    border-color: var(--accent, #9146ff);
+    background: var(--panel-2, rgba(255, 255, 255, .06));
+}
+
+.bc-cat-name {
+    font-weight: 600;
+}
+
+.bc-add {
+    align-items: flex-end;
+}
+
+.bc-add .field {
+    margin-bottom: 0;
+}
+
+/* Die Vorschlagsliste - wie das Kategoriefeld von Streaminfo. */
+.bc-search {
+    position: relative;
+    min-width: 240px;
+}
+
+.bc-suggest {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    margin: 4px 0 0;
+    padding: 4px;
+    list-style: none;
+    max-height: 280px;
+    overflow-y: auto;
+    background: var(--panel);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, .35);
+}
+
+.bc-suggest li {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.bc-suggest li:hover,
+.bc-suggest li.is-active {
+    background: var(--panel-2, rgba(255, 255, 255, .06));
+}
+
+.bc-suggest img {
+    width: 28px;
+    height: 38px;
+    object-fit: cover;
+    border-radius: 3px;
+    flex: 0 0 auto;
+}
+
+.bc-suggest span {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* -------------------------------------------------------------------
+   Die Flaeche
+   ------------------------------------------------------------------- */
+.bc-screen {
+    margin: 10px 0;
+}
+
+/*
+ * Aussen die sichtbare Flaeche im Seitenverhaeltnis der Buehne (steht
+ * im style-Attribut), innen die Buehne in voller Groesse. Das Skript
+ * verkleinert sie mit transform und setzt --bc-inv auf den Kehrwert:
+ * damit bleiben Rahmen, Anfasser und Schrift auf dem Bildschirm gleich
+ * gross, egal wie stark verkleinert wird.
+ */
+.bc-editor {
+    position: relative;
+    width: 100%;
+    overflow: hidden;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: #0b0c10;
+    user-select: none;
+}
+
+.bc-stage {
+    --bc-inv: 1;
+    position: absolute;
+    left: 0;
+    top: 0;
+    transform-origin: 0 0;
+    background-color: #15171d;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    /* Ohne Screenshot ein Raster, damit man Lage und Groesse abschaetzen kann. */
+    background-image:
+        linear-gradient(rgba(255, 255, 255, .05) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, .05) 1px, transparent 1px);
+}
+
+.bc-stage:not([style*="background-image"]) {
+    background-size: 120px 120px;
+}
+
+.bc-box {
+    cursor: move;
+    touch-action: none;
+}
+
+.bc-frame {
+    position: absolute;
+    inset: 0;
+    border: calc(1.5px * var(--bc-inv)) dashed rgba(255, 255, 255, .55);
+    border-radius: inherit;
+    pointer-events: none;
+}
+
+.bc-box.is-active .bc-frame {
+    border-style: solid;
+    border-color: var(--accent, #9146ff);
+}
+
+.bc-tag {
+    position: absolute;
+    left: 0;
+    top: 0;
+    max-width: 100%;
+    padding: calc(2px * var(--bc-inv)) calc(6px * var(--bc-inv));
+    overflow: hidden;
+    border-radius: calc(4px * var(--bc-inv));
+    background: rgba(0, 0, 0, .65);
+    color: #fff;
+    font-size: calc(12px * var(--bc-inv));
+    line-height: 1.3;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    pointer-events: none;
+}
+
+.bc-handle {
+    position: absolute;
+    right: calc(-7px * var(--bc-inv));
+    bottom: calc(-7px * var(--bc-inv));
+    width: calc(14px * var(--bc-inv));
+    height: calc(14px * var(--bc-inv));
+    border: calc(2px * var(--bc-inv)) solid #fff;
+    border-radius: 50%;
+    background: var(--accent, #9146ff);
+    cursor: nwse-resize;
+    touch-action: none;
+}
+
+.bc-readonly .bc-box {
+    cursor: default;
+}
+
+.bc-screen-note {
+    margin: 6px 0 16px;
+}
+
+/* -------------------------------------------------------------------
+   Die Zeilen
+   ------------------------------------------------------------------- */
+.bc-table {
+    overflow-x: auto;
+}
+
+.bc-table td {
+    vertical-align: middle;
+}
+
+.bc-row.is-active td {
+    background: var(--panel-2, rgba(255, 255, 255, .06));
+}
+
+.bc-label {
+    min-width: 140px;
+}
+
+.bc-num {
+    width: 6em;
+}
+
+.bc-color {
+    width: 42px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: none;
+    cursor: pointer;
+}
+
+.bc-opacity {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+}
+
+.bc-opacity output {
+    min-width: 3.5em;
+    text-align: right;
+}
+
+.bc-actions {
+    margin-top: 14px;
+}

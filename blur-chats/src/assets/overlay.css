@@ -1,0 +1,24 @@
+/*
+ * Blur Chats im Overlay.
+ *
+ * Der Platz deckt die ganze Buehne (position "fill"), darf aber keinen
+ * Klick fangen - in OBS ohnehin nicht, aber beim Interagieren mit der
+ * Browserquelle sollen die Kaesten darunter erreichbar bleiben.
+ *
+ * Beim Umschalten blenden die alten Bereiche aus und die neuen ein,
+ * beides in 300 ms (overlay.js entfernt die alten danach).
+ */
+
+#ov-slot-blur-chats,
+#ov-slot-blur-chats * {
+    pointer-events: none;
+}
+
+#ov-slot-blur-chats .blur-chats-region {
+    opacity: 0;
+    transition: opacity 300ms ease;
+}
+
+#ov-slot-blur-chats .blur-chats-region.is-on {
+    opacity: 1;
+}
