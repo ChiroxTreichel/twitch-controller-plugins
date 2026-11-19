@@ -61,14 +61,6 @@ $hooks->on('plugin.settings', static function (array $links): array {
         'href'  => '/display/goals/tips/settings',
     ];
 
-    // Das Aussehen als zweiter Eintrag - wie bei den Twitch-Zielen.
-    // Zugang und Aussehen sind zwei verschiedene Fragen, und wer den
-    // Balken umbaut, sucht nicht bei den Zugangsdaten.
-    $links[TipGoals::SLUG . ':appearance'] = [
-        'label' => translate('sl_tip.appearance'),
-        'href'  => '/display/goals/tips/appearance',
-    ];
-
     return $links;
 });
 

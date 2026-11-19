@@ -30,6 +30,15 @@ $ziel = $url('/display/goals/tips/settings');
     <div class="note note-error"><?= $e($error) ?></div>
 <?php endif ?>
 
+<?php /*
+    Zugang und Aussehen als Reiter: die Plugin-Liste hat nur EINEN
+    Knopf "Einstellungen", und der fuehrt zum Zugang.
+*/ ?>
+<div class="tabs">
+    <a class="tab is-active" href="<?= $e($url('/display/goals/tips/settings')) ?>"><?= $e(translate('sl_tip.settings')) ?></a>
+    <a class="tab" href="<?= $e($url('/display/goals/tips/appearance')) ?>"><?= $e(translate('sl_tip.appearance')) ?></a>
+</div>
+
 <div class="card">
     <div class="card-head">
         <h2><?= $e(translate('sl_tip.credentials')) ?></h2>

@@ -2,9 +2,8 @@
 /**
  * Das Aussehen: HTML und CSS des Spendenbalkens.
  *
- * Erreichbar über Plugin → Einstellungen, nicht als Reiter in Goals —
- * es ist eine Einstellung dieses Plugins und gehört nicht zwischen die
- * Spendenziele.
+ * Ein Reiter neben dem Zugang: die Plugin-Liste hat nur EINEN Knopf
+ * "Einstellungen", und der fuehrt zum Zugang. Von dort geht es hierher.
  *
  * @var callable $e
  * @var callable $url
@@ -41,6 +40,15 @@ $ziel = $url('/display/goals/tips/appearance');
 <?php if ($error !== ''): ?>
     <div class="note note-error"><?= $e($error) ?></div>
 <?php endif ?>
+
+<?php /*
+    Zugang und Aussehen als Reiter: die Plugin-Liste hat nur EINEN
+    Knopf "Einstellungen", und der fuehrt zum Zugang.
+*/ ?>
+<div class="tabs">
+    <a class="tab" href="<?= $e($url('/display/goals/tips/settings')) ?>"><?= $e(translate('sl_tip.settings')) ?></a>
+    <a class="tab is-active" href="<?= $e($url('/display/goals/tips/appearance')) ?>"><?= $e(translate('sl_tip.appearance')) ?></a>
+</div>
 
 <?php /*
     Fehlende Pflichtelemente stehen oben und nicht versteckt: ein
