@@ -6,7 +6,8 @@ declare(strict_types=1);
  * Loeschbot legt keine Tabelle an.
  *
  * Die Musterliste liegt unter "words" im Scope "plugin:delete-bot",
- * der Hauptschalter unter "enabled". Den Scope loescht der Kern beim
+ * der Hauptschalter unter "enabled", die Ausnahmen unter "exempt_*"
+ * (fehlen sie, ist niemand ausgenommen). Den Scope loescht der Kern beim
  * Entfernen des Plugins mit.
  *
  * Nach der Installation ist die Liste leer und der Schalter AUS - ein

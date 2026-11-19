@@ -71,6 +71,32 @@ fertiges Muster soll man stehen lassen und weiterschreiben können.
 Wer bereits `\/` geschrieben hat, merkt davon nichts — maskiert wird nur
 ein Schrägstrich ohne Gegenschrägstrich davor.
 
+## Ausnahmen
+
+Unter **Plugins → Löschbot → Einstellungen** lässt sich festlegen, bei
+wem die Muster nicht gelten — jede Gruppe mit eigenem Schalter:
+
+- **Moderatoren**
+- **Subs** — Founder zählen mit, sie tragen ein eigenes Badge
+- **VIPs**
+- **Wer lange genug folgt** — seit mindestens *x* Wochen (1 bis 520)
+
+Voreinstellung: alles aus. Nach dem Update verhält sich der Bot also
+wie vorher.
+
+Die Rollen stehen in der Chatnachricht selbst. „Folgt seit“ kostet eine
+Anfrage bei Twitch und wird darum **erst nach einem Treffer**
+nachgesehen, nicht bei jeder Zeile. Kann Twitch nicht antworten, gilt
+die Regel: die Nachricht wird gelöscht, die Ursache steht im Log. Eine
+Ausnahme, die bei einem Fehler für alle greift, wäre ein Loch im
+Filter. Gebraucht wird dafür `moderator:read:followers`; der Kern
+fordert es an.
+
+Eine ausgenommene Nachricht steht mit Grund im Log
+(„Treffer bei …, aber ausgenommen (mods)“). Das Testfeld prüft nur den
+Text und kennt keinen Schreiber — die Ausnahmen spielen dort keine
+Rolle.
+
 ## Was der Bot nicht löschen kann
 
 **Die eigenen Nachrichten des Kanalinhabers.** Das lässt Twitch

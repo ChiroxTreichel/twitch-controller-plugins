@@ -22,6 +22,7 @@ declare(strict_types=1);
 
 use TwitchController\Core\Http\Request;
 use TwitchController\Core\Http\Response;
+use TwitchController\Plugin\DeleteBot\Exemptions;
 use TwitchController\Plugin\DeleteBot\Moderator;
 use TwitchController\Plugin\DeleteBot\Words;
 
@@ -70,6 +71,18 @@ $hooks->on('admin.nav', static function (array $nav) use ($app): array {
     ];
 
     return $nav;
+});
+
+// -------------------------------------------------------------------
+//  Einstellungen: bei wem die Muster nicht gelten
+// -------------------------------------------------------------------
+$hooks->on('plugin.settings', static function (array $links): array {
+    $links[Words::SLUG] = [
+        'label' => translate('delete_bot.settings'),
+        'href'  => '/chat/delete-bot/settings',
+    ];
+
+    return $links;
 });
 
 // -------------------------------------------------------------------
@@ -230,4 +243,48 @@ $router->post('/chat/delete-bot', static function (Request $request) use ($app, 
             'count' => (string) count(Words::active($app)),
         ]),
     ]);
+}, ['auth' => true, 'permission' => 'DeleteBot.Global.View']);
+
+// -------------------------------------------------------------------
+//  Einstellungen
+// -------------------------------------------------------------------
+$router->get('/chat/delete-bot/settings', static function (Request $request) use ($app, $plugin): Response {
+    return Response::html($app->view->from($plugin->directory . '/views')->render('settings', [
+        'title'      => translate('delete_bot.settings'),
+        'active'     => 'chat/delete-bot',
+        'exemptions' => Exemptions::get($app),
+        'canEdit'    => permission('DeleteBot.Global.Edit'),
+        'csrf'       => $app->auth->csrfToken(),
+        'notice'     => (string) $request->get('notice'),
+        'error'      => (string) $request->get('error'),
+    ]));
+}, ['auth' => true, 'permission' => 'DeleteBot.Global.View']);
+
+$router->post('/chat/delete-bot/settings', static function (Request $request) use ($app): Response {
+    $hierher = static function (array $query) use ($app): Response {
+        return Response::redirect($app->url('/chat/delete-bot/settings') . '?' . http_build_query($query));
+    };
+
+    if (!$app->auth->checkCsrf($request->input('csrf'))) {
+        return $hierher(['error' => translate('common.error.form_expired')]);
+    }
+
+    if (!permission('DeleteBot.Global.Edit')) {
+        return $hierher(['error' => translate('common.error.no_permission')]);
+    }
+
+    // Ein leeres oder unsinniges Feld wird nicht abgewiesen, sondern
+    // auf den naechsten erlaubten Wert gezogen - sonst gingen mit
+    // einem Tippfehler auch die Schalter verloren.
+    $wochen = trim((string) $request->input('follow_weeks'));
+
+    Exemptions::save($app, [
+        'mods'      => $request->input('exempt_mods') !== '',
+        'subs'      => $request->input('exempt_subs') !== '',
+        'vips'      => $request->input('exempt_vips') !== '',
+        'followers' => $request->input('exempt_followers') !== '',
+        'weeks'     => ctype_digit($wochen) ? (int) $wochen : Exemptions::DEFAULT_WEEKS,
+    ]);
+
+    return $hierher(['notice' => translate('delete_bot.settings_saved')]);
 }, ['auth' => true, 'permission' => 'DeleteBot.Global.View']);

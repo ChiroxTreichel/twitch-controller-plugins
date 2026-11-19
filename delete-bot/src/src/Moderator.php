@@ -49,6 +49,21 @@ final class Moderator
             return;
         }
 
+        // Ausnahmen erst jetzt: "folgt seit" ist eine Anfrage bei
+        // Twitch, und die soll nur fuer die Nachrichten anfallen, die
+        // sonst fallen wuerden - nicht fuer jede Zeile im Chat.
+        $ausnahme = Exemptions::reason($this->app, $message);
+        if ($ausnahme !== null) {
+            $this->app->log(sprintf(
+                'Loeschbot: Treffer bei %s (Muster: %s), aber ausgenommen (%s).',
+                (string) ($message['chatter_login'] ?? '?'),
+                $ergebnis['pattern'],
+                $ausnahme
+            ));
+
+            return;
+        }
+
         $messageId = (string) ($message['message_id'] ?? '');
         if ($messageId === '') {
             $this->app->log('Loeschbot: Treffer, aber ohne Nachrichten-Nummer.');

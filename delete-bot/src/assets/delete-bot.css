@@ -27,3 +27,27 @@
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.86rem;
 }
+
+/*
+ * Einstellungen: "folgt seit" mit seiner Wochenzahl.
+ *
+ * Die Zahl steht eingerueckt unter dem Schalter, auf Hoehe seiner
+ * Beschriftung - so sieht man, dass sie zu ihm gehoert, und auf dem
+ * Handy laeuft nichts ueber den Rand.
+ */
+.db-follow {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.db-follow-weeks {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-left: 60px;
+}
+
+.db-follow-weeks .input {
+    width: 90px;
+}
