@@ -68,6 +68,9 @@ $ziel = $url('/display/goals/tips/settings');
         <a class="tab<?= $tab === $schluessel ? ' is-active' : '' ?>"
            href="<?= $e($ziel . '/' . rawurlencode($schluessel)) ?>"><?= $e(Legal::title($schluessel)) ?></a>
     <?php endforeach ?>
+
+    <?php /* Eigene Seite, aber dieselbe Reihe - siehe appearance.php. */ ?>
+    <a class="tab" href="<?= $e($url('/display/goals/tips/appearance')) ?>"><?= $e(translate('tips.appearance')) ?></a>
 </div>
 
 <?php if ($tab === 'page'): ?>

@@ -96,11 +96,6 @@ $hooks->on('plugin.settings', static function (array $links): array {
         'href'  => '/display/goals/tips/settings',
     ];
 
-    $links[TipGoals::SLUG . ':appearance'] = [
-        'label' => translate('tips.appearance'),
-        'href'  => '/display/goals/tips/appearance',
-    ];
-
     return $links;
 });
 

@@ -2,9 +2,9 @@
 /**
  * Das Aussehen: HTML und CSS des Spendenbalkens.
  *
- * Erreichbar über Plugin → Einstellungen, nicht als Reiter in Goals —
- * es ist eine Einstellung dieses Plugins und gehört nicht zwischen die
- * Spendenziele.
+ * Ein Reiter in derselben Reihe wie Seite und Rechtstexte: die
+ * Plugin-Liste hat nur EINEN Knopf "Einstellungen", und der fuehrt zur
+ * Spendenseite. Von dort geht es hierher.
  *
  * @var callable $e
  * @var callable $url
@@ -21,7 +21,10 @@
  * @var string $error
  */
 
+use TwitchController\Plugin\TipGoals\Legal;
+
 $ziel = $url('/display/goals/tips/appearance');
+$einstellungen = $url('/display/goals/tips/settings');
 ?>
 <div class="row">
     <a class="btn btn-ghost" href="<?= $e($url('/account/plugins')) ?>">
@@ -41,6 +44,16 @@ $ziel = $url('/display/goals/tips/appearance');
 <?php if ($error !== ''): ?>
     <div class="note note-error"><?= $e($error) ?></div>
 <?php endif ?>
+
+<div class="tabs">
+    <a class="tab" href="<?= $e($einstellungen . '/page') ?>"><?= $e(translate('tips.tab.page')) ?></a>
+
+    <?php foreach (Legal::PAGES as $schluessel => $titel): ?>
+        <a class="tab" href="<?= $e($einstellungen . '/' . rawurlencode($schluessel)) ?>"><?= $e(Legal::title($schluessel)) ?></a>
+    <?php endforeach ?>
+
+    <a class="tab is-active" href="<?= $e($ziel) ?>"><?= $e(translate('tips.appearance')) ?></a>
+</div>
 
 <?php /*
     Fehlende Pflichtelemente stehen oben und nicht versteckt: ein
