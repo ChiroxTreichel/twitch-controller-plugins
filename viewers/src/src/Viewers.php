@@ -18,8 +18,10 @@ final class Viewers
     public const PER_PAGE = 50;
 
     /**
-     * So oft werden die Abos abgeglichen. Die Follower gleicht der
-     * Kern ab, alle zehn Sekunden - siehe Twitch\Followers.
+     * So oft wird die eigene Abo-Tabelle zur Sicherheit an die Liste
+     * des Kerns angeglichen. Der eigentliche Anlass ist
+     * core.subscribers.changed - Follower und Abos gleicht der Kern
+     * alle zehn Sekunden mit Twitch ab.
      */
     public const SUBS_EVERY = 600;
 
@@ -105,25 +107,19 @@ final class Viewers
     }
 
     /**
-     * Stand des letzten Abgleichs, fuer die Anzeige.
-     *
-     * Die Follower gleicht der Kern ab - deren Stand steht in seinen
+     * Stand des letzten Abgleichs mit Twitch, fuer die Anzeige. Beide
+     * Listen gleicht der Kern ab - der Stand steht in seinen
      * Einstellungen.
      *
      * @return array{at: int, error: string}
      */
     public static function syncState(App $app, string $was): array
     {
-        if ($was === 'followers') {
-            return [
-                'at'    => $app->settings->int('followers_full_at', 0),
-                'error' => $app->settings->string('followers_error', ''),
-            ];
-        }
+        $kern = $was === 'followers' ? 'followers' : 'subscribers';
 
         return [
-            'at'    => $app->settings->int($was . '_synced_at', 0, self::scope()),
-            'error' => $app->settings->string($was . '_sync_error', '', self::scope()),
+            'at'    => $app->settings->int($kern . '_full_at', 0),
+            'error' => $app->settings->string($kern . '_error', ''),
         ];
     }
 }

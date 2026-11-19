@@ -18,10 +18,12 @@ declare(strict_types=1);
  * Dasselbe fuer Follower: wer nicht mehr folgt und seit wann, mit
  * eigenem Schalterpaar.
  *
- * Die Follower-Liste fuehrt der Kern (twitch_followers) - er erkennt
- * daran die Unfollows, die Twitch nicht meldet. Die Abos gleicht dieses
- * Plugin im Worker ab; Ereignisse (Abo, Verlaengerung, Abo-Ende,
- * Follow, Unfollow) schreiben beides zwischendurch fort.
+ * Beide Listen fuehrt der Kern (twitch_followers, twitch_subscribers)
+ * und gleicht sie alle zehn Sekunden mit Twitch ab. Dieses Plugin fragt
+ * Twitch nicht selbst: es liest die Follower direkt beim Kern und
+ * gleicht seine Abo-Tabelle (mit errechnetem Ende und Geschichte) an
+ * dessen Liste an. Ereignisse (Abo, Verlaengerung, Abo-Ende, Follow,
+ * Unfollow) schreiben zwischendurch fort.
  */
 
 use TwitchController\Core\Http\Request;
@@ -91,6 +93,12 @@ $hooks->on('core.event.stored', static function (array $event) use ($app): void 
     Store::onEvent($app, $event);
 });
 
+// Die Abo-Liste des Kerns hat sich geaendert - angleichen.
+$hooks->on('core.subscribers.changed', static function () use ($app): void {
+    Sync::subs($app);
+});
+
+// Zur Sicherheit, falls eine Meldung verloren ging (Neustart).
 $hooks->on('cron.tick', static function () use ($app): void {
     Sync::due($app);
 });
@@ -133,8 +141,8 @@ $router->get('/stream/viewers', static function (Request $request) use ($app, $p
 
 /*
  * Jetzt abgleichen - fuer den, der nicht auf den Worker warten will.
- * Nur die Liste des offenen Reiters. Die Follower gleicht ohnehin der
- * Kern alle zehn Sekunden ab; der Knopf fragt ihn nur sofort.
+ * Nur die Liste des offenen Reiters. Beide gleicht ohnehin der Kern
+ * alle zehn Sekunden ab; der Knopf fragt ihn nur sofort.
  */
 $router->post('/stream/viewers/sync', static function (Request $request) use ($app): Response {
     $reiter = $request->input('tab') === 'subs' ? 'subs' : 'followers';
@@ -148,17 +156,21 @@ $router->post('/stream/viewers/sync', static function (Request $request) use ($a
 
     @set_time_limit(180);
 
-    if ($reiter === 'subs') {
-        $ok = Sync::subs($app);
-    } else {
-        try {
+    $kern = $reiter === 'subs' ? 'subscribers' : 'followers';
+
+    try {
+        if ($reiter === 'subs') {
+            $app->twitch->subscribers()->check();
+            Sync::subs($app);
+        } else {
             $app->twitch->followers()->check();
-            $app->settings->set('followers_error', '');
-            $ok = true;
-        } catch (Throwable $fehler) {
-            $app->settings->set('followers_error', mb_substr($fehler->getMessage(), 0, 300));
-            $ok = false;
         }
+
+        $app->settings->set($kern . '_error', '');
+        $ok = true;
+    } catch (Throwable $fehler) {
+        $app->settings->set($kern . '_error', mb_substr($fehler->getMessage(), 0, 300));
+        $ok = false;
     }
 
     return $zurueck($ok

@@ -4,8 +4,7 @@ Wer dir folgt und wer ein Abo hat — zwei Reiter, beide mit Suche.
 
 ## Follower
 
-Name und seit wann er folgt, neueste zuerst. Die Liste führt der Kern
-(ab 2.18.0): er gleicht sie alle zehn Sekunden mit Twitch ab, weil er
+Name und seit wann er folgt, neueste zuerst. Die Liste führt der Kern: er gleicht sie alle zehn Sekunden mit Twitch ab, weil er
 daran die Unfollows erkennt, die Twitch nicht meldet.
 
 ## Abonnenten
@@ -23,8 +22,10 @@ vor der Installation — der Kern bewahrt sie auf.
 - **unbekannt** — zu diesem Abo liegt gar kein Ereignis vor. Das Ende
   steht da nach der nächsten Verlängerung.
 
-Die Liste gleicht das Plugin alle zehn Minuten ab; neue Abos,
-Verlängerungen und Abo-Enden stehen sofort drin.
+Die Abo-Liste führt der Kern (ab 2.19.0) und gleicht sie alle zehn
+Sekunden mit Twitch ab; das Plugin übernimmt jede Änderung sofort.
+Neue Abos, Verlängerungen und Abo-Enden stehen über die Ereignisse
+ohnehin gleich drin.
 
 ## Ehemalige — mit Doppel-Opt-in
 

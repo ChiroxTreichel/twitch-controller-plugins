@@ -4,174 +4,85 @@ declare(strict_types=1);
 
 namespace TwitchController\Plugin\Viewers;
 
-use RuntimeException;
-use Throwable;
 use TwitchController\Core\App;
-use TwitchController\Core\Twitch\TokenStore;
 
 /**
- * Die Abos bei Twitch abholen. (Die Follower holt der Kern - siehe
- * Twitch\Followers.)
+ * Die eigene Abo-Tabelle an die Liste des Kerns angleichen.
  *
- * Der Endpunkt liefert hundert Zeilen je Anfrage und blaettert mit
- * einem Cursor. Erst wenn ALLE Seiten da sind, wird verglichen: wer
- * dann fehlt, hat kein Abo mehr. Bricht der Abruf mittendrin ab,
- * bleibt die Tabelle, wie sie war - sonst verloere ein Netzfehler auf
- * Seite drei alle ab Seite vier.
+ * Seit 2.19.0 fuehrt der Kern die Abos (twitch_subscribers) und gleicht
+ * sie alle zehn Sekunden mit Twitch ab. Hier wird nicht mehr bei Twitch
+ * gefragt - nur verglichen:
  *
- * Gefragt wird mit dem Token des Kanalinhabers (channel:read:subscriptions,
- * fordert der Kern an).
+ *   in der Liste des Kerns  -> aktiv, Stufe und Geschenk von dort
+ *   nicht mehr darin        -> Geschichte (wenn freigeschaltet), sonst weg
+ *
+ * Eigenes bleibt hier: das errechnete Ende und die Geschichte.
+ *
+ * Ausgeloest von core.subscribers.changed, und zur Sicherheit alle zehn
+ * Minuten im Worker - das kostet nur zwei Abfragen in der Datenbank.
  */
 final class Sync
 {
-    /** Hundert Seiten zu hundert: zehntausend. Danach eher ein Fehler. */
-    private const MAX_PAGES = 1000;
-
-    /** Laeuft im Worker - der soll nicht minutenlang an einer Liste haengen. */
-    private const MAX_SECONDS = 120;
-
-    /** Faellig? Dann abgleichen. Fuer cron.tick. */
+    /** Fuer cron.tick: das Netz unter dem Hook. */
     public static function due(App $app): void
     {
-        $jetzt = time();
-
-        if ($jetzt - Viewers::syncState($app, 'subs')['at'] >= Viewers::SUBS_EVERY) {
+        if (time() - $app->settings->int('subs_synced_at', 0, Viewers::scope()) >= Viewers::SUBS_EVERY) {
             self::subs($app);
         }
-
     }
 
+    /**
+     * @return bool false, wenn der Kern noch keine Liste hat
+     */
     public static function subs(App $app): bool
     {
-        return self::run($app, 'subs', static function () use ($app): void {
-            $kanal = $app->twitch->broadcasterId();
-            $zeilen = self::fetchAll($app, 'subscriptions', $kanal);
-            $stand = (string) $app->db->value('SELECT now()::text');
+        $app->settings->set('subs_synced_at', time(), Viewers::scope());
 
-            $app->db->transaction(static function () use ($app, $zeilen, $kanal, $stand): void {
-                foreach ($zeilen as $zeile) {
-                    $id = (string) ($zeile['user_id'] ?? '');
-
-                    // Der Kanalinhaber steht in seiner eigenen Liste.
-                    if ($id === '' || $id === $kanal) {
-                        continue;
-                    }
-
-                    $app->db->run(
-                        'INSERT INTO viewers_subs (user_id, login, name, tier, is_gift, gifter_name, seen_at)
-                         VALUES (:id, :login, :name, :tier, CAST(:gift AS boolean), :gifter, CAST(:stand AS timestamptz))
-                         ON CONFLICT (user_id) DO UPDATE
-                            SET login = EXCLUDED.login, name = EXCLUDED.name, tier = EXCLUDED.tier,
-                                is_gift = EXCLUDED.is_gift, gifter_name = EXCLUDED.gifter_name,
-                                seen_at = EXCLUDED.seen_at,
-                                -- War es Geschichte, ist es wieder ein Abo. Das alte
-                                -- Ende gehoert zum alten Abo.
-                                ends_at = CASE WHEN viewers_subs.active THEN viewers_subs.ends_at END,
-                                ends_estimated = viewers_subs.active AND viewers_subs.ends_estimated,
-                                active = true, ended_at = NULL, updated_at = now()',
-                        [
-                            'id'     => $id,
-                            'login'  => (string) ($zeile['user_login'] ?? ''),
-                            'name'   => (string) ($zeile['user_name'] ?? $zeile['user_login'] ?? ''),
-                            'tier'   => (string) ($zeile['tier'] ?? '1000'),
-                            'gift'   => !empty($zeile['is_gift']) ? 'true' : 'false',
-                            'gifter' => (string) ($zeile['gifter_name'] ?? ''),
-                            'stand'  => $stand,
-                        ]
-                    );
-                }
-
-                // Wer nicht mehr in der Liste steht, hat kein Abo mehr.
-                if (Viewers::historyAllowed($app)) {
-                    $app->db->run(
-                        'UPDATE viewers_subs
-                            SET active = false, ended_at = now(), ends_estimated = false, updated_at = now()
-                          WHERE active AND seen_at < CAST(:stand AS timestamptz)',
-                        ['stand' => $stand]
-                    );
-                } else {
-                    $app->db->run(
-                        'DELETE FROM viewers_subs WHERE active AND seen_at < CAST(:stand AS timestamptz)',
-                        ['stand' => $stand]
-                    );
-                }
-            });
-
-            Store::fillEnds($app);
-            Store::rollEnds($app);
-        });
-    }
-
-    /**
-     * Abgleich mit Buchfuehrung: Zeitpunkt und Fehler stehen danach in
-     * den Einstellungen, damit die Seite sagen kann, wie alt die Liste
-     * ist - und warum sie es ist.
-     *
-     * Der Zeitpunkt wird auch bei einem Fehler gesetzt. Sonst versuchte
-     * es der Worker alle fuenfzehn Sekunden erneut, und ein fehlendes
-     * Recht wuerde zur Dauerschleife gegen die Twitch-API.
-     */
-    private static function run(App $app, string $was, callable $arbeit): bool
-    {
-        $app->settings->set($was . '_synced_at', time(), Viewers::scope());
-
-        try {
-            if ($app->twitch->broadcasterId() === '') {
-                throw new RuntimeException(translate('viewers.error.no_channel'));
-            }
-
-            $arbeit();
-            $app->settings->set($was . '_sync_error', '', Viewers::scope());
-
-            return true;
-        } catch (Throwable $fehler) {
-            $app->settings->set($was . '_sync_error', mb_substr($fehler->getMessage(), 0, 300), Viewers::scope());
-            $app->log('Zuschauer: Abgleich ' . $was . ' gescheitert - ' . $fehler->getMessage());
-
+        /*
+         * Hat der Kern noch nie abgeglichen, ist seine Tabelle leer -
+         * und eine leere Liste hiesse hier: niemand hat mehr ein Abo.
+         * Das waere die ganze Geschichte auf einen Schlag, und falsch.
+         */
+        if ($app->twitch->subscribers()->total() === null) {
             return false;
         }
-    }
 
-    /**
-     * Alle Seiten eines Endpunkts.
-     *
-     * @return list<array<string, mixed>>
-     */
-    private static function fetchAll(App $app, string $endpunkt, string $kanal): array
-    {
-        $api = $app->twitch->api()->as(TokenStore::BROADCASTER);
-        $alle = [];
-        $cursor = '';
-        $start = time();
+        $app->db->transaction(static function () use ($app): void {
+            $app->db->run(
+                'INSERT INTO viewers_subs (user_id, login, name, tier, is_gift, gifter_name, seen_at)
+                 SELECT user_id, login, name, tier, is_gift, gifter_name, now()
+                   FROM twitch_subscribers
+                  WHERE user_id <> :owner
+                 ON CONFLICT (user_id) DO UPDATE
+                    SET login = EXCLUDED.login, name = EXCLUDED.name, tier = EXCLUDED.tier,
+                        is_gift = EXCLUDED.is_gift, gifter_name = EXCLUDED.gifter_name,
+                        seen_at = EXCLUDED.seen_at,
+                        -- War es Geschichte, ist es wieder ein Abo. Das alte
+                        -- Ende gehoert zum alten Abo.
+                        ends_at = CASE WHEN viewers_subs.active THEN viewers_subs.ends_at END,
+                        ends_estimated = viewers_subs.active AND viewers_subs.ends_estimated,
+                        active = true, ended_at = NULL, updated_at = now()',
+                // Der Kanalinhaber hat ein Abo auf sich selbst. Das ist
+                // kein Abonnent.
+                ['owner' => $app->twitch->broadcasterId()]
+            );
 
-        for ($seite = 0; $seite < self::MAX_PAGES; $seite++) {
-            if (time() - $start > self::MAX_SECONDS) {
-                throw new RuntimeException(translate('viewers.error.too_long'));
+            $weg = 'active AND NOT EXISTS (SELECT 1 FROM twitch_subscribers t WHERE t.user_id = viewers_subs.user_id)';
+
+            if (Viewers::historyAllowed($app)) {
+                $app->db->run(
+                    'UPDATE viewers_subs
+                        SET active = false, ended_at = now(), ends_estimated = false, updated_at = now()
+                      WHERE ' . $weg
+                );
+            } else {
+                $app->db->run('DELETE FROM viewers_subs WHERE ' . $weg);
             }
+        });
 
-            $abfrage = ['broadcaster_id' => $kanal, 'first' => 100];
-            if ($cursor !== '') {
-                $abfrage['after'] = $cursor;
-            }
+        Store::fillEnds($app);
+        Store::rollEnds($app);
 
-            $antwort = $api->get($endpunkt, $abfrage);
-            if (!$antwort->ok()) {
-                throw new RuntimeException($endpunkt . ': ' . $antwort->error());
-            }
-
-            $daten = $antwort->json['data'] ?? [];
-            foreach (is_array($daten) ? $daten : [] as $zeile) {
-                if (is_array($zeile)) {
-                    $alle[] = $zeile;
-                }
-            }
-
-            $cursor = (string) ($antwort->json['pagination']['cursor'] ?? '');
-            if ($cursor === '' || $daten === []) {
-                return $alle;
-            }
-        }
-
-        throw new RuntimeException(translate('viewers.error.too_many'));
+        return true;
     }
 }

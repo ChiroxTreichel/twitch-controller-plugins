@@ -242,10 +242,8 @@ $seiten = max(1, (int) ceil($total / Viewers::PER_PAGE));
 */ ?>
 <div class="viewers-sync">
     <span class="hint">
-        <?php if ($tab === 'followers'): ?>
-            <?= $e(translate('viewers.followers_live')) ?>
-        <?php elseif ($sync['at'] > 0): ?>
-            <?= $e(translate('viewers.synced_at', ['time' => Dates::long(date(DATE_ATOM, $sync['at']))])) ?>
+        <?php if ($sync['at'] > 0): ?>
+            <?= $e(translate('viewers.live')) ?>
         <?php else: ?>
             <?= $e(translate('viewers.never_synced')) ?>
         <?php endif ?>
