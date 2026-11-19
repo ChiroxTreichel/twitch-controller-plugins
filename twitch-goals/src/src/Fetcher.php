@@ -17,10 +17,16 @@ use TwitchController\Plugin\Goals\Goals;
  *   helix/goals   die Ziele, die man auf Twitch selbst angelegt hat.
  *                 Typ "follower" und "subscription_count" - daraus
  *                 kommen aktueller Stand UND Zielwert.
- *   die Zaehler   helix/channels/followers und helix/subscriptions
- *                 liefern ein "total". Das ist der Rueckfall, wenn
- *                 auf Twitch gar kein Ziel angelegt ist: dann steht
- *                 wenigstens die Zahl da, nur ohne Ziel.
+ *   die Zaehler   die Zahl der Follower und der Abos. Das ist der
+ *                 Rueckfall, wenn auf Twitch gar kein Ziel angelegt
+ *                 ist: dann steht wenigstens die Zahl da, nur ohne
+ *                 Ziel.
+ *
+ * Die Follower zaehlt seit 2.18.0 der Kern - er fuehrt die Liste
+ * ohnehin, um Unfollows zu erkennen, und meldet jede Aenderung
+ * (core.followers.changed). Gefragt wird bei Twitch nur noch, wenn der
+ * Kern die Zahl nicht hat: ein aelterer Kern, oder kurz nach dem
+ * Start, bevor er einmal abgeglichen hat.
  *
  * Aktuell bleibt es auf zwei Arten: die Abos channel.goal.* melden
  * jede Aenderung sofort, und cron.tick fragt zusaetzlich nach. Ohne
@@ -119,7 +125,7 @@ final class Fetcher
         // und die beiden muessen nicht uebereinstimmen: ein Ziel zaehlt
         // ab seinem Anlegen, der Zaehler ab null.
         if ($neu['follower_goal'] === 0) {
-            $anzahl = $this->total('channels/followers', ['broadcaster_id' => $kanalId]);
+            $anzahl = $this->followerCount($kanalId);
             if ($anzahl !== null) {
                 $neu['follower_current'] = $anzahl;
             }
@@ -168,6 +174,43 @@ final class Fetcher
 
         $this->store($stand);
         $this->push($stand);
+    }
+
+    /**
+     * Die Follower-Zahl hat sich geaendert - gemeldet vom Kern.
+     *
+     * Nur ohne Follower-Ziel auf Twitch: mit Ziel kommt der Stand aus
+     * channel.goal.progress, und der zaehlt ab dem Anlegen des Ziels,
+     * nicht ab null.
+     */
+    public function onFollowerTotal(int $gesamt): void
+    {
+        $stand = $this->state();
+        if ($stand['follower_goal'] !== 0 || $stand['follower_current'] === $gesamt) {
+            return;
+        }
+
+        $stand['follower_current'] = max(0, $gesamt);
+
+        $this->store($stand);
+        $this->push($stand);
+    }
+
+    /**
+     * Wie viele folgen: vom Kern, sonst von Twitch.
+     */
+    private function followerCount(string $kanalId): ?int
+    {
+        $twitch = $this->app->twitch;
+
+        if (method_exists($twitch, 'followers')) {
+            $gesamt = $twitch->followers()->total();
+            if ($gesamt !== null) {
+                return $gesamt;
+            }
+        }
+
+        return $this->total('channels/followers', ['broadcaster_id' => $kanalId]);
     }
 
     /**

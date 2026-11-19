@@ -105,6 +105,13 @@ $hooks->on('core.event.stored', static function (array $event) use ($app): void 
     (new Fetcher($app))->onEvent($typ, $payload);
 });
 
+// Die Follower-Zahl meldet der Kern, nachdem er abgeglichen hat
+// (seit 2.18.0, alle zehn Sekunden). So folgt die Anzeige einem
+// Unfollow genauso wie einem Follow - ohne eigene Anfrage bei Twitch.
+$hooks->on('core.followers.changed', static function (int $gesamt) use ($app): void {
+    (new Fetcher($app))->onFollowerTotal($gesamt);
+});
+
 $hooks->on('cron.tick', static function () use ($app): void {
     // Gedrosselt - siehe Fetcher::POLL_SECONDS. Das Nachfragen ist das
     // Netz unter den Abos, nicht der Hauptweg.
