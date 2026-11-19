@@ -25,6 +25,10 @@
     display: flex;
     align-items: center;
     gap: 10px;
+
+    /* Auf dem Handy passen "Importieren" und "Neue Belohnung" nicht
+       nebeneinander - dann eben untereinander statt ueber den Rand. */
+    flex-wrap: wrap;
 }
 
 /* --- Das Gitter ---------------------------------------------------- */
