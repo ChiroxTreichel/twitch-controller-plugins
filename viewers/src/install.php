@@ -12,6 +12,7 @@ declare(strict_types=1);
  * Idempotent: laeuft bei jedem Versionswechsel.
  *
  * @var \TwitchController\Core\Database\Db $db
+ * @var \TwitchController\Core\Config\Settings $settings
  * @var string|null $fromVersion
  */
 
@@ -58,4 +59,16 @@ $db->run('
     )
 ');
 $db->run('CREATE INDEX IF NOT EXISTS viewers_subs_active_idx ON viewers_subs (active, ended_at DESC)');
+
+/*
+ * 1.1.1: Bis dahin wurde duration_months als "im Voraus bezahlte
+ * Monate" gelesen - es zaehlt aber hoch, und Enden lagen im Jahr 2029.
+ * Alle Enden verwerfen; der naechste Abgleich errechnet sie neu aus
+ * den Ereignissen. Der Merker sorgt dafuer, dass er gleich laeuft und
+ * nicht erst in zehn Minuten.
+ */
+if ($fromVersion !== null && version_compare($fromVersion, '1.1.1', '<')) {
+    $db->run('UPDATE viewers_subs SET ends_at = NULL, ends_estimated = false WHERE active');
+    $settings->forget('subs_synced_at', \TwitchController\Core\Config\Settings::pluginScope('viewers'));
+}
 $db->run('CREATE INDEX IF NOT EXISTS viewers_subs_login_idx ON viewers_subs (lower(login))');

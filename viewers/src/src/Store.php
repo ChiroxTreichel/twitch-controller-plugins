@@ -11,8 +11,8 @@ use TwitchController\Core\App;
  *
  * Das Ende eines Abos sagt Twitch nicht - weder die Liste der Abos noch
  * sonst ein Endpunkt kennt es. Errechnet wird es aus dem letzten
- * Abo-Ereignis: ein neues Abo gilt einen Monat, eine Verlaengerung so
- * viele Monate, wie im Voraus bezahlt sind (duration_months).
+ * Abo-Ereignis: jedes gilt einen Monat. Verlaengert sich ein Abo, ohne
+ * dass Twitch es meldet, wird monatsweise fortgeschrieben (rollEnds).
  *
  * Gerechnet wird in der Datenbank und nicht in PHP: "+1 month" macht
  * in PHP aus dem 31. Januar den 3. Maerz, Postgres den 28. Februar.
@@ -31,14 +31,17 @@ final class Store
     private const UNFOLLOW = 'twitch.channel.unfollow';
 
     /**
-     * Monate eines Ereignisses als SQL-Ausdruck ueber "payload".
+     * Monate, die ein Abo-Ereignis gilt: einer.
      *
-     * Nur eine Verlaengerung kennt duration_months. Alles andere -
-     * auch ein geschenktes Abo, dessen Laufzeit Twitch dem Beschenkten
-     * nicht mitteilt - zaehlt als ein Monat.
+     * NICHT duration_months. Das sah nach "im Voraus bezahlte Monate"
+     * aus, zaehlt aber bei jeder Verlaengerung hoch - 24, einen Monat
+     * spaeter 25, knapp neben cumulative_months. Daraus wurde "noch 25
+     * Monate", und Leute standen mit einem Ende im Jahr 2029 in der
+     * Liste (1.1.1). Ob jemand wirklich mehrere Monate im Voraus bezahlt
+     * hat, ist aus den Ereignissen nicht verlaesslich zu lesen; dann
+     * schreibt rollEnds() das Ende eben monatsweise fort.
      */
-    private const MONTHS_SQL = "GREATEST(1, CASE WHEN payload->>'duration_months' ~ '^[0-9]{1,3}$'
-                                    THEN (payload->>'duration_months')::int ELSE 1 END)";
+    private const MONTHS_SQL = '1';
 
     // -----------------------------------------------------------------
     //  Lesen
@@ -216,12 +219,8 @@ final class Store
 
     /**
      * Neues Abo oder Verlaengerung: aktiv, und das Ende neu errechnen.
-     *
-     * Ein Ende aus einem Ereignis schlaegt ein fortgeschriebenes: das
-     * fortgeschriebene ist nur geraten. Zwischen zwei Ereignissen
-     * gewinnt das spaetere Ende - eine Verlaengerung um drei Monate
-     * soll nicht von der Abo-Meldung derselben Sekunde (ein Monat)
-     * ueberschrieben werden.
+     * Ein Ende aus einem Ereignis schlaegt ein fortgeschriebenes - das
+     * fortgeschriebene ist nur geraten.
      */
     private static function subscribed(App $app, int $id, string $typ): void
     {
@@ -238,10 +237,8 @@ final class Store
                     -- Nur ein neues Abo sagt, ob es geschenkt ist; eine
                     -- Verlaengerung weiss es nicht und laesst es stehen.
                     is_gift = CASE WHEN CAST(:has_gift AS boolean) THEN EXCLUDED.is_gift ELSE viewers_subs.is_gift END,
-                    ends_at = CASE
-                        WHEN viewers_subs.ends_at IS NULL OR viewers_subs.ends_estimated OR NOT viewers_subs.active
-                            THEN EXCLUDED.ends_at
-                        ELSE GREATEST(viewers_subs.ends_at, EXCLUDED.ends_at) END,
+                    -- Das neueste Ereignis entscheidet, sonst nichts.
+                    ends_at = EXCLUDED.ends_at,
                     ends_estimated = false, active = true, ended_at = NULL, updated_at = now()",
             ['id' => $id, 'has_gift' => $typ === self::SUBSCRIBE ? 'true' : 'false']
         );

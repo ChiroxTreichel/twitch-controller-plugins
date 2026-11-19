@@ -12,9 +12,13 @@ daran die Unfollows erkennt, die Twitch nicht meldet.
 Name, Stufe, geschenkt (und von wem) und **bis wann das Abo gilt**.
 
 Das Ende sagt Twitch nicht. Es wird aus dem letzten Abo-Ereignis
-errechnet: ein neues Abo gilt einen Monat, eine Verlängerung so viele
-Monate, wie im Voraus bezahlt sind. Dafür reichen auch Ereignisse von
+errechnet: jedes gilt einen Monat. Dafür reichen auch Ereignisse von
 vor der Installation — der Kern bewahrt sie auf.
+
+`duration_months` aus den Verlängerungen wird bewusst nicht benutzt:
+es zählt bei jeder Verlängerung hoch und sagt nicht, wie viele Monate
+im Voraus bezahlt sind. Wer das tut, steht nach einem Monat mit
+„voraussichtlich“ da.
 
 - **voraussichtlich** — das Abo hat sich verlängert, ohne dass Twitch
   es gemeldet hat (wer seine Verlängerung nicht im Chat teilt, schickt

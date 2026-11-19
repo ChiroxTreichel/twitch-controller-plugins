@@ -1,7 +1,7 @@
 {
   "slug": "viewers",
   "name": "Stream - Zuschauer",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "description": "Wer folgt dir seit wann, wer hat ein Abo, welche Stufe und bis wann es gilt. Mit Suche. Auf Wunsch auch, wer nicht mehr folgt oder kein Abo mehr hat und seit wann – das muss in den Einstellungen eigens freigeschaltet werden.",
   "author": "Twitch-Controller",
   "requires": {
