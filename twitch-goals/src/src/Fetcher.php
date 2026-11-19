@@ -22,10 +22,11 @@ use TwitchController\Plugin\Goals\Goals;
  *                 ist: dann steht wenigstens die Zahl da, nur ohne
  *                 Ziel.
  *
- * Die Follower zaehlt seit 2.18.0 der Kern - er fuehrt die Liste
- * ohnehin, um Unfollows zu erkennen, und meldet jede Aenderung
- * (core.followers.changed). Gefragt wird bei Twitch nur noch, wenn der
- * Kern die Zahl nicht hat: ein aelterer Kern, oder kurz nach dem
+ * Beide Zahlen hat inzwischen der Kern: die Follower seit 2.18.0, die
+ * Abos seit 2.19.0. Er gleicht sie alle zehn Sekunden mit Twitch ab
+ * und meldet jede Aenderung (core.followers.changed,
+ * core.subscribers.changed). Gefragt wird bei Twitch nur noch, wenn
+ * der Kern die Zahl nicht hat: ein aelterer Kern, oder kurz nach dem
  * Start, bevor er einmal abgeglichen hat.
  *
  * Aktuell bleibt es auf zwei Arten: die Abos channel.goal.* melden
@@ -132,7 +133,7 @@ final class Fetcher
         }
 
         if ($neu['sub_goal'] === 0) {
-            $anzahl = $this->total('subscriptions', ['broadcaster_id' => $kanalId]);
+            $anzahl = $this->subCount($kanalId);
             if ($anzahl !== null) {
                 $neu['sub_current'] = $anzahl;
             }
@@ -185,12 +186,23 @@ final class Fetcher
      */
     public function onFollowerTotal(int $gesamt): void
     {
+        $this->onTotal('follower', $gesamt);
+    }
+
+    /** Dasselbe fuer die Abos - gemeldet vom Kern (ab 2.19.0). */
+    public function onSubTotal(int $gesamt): void
+    {
+        $this->onTotal('sub', $gesamt);
+    }
+
+    private function onTotal(string $art, int $gesamt): void
+    {
         $stand = $this->state();
-        if ($stand['follower_goal'] !== 0 || $stand['follower_current'] === $gesamt) {
+        if ($stand[$art . '_goal'] !== 0 || $stand[$art . '_current'] === $gesamt) {
             return;
         }
 
-        $stand['follower_current'] = max(0, $gesamt);
+        $stand[$art . '_current'] = max(0, $gesamt);
 
         $this->store($stand);
         $this->push($stand);
@@ -211,6 +223,21 @@ final class Fetcher
         }
 
         return $this->total('channels/followers', ['broadcaster_id' => $kanalId]);
+    }
+
+    /** Wie viele Abos: vom Kern, sonst von Twitch. */
+    private function subCount(string $kanalId): ?int
+    {
+        $twitch = $this->app->twitch;
+
+        if (method_exists($twitch, 'subscribers')) {
+            $gesamt = $twitch->subscribers()->total();
+            if ($gesamt !== null) {
+                return $gesamt;
+            }
+        }
+
+        return $this->total('subscriptions', ['broadcaster_id' => $kanalId]);
     }
 
     /**
